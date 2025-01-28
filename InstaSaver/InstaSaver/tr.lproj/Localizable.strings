@@ -51,12 +51,12 @@
 "Paste Instagram URL here..." = "Instagram URL'sini buraya yapıştırın...";
 "Paste" = "Yapıştır";
 "InSave for Instagram" = "Instagram için InSave";
-"Download Reels & Video Posts" = "Reels ve Video Gönderilerini İndir";
+"Download Reels, Stories & Video Posts" = "Reels, Hikayeler ve Video Gönderilerini İndir";
 "PRO" = "PRO";
 
 /* Tutorial Steps */
 "Copy Link" = "Bağlantıyı Kopyala";
-"Open Instagram and copy video link" = "Instagram'ı açın ve video bağlantısını kopyalayın";
+"Open Instagram and copy video/story link" = "Instagram'ı açın ve video/hikaye bağlantısını kopyalayın";
 "Paste URL" = "URL'yi Yapıştır";
 "Paste the link in the input box" = "Bağlantıyı giriş kutusuna yapıştırın";
 "Download" = "İndir";
@@ -190,3 +190,8 @@
 "Annual" = "Yıllık";
 "Only %@ per month" = "Ayda yalnızca %@";
 "BEST OFFER" = "EN İYİ TEKLİF";
+
+/* StoryView */
+"Stories" = "Hikayeler";
+"Download Bulk" = "Toplu İndir";
+"Downloading Stories..." = "Hikayeler İndiriliyor...";

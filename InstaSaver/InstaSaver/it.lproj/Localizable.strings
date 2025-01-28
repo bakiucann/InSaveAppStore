@@ -51,12 +51,12 @@
 "Paste Instagram URL here..." = "Incolla qui l'URL Instagram...";
 "Paste" = "Incolla";
 "InSave for Instagram" = "InSave per Instagram";
-"Download Reels & Video Posts" = "Scarica Reels e post video";
+"Download Reels, Stories & Video Posts" = "Scarica Reels, Storie e post video";
 "PRO" = "PRO";
 
 /* Tutorial Steps */
 "Copy Link" = "Copia link";
-"Open Instagram and copy video link" = "Apri Instagram e copia il link del video";
+"Open Instagram and copy video/story link" = "Apri Instagram e copia il link del video/storia";
 "Paste URL" = "Incolla URL";
 "Paste the link in the input box" = "Incolla il link nel campo di input";
 "Download" = "Scarica";
@@ -190,3 +190,8 @@
 "Annual" = "Annuale";
 "Only %@ per month" = "Solo %@ al mese";
 "BEST OFFER" = "MIGLIORE OFFERTA";
+
+/* StoryView */
+"Stories" = "Storie";
+"Download Bulk" = "Download multiplo";
+"Downloading Stories..." = "Download storie in corso...";

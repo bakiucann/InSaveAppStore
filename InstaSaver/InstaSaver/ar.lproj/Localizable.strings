@@ -51,12 +51,12 @@
 "Paste Instagram URL here..." = "الصق رابط انستغرام هنا...";
 "Paste" = "لصق";
 "InSave for Instagram" = "InSave لانستغرام";
-"Download Reels & Video Posts" = "تحميل الريلز ومنشورات الفيديو";
+"Download Reels, Stories & Video Posts" = "تحميل الريلز والقصص ومنشورات الفيديو";
 "PRO" = "النسخة المحترفة";
 
 /* Tutorial Steps */
 "Copy Link" = "نسخ الرابط";
-"Open Instagram and copy video link" = "افتح انستغرام وانسخ رابط الفيديو";
+"Open Instagram and copy video/story link" = "افتح انستغرام وانسخ رابط الفيديو/القصة";
 "Paste URL" = "لصق الرابط";
 "Paste the link in the input box" = "الصق الرابط في مربع الإدخال";
 "Download" = "تحميل";
@@ -190,3 +190,8 @@
 "Annual" = "سنوي";
 "Only %@ per month" = "فقط %@ في الشهر";
 "BEST OFFER" = "أفضل عرض";
+
+/* StoryView */
+"Stories" = "القصص";
+"Download Bulk" = "تحميل متعدد";
+"Downloading Stories..." = "جارٍ تحميل القصص...";

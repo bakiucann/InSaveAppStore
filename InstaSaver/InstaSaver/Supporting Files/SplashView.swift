@@ -28,7 +28,21 @@ struct SplashView: View {
                     
                     Text("InSave")
                         .font(.system(size: 26, weight: .bold))
-                        .foregroundColor(.black)
+                        .overlay(
+                            LinearGradient(
+                                colors: [
+                                    Color("igPurple"),
+                                    Color("igPink"),
+                                    Color("igOrange")
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                            .mask(
+                                Text("InSave")
+                                    .font(.system(size: 26, weight: .bold))
+                            )
+                        )
                     
                     if showProgress && !isConnected {
                         ProgressView()

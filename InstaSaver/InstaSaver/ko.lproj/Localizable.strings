@@ -51,12 +51,12 @@
 "Paste Instagram URL here..." = "여기에 Instagram URL 붙여넣기...";
 "Paste" = "붙여넣기";
 "InSave for Instagram" = "Instagram용 InSave";
-"Download Reels & Video Posts" = "릴스와 동영상 게시물 다운로드";
+"Download Reels, Stories & Video Posts" = "릴스, 스토리 및 동영상 게시물 다운로드";
 "PRO" = "프로";
 
 /* Tutorial Steps */
 "Copy Link" = "링크 복사";
-"Open Instagram and copy video link" = "Instagram을 열고 동영상 링크 복사";
+"Open Instagram and copy video/story link" = "Instagram을 열고 동영상/스토리 링크 복사";
 "Paste URL" = "URL 붙여넣기";
 "Paste the link in the input box" = "입력창에 링크 붙여넣기";
 "Download" = "다운로드";
@@ -190,3 +190,8 @@
 "Annual" = "연간";
 "Only %@ per month" = "월 %@만";
 "BEST OFFER" = "최고의 혜택";
+
+/* StoryView */
+"Stories" = "스토리";
+"Download Bulk" = "일괄 다운로드";
+"Downloading Stories..." = "스토리 다운로드 중...";

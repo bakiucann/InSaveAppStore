@@ -23,7 +23,7 @@ class SubscriptionManager: ObservableObject {
                     self?.isUserSubscribed = true
                     print("Kullanıcı pro abonelik aktif: \(self?.isUserSubscribed ?? false)")
                 } else {
-                    self?.isUserSubscribed = false 
+                    self?.isUserSubscribed = false
                     print("Kullanıcı pro abonelik yok: \(self?.isUserSubscribed ?? false)")
                 }
             } else {

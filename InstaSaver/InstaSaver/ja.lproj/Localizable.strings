@@ -51,12 +51,12 @@
 "Paste Instagram URL here..." = "ここにInstagram URLを貼り付け...";
 "Paste" = "貼り付け";
 "InSave for Instagram" = "InSave for Instagram";
-"Download Reels & Video Posts" = "リールと動画投稿をダウンロード";
+"Download Reels, Stories & Video Posts" = "リール、ストーリー、動画投稿をダウンロード";
 "PRO" = "PRO";
 
 /* Tutorial Steps */
 "Copy Link" = "リンクをコピー";
-"Open Instagram and copy video link" = "Instagramを開いて動画リンクをコピー";
+"Open Instagram and copy video/story link" = "Instagramを開いて動画/ストーリーのリンクをコピー";
 "Paste URL" = "URLを貼り付け";
 "Paste the link in the input box" = "入力ボックスにリンクを貼り付け";
 "Download" = "ダウンロード";
@@ -190,3 +190,8 @@
 "Annual" = "年間";
 "Only %@ per month" = "月額たったの %@";
 "BEST OFFER" = "ベストオファー";
+
+/* StoryView */
+"Stories" = "ストーリー";
+"Download Bulk" = "一括ダウンロード";
+"Downloading Stories..." = "ストーリーをダウンロード中...";

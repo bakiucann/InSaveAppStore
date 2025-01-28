@@ -49,7 +49,7 @@ struct StoryView: View {
                         if !isFromHistory {
                             if subscriptionManager.isUserSubscribed {
                                 ActionButton(
-                                    title: NSLocalizedString("Save Bulk", comment: ""),
+                                    title: NSLocalizedString("Download Bulk", comment: ""),
                                     icon: "square.and.arrow.down.fill",
                                     gradient: [Color("igPurple"), Color("igPink")],
                                     action: {
@@ -58,7 +58,7 @@ struct StoryView: View {
                                 )
                             } else {
                                 ActionButton(
-                                    title: NSLocalizedString("Save Bulk", comment: ""),
+                                    title: NSLocalizedString("Download Bulk", comment: ""),
                                     icon: "square.and.arrow.down.fill",
                                     gradient: [Color("igPurple"), Color("igPink")],
                                     action: {
@@ -169,7 +169,7 @@ struct StoryView: View {
                     .accentColor(.white)
                     .foregroundColor(.white)
                 
-                Text("Saving Stories...")
+                Text("Downloading Stories...")
                     .font(.system(size: 16, weight: .medium))
                     .foregroundColor(.white)
                 
@@ -272,7 +272,10 @@ struct StoryView: View {
                         }
                         
                         do {
-                            let tmpUrl = FileManager.default.temporaryDirectory.appendingPathComponent("downloadedStory_\(index).mp4")
+                            let isVideo = story.type == "video"
+                            let fileExtension = isVideo ? "mp4" : "jpg"
+                            let tmpUrl = FileManager.default.temporaryDirectory.appendingPathComponent("downloadedStory_\(index).\(fileExtension)")
+                            
                             if FileManager.default.fileExists(atPath: tmpUrl.path) {
                                 try FileManager.default.removeItem(at: tmpUrl)
                             }
@@ -280,7 +283,11 @@ struct StoryView: View {
                             
                             // Gallery'ye kaydet
                             Task {
-                                await self.saveVideoToGalleryAsync(from: tmpUrl)
+                                if isVideo {
+                                    await self.saveVideoToGalleryAsync(from: tmpUrl)
+                                } else {
+                                    await self.saveImageToGalleryAsync(from: tmpUrl)
+                                }
                                 CoreDataManager.shared.saveStoryInfo(story: story)
                                 
                                 DispatchQueue.main.async {
@@ -330,7 +337,10 @@ struct StoryView: View {
             }
             
             do {
-                let tmpUrl = FileManager.default.temporaryDirectory.appendingPathComponent("downloadedStory.mp4")
+                let isVideo = stories[currentPage].type == "video"
+                let fileExtension = isVideo ? "mp4" : "jpg"
+                let tmpUrl = FileManager.default.temporaryDirectory.appendingPathComponent("downloadedStory.\(fileExtension)")
+                
                 if FileManager.default.fileExists(atPath: tmpUrl.path) {
                     try FileManager.default.removeItem(at: tmpUrl)
                 }
@@ -343,7 +353,11 @@ struct StoryView: View {
                     if !subscriptionManager.isUserSubscribed {
                         CoreDataManager.shared.incrementDailyDownloadCount()
                     }
-                    saveVideoToGallery(from: tmpUrl, isBulkDownload: isBulkDownload)
+                    if isVideo {
+                        saveVideoToGallery(from: tmpUrl, isBulkDownload: isBulkDownload)
+                    } else {
+                        saveImageToGallery(from: tmpUrl, isBulkDownload: isBulkDownload)
+                    }
                 }
             } catch {
                 print("File handling error: \(error.localizedDescription)")
@@ -364,16 +378,63 @@ struct StoryView: View {
                     if success {
                         if !isBulkDownload {
                             showSuccessMessage = true
+                            
+                            // Success message'ı 2 saniye göster, sonra reklamı göster
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                 showSuccessMessage = false
+                                
+                                // Success message kapandıktan 0.5 saniye sonra reklamı göster
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    if !subscriptionManager.isUserSubscribed {
+                                        if let windowScene = UIApplication.shared.windows.first?.rootViewController {
+                                            let presenter = windowScene.presentedViewController ?? windowScene
+                                            if presenter.presentedViewController == nil {
+                                                interstitialAd.showAd(from: presenter) {
+                                                    print("Ad shown successfully")
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
+                        }
+                    } else {
+                        if let error = error {
+                            print("Error: \(error)")
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func saveImageToGallery(from fileURL: URL, isBulkDownload: Bool = false) {
+        PHPhotoLibrary.requestAuthorization { status in
+            guard status == .authorized else { return }
+            
+            PHPhotoLibrary.shared().performChanges({
+                let creationRequest = PHAssetCreationRequest.forAsset()
+                creationRequest.addResource(with: .photo, fileURL: fileURL, options: nil)
+            }) { success, error in
+                DispatchQueue.main.async {
+                    if success {
+                        if !isBulkDownload {
+                            showSuccessMessage = true
                             
-                            if !subscriptionManager.isUserSubscribed {
-                                if let windowScene = UIApplication.shared.windows.first?.rootViewController {
-                                    let presenter = windowScene.presentedViewController ?? windowScene
-                                    if presenter.presentedViewController == nil {
-                                        interstitialAd.showAd(from: presenter) {
-                                            print("Ad shown successfully")
+                            // Success message'ı 2 saniye göster, sonra reklamı göster
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                showSuccessMessage = false
+                                
+                                // Success message kapandıktan 0.5 saniye sonra reklamı göster
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    if !subscriptionManager.isUserSubscribed {
+                                        if let windowScene = UIApplication.shared.windows.first?.rootViewController {
+                                            let presenter = windowScene.presentedViewController ?? windowScene
+                                            if presenter.presentedViewController == nil {
+                                                interstitialAd.showAd(from: presenter) {
+                                                    print("Ad shown successfully")
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -400,6 +461,27 @@ struct StoryView: View {
                 PHPhotoLibrary.shared().performChanges({
                     let creationRequest = PHAssetCreationRequest.forAsset()
                     creationRequest.addResource(with: .video, fileURL: fileURL, options: nil)
+                }) { success, error in
+                    if !success {
+                        print("Error saving to gallery: \(String(describing: error))")
+                    }
+                    continuation.resume()
+                }
+            }
+        }
+    }
+    
+    private func saveImageToGalleryAsync(from fileURL: URL) async {
+        await withCheckedContinuation { continuation in
+            PHPhotoLibrary.requestAuthorization { status in
+                guard status == .authorized else {
+                    continuation.resume()
+                    return
+                }
+                
+                PHPhotoLibrary.shared().performChanges({
+                    let creationRequest = PHAssetCreationRequest.forAsset()
+                    creationRequest.addResource(with: .photo, fileURL: fileURL, options: nil)
                 }) { success, error in
                     if !success {
                         print("Error saving to gallery: \(String(describing: error))")

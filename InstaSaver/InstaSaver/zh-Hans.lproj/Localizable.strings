@@ -51,12 +51,12 @@
 "Paste Instagram URL here..." = "在此粘贴Instagram网址...";
 "Paste" = "粘贴";
 "InSave for Instagram" = "InSave for Instagram";
-"Download Reels & Video Posts" = "下载Reels和视频帖子";
+"Download Reels, Stories & Video Posts" = "下载Reels、故事和视频帖子";
 "PRO" = "专业版";
 
 /* Tutorial Steps */
 "Copy Link" = "复制链接";
-"Open Instagram and copy video link" = "打开Instagram并复制视频链接";
+"Open Instagram and copy video/story link" = "打开Instagram并复制视频/故事链接";
 "Paste URL" = "粘贴网址";
 "Paste the link in the input box" = "在输入框中粘贴链接";
 "Download" = "下载";
@@ -190,3 +190,8 @@
 "Annual" = "年度";
 "Only %@ per month" = "仅 %@ 每月";
 "BEST OFFER" = "最佳优惠";
+
+/* StoryView */
+"Stories" = "故事";
+"Download Bulk" = "批量下载";
+"Downloading Stories..." = "正在下载故事...";

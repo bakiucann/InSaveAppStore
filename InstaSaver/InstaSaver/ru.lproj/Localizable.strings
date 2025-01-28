@@ -51,12 +51,12 @@
 "Paste Instagram URL here..." = "Вставьте URL Instagram здесь...";
 "Paste" = "Вставить";
 "InSave for Instagram" = "InSave для Instagram";
-"Download Reels & Video Posts" = "Скачивайте Reels и видео посты";
+"Download Reels, Stories & Video Posts" = "Скачивайте Reels, Истории и видео посты";
 "PRO" = "PRO";
 
 /* Tutorial Steps */
 "Copy Link" = "Копировать ссылку";
-"Open Instagram and copy video link" = "Откройте Instagram и скопируйте ссылку на видео";
+"Open Instagram and copy video/story link" = "Откройте Instagram и скопируйте ссылку на видео/историю";
 "Paste URL" = "Вставить URL";
 "Paste the link in the input box" = "Вставьте ссылку в поле ввода";
 "Download" = "Скачать";
@@ -190,3 +190,8 @@
 "Annual" = "Годовой";
 "Only %@ per month" = "Всего %@ в месяц";
 "BEST OFFER" = "ЛУЧШЕЕ ПРЕДЛОЖЕНИЕ";
+
+/* StoryView */
+"Stories" = "Истории";
+"Download Bulk" = "Массовая загрузка";
+"Downloading Stories..." = "Загрузка историй...";

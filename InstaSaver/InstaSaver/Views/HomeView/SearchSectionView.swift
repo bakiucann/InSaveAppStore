@@ -248,12 +248,12 @@ struct SearchSectionView: View {
                     .tag(2)
                 }
                 .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .frame(height: 160)
+                .frame(height: 180)
                 
                 // Custom Page Control
                 CustomPageControl(numberOfPages: 3, currentPage: $currentPage)
             }
-            .padding(.top, 5)
+            .padding(.top, 20)
         }
         .padding(.vertical)
         .background(Color.white)
