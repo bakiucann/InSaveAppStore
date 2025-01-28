@@ -1,0 +1,192 @@
+/* 
+  Localizable.strings
+  InstaSaver
+
+  Created by Baki Uçan on 12.01.2025.
+  
+*/
+
+/* General */
+"OK" = "ОК";
+"Cancel" = "Отмена";
+"Error" = "Ошибка";
+"Send" = "Отправить";
+"Preview" = "Предпросмотр";
+"Terms" = "Условия";
+"Privacy" = "Конфиденциальность";
+"Version %@" = "Версия %@";
+"Done" = "Готово";
+"Delete" = "Удалить";
+"Save" = "Сохранить";
+"Close" = "Закрыть";
+"Create" = "Создать";
+
+/* Email Content */
+"Feedback Type: %@" = "Тип отзыва: %@";
+"User Feedback:" = "Отзыв пользователя:";
+"Device Info" = "Информация об устройстве";
+"App Version: %@ (%@)" = "Версия приложения: %@ (%@)";
+"iOS Version: %@" = "Версия iOS: %@";
+"Device: %@" = "Устройство: %@";
+"Email not available message" = "Электронная почта недоступна. Вы можете связаться с нами через:\n\n• Email: ucnllc@gmail.com\n• Instagram: @insaveapp\n\nПожалуйста, скопируйте свой отзыв и используйте любой из этих методов.";
+
+/* TabBar */
+"Home" = "Главная";
+"History" = "История";
+"Collections" = "Коллекции";
+"Profile" = "Профиль";
+
+/* HomeView */
+"Paste Instagram Link" = "Вставьте ссылку Instagram";
+"Enter Instagram URL" = "Введите URL Instagram";
+"Clear" = "Очистить";
+"Download Now" = "Скачать сейчас";
+"Recent Downloads" = "Недавние загрузки";
+"No Downloads Yet" = "Пока нет загрузок";
+"Start downloading your favorite Instagram content" = "Начните скачивать любимый контент из Instagram";
+"Invalid URL" = "Неверный URL";
+"Please enter a valid Instagram URL" = "Пожалуйста, введите действительный URL Instagram";
+"Processing..." = "Обработка...";
+"Loading..." = "Загрузка...";
+"Paste Instagram URL here..." = "Вставьте URL Instagram здесь...";
+"Paste" = "Вставить";
+"InSave for Instagram" = "InSave для Instagram";
+"Download Reels & Video Posts" = "Скачивайте Reels и видео посты";
+"PRO" = "PRO";
+
+/* Tutorial Steps */
+"Copy Link" = "Копировать ссылку";
+"Open Instagram and copy video link" = "Откройте Instagram и скопируйте ссылку на видео";
+"Paste URL" = "Вставить URL";
+"Paste the link in the input box" = "Вставьте ссылку в поле ввода";
+"Download" = "Скачать";
+"Click download and save video" = "Нажмите скачать и сохраните видео";
+
+/* Collection Related */
+"Rename Collection" = "Переименовать коллекцию";
+"New collection name" = "Новое название коллекции";
+"Rename" = "Переименовать";
+"Delete Collection" = "Удалить коллекцию";
+"Collection Name cannot be empty." = "Название коллекции не может быть пустым.";
+"No Collections Yet" = "Пока нет коллекций";
+"Create your first collection to organize your downloads" = "Создайте свою первую коллекцию для организации загрузок";
+"Collections" = "Коллекции";
+"Unknown Collection" = "Неизвестная коллекция";
+"videos" = "видео";
+"Create a Collection" = "Создать коллекцию";
+"Enter collection name" = "Введите название коллекции";
+"Collection Name" = "Название коллекции";
+"Open on Instagram" = "Открыть в Instagram";
+
+/* Premium Features */
+"Unlock All Features" = "Разблокировать все функции";
+"Experience Instagram without limitations" = "Используйте Instagram без ограничений";
+"Premium Downloads" = "Премиум загрузки";
+"Download stories, posts & reels in HD" = "Скачивайте истории, посты и reels в HD";
+"Unlimited Access" = "Безлимитный доступ";
+"No restrictions, download as much as you want" = "Без ограничений, скачивайте сколько хотите";
+"Ad-Free Experience" = "Без рекламы";
+"Enjoy a clean, distraction-free experience" = "Наслаждайтесь чистым интерфейсом без отвлекающих факторов";
+"Batch Downloads" = "Пакетные загрузки";
+"Save time with multiple downloads at once" = "Экономьте время с множественными загрузками";
+"Most Popular" = "Самые популярные";
+"Restore Purchases" = "Восстановить покупки";
+"Secured by Apple" = "Защищено Apple";
+
+/* Download Related */
+"Download HD" = "Скачать HD";
+"Download" = "Скачать";
+"Downloading..." = "Загрузка...";
+"Video saved successfully!" = "Видео успешно сохранено!";
+"Choose from library" = "Выбрать из библиотеки";
+"Image selected" = "Изображение выбрано";
+"Download Failed" = "Ошибка загрузки";
+"Please try again later" = "Пожалуйста, попробуйте позже";
+"Preparing Download..." = "Подготовка загрузки...";
+"Please wait" = "Пожалуйста, подождите";
+
+/* Feedback */
+"What type of feedback do you have?" = "Какой у вас тип отзыва?";
+"Tell us more" = "Расскажите подробнее";
+"Add a screenshot" = "Добавить скриншот";
+"Alternative Contact Options" = "Альтернативные способы связи";
+"Copy Feedback" = "Копировать отзыв";
+"General" = "Общее";
+"Bug" = "Ошибка";
+"Feature Request" = "Запрос функции";
+"Other" = "Другое";
+"Feedback sent successfully!" = "Отзыв успешно отправлен!";
+"Failed to send feedback" = "Не удалось отправить отзыв";
+
+/* Share */
+"Help your friends discover the easiest way\nto save Instagram videos!" = "Помогите друзьям найти самый простой способ\nсохранять видео из Instagram!";
+"Share with Friends" = "Поделиться с друзьями";
+
+/* Profile */
+"My Account" = "Мой аккаунт";
+"Current Plan" = "Текущий план";
+"PRO PLAN" = "PRO ПЛАН";
+"FREE PLAN" = "БЕСПЛАТНЫЙ ПЛАН";
+"Upgrade" = "Улучшить";
+"No Ads" = "Без рекламы";
+"HD Quality" = "HD качество";
+"Unlimited" = "Безлимитно";
+"Daily Download Limit" = "Дневной лимит загрузок";
+"Downloads Today" = "Загрузки сегодня";
+"Remaining Today" = "Осталось сегодня";
+"Get unlimited downloads" = "Получить безлимитные загрузки";
+"Quick Actions" = "Быстрые действия";
+"Restore" = "Восстановить";
+"Share App" = "Поделиться приложением";
+"Help" = "Помощь";
+"Support" = "Поддержка";
+"Privacy Policy" = "Политика конфиденциальности";
+"Terms of Use" = "Условия использования";
+
+/* Input */
+"Input Required" = "Требуется ввод";
+"Please enter a URL." = "Пожалуйста, введите URL.";
+
+/* History */
+"Clear History" = "Очистить историю";
+"Are you sure?" = "Вы уверены?";
+"This action cannot be undone" = "Это действие нельзя отменить";
+"No History" = "Нет истории";
+"Your download history will appear here" = "Ваша история загрузок появится здесь";
+
+/* Empty States */
+"No Videos" = "Нет видео";
+"This collection has no videos yet" = "В этой коллекции пока нет видео";
+"No History Available" = "История недоступна";
+"Your downloaded videos will appear here" = "Ваши загруженные видео появятся здесь";
+
+/* Error Messages */
+"You have entered an invalid URL. Please check the URL and try again." = "Вы ввели неверный URL. Пожалуйста, проверьте URL и попробуйте снова.";
+"No data was received from the server. Please try again later." = "Не получены данные с сервера. Пожалуйста, попробуйте позже.";
+"There was an error processing the data. Please try again." = "Произошла ошибка при обработке данных. Пожалуйста, попробуйте снова.";
+"The request timed out. Please check your internet connection and try again." = "Время запроса истекло. Пожалуйста, проверьте подключение к интернету и попробуйте снова.";
+"A network error occurred. Please check your internet connection and try again." = "Произошла сетевая ошибка. Пожалуйста, проверьте подключение к интернету и попробуйте снова.";
+"An unknown error occurred. Please try again." = "Произошла неизвестная ошибка. Пожалуйста, попробуйте снова.";
+
+/* Paywall */
+"Unlock Premium Features" = "Разблокировать премиум функции";
+"Join thousands of satisfied users" = "Присоединитесь к тысячам довольных пользователей";
+"HD Quality Downloads" = "Загрузки в HD качестве";
+"Get the highest quality videos" = "Получите видео высочайшего качества";
+"Unlimited Downloads" = "Безлимитные загрузки";
+"No daily download limits" = "Без дневных лимитов загрузки";
+"Ad-Free Experience" = "Без рекламы";
+"Enjoy without interruptions" = "Наслаждайтесь без прерываний";
+"Priority Support" = "Приоритетная поддержка";
+"Get help when you need it" = "Получите помощь, когда она нужна";
+"Monthly" = "Ежемесячно";
+"Weekly" = "Еженедельно";
+"Yearly" = "Ежегодно";
+"BEST VALUE" = "ЛУЧШАЯ ЦЕНА";
+"FLEXIBLE PLAN" = "ГИБКИЙ ПЛАН";
+"Save 33%" = "Экономия 33%";
+"per year" = "в год";
+"per month" = "в месяц";
+"Annual" = "Годовой";
+"Only %@ per month" = "Всего %@ в месяц";
+"BEST OFFER" = "ЛУЧШЕЕ ПРЕДЛОЖЕНИЕ";

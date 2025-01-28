@@ -1,0 +1,192 @@
+/* 
+  Localizable.strings
+  InstaSaver
+
+  Created by Baki Uçan on 12.01.2025.
+  
+*/
+
+/* General */
+"OK" = "موافق";
+"Cancel" = "إلغاء";
+"Error" = "خطأ";
+"Send" = "إرسال";
+"Preview" = "معاينة";
+"Terms" = "الشروط";
+"Privacy" = "الخصوصية";
+"Version %@" = "الإصدار %@";
+"Done" = "تم";
+"Delete" = "حذف";
+"Save" = "حفظ";
+"Close" = "إغلاق";
+"Create" = "إنشاء";
+
+/* Email Content */
+"Feedback Type: %@" = "نوع التعليق: %@";
+"User Feedback:" = "تعليق المستخدم:";
+"Device Info" = "معلومات الجهاز";
+"App Version: %@ (%@)" = "إصدار التطبيق: %@ (%@)";
+"iOS Version: %@" = "إصدار iOS: %@";
+"Device: %@" = "الجهاز: %@";
+"Email not available message" = "البريد الإلكتروني غير متاح. يمكنك التواصل معنا عبر:\n\n• البريد الإلكتروني: ucnllc@gmail.com\n• انستغرام: @insaveapp\n\nيرجى نسخ تعليقك واستخدام أي من هذه الطرق.";
+
+/* TabBar */
+"Home" = "الرئيسية";
+"History" = "السجل";
+"Collections" = "المجموعات";
+"Profile" = "الملف الشخصي";
+
+/* HomeView */
+"Paste Instagram Link" = "لصق رابط انستغرام";
+"Enter Instagram URL" = "أدخل رابط انستغرام";
+"Clear" = "مسح";
+"Download Now" = "تحميل الآن";
+"Recent Downloads" = "التحميلات الأخيرة";
+"No Downloads Yet" = "لا توجد تحميلات بعد";
+"Start downloading your favorite Instagram content" = "ابدأ بتحميل محتوى انستغرام المفضل لديك";
+"Invalid URL" = "رابط غير صالح";
+"Please enter a valid Instagram URL" = "يرجى إدخال رابط انستغرام صالح";
+"Processing..." = "جارٍ المعالجة...";
+"Loading..." = "جارٍ التحميل...";
+"Paste Instagram URL here..." = "الصق رابط انستغرام هنا...";
+"Paste" = "لصق";
+"InSave for Instagram" = "InSave لانستغرام";
+"Download Reels & Video Posts" = "تحميل الريلز ومنشورات الفيديو";
+"PRO" = "النسخة المحترفة";
+
+/* Tutorial Steps */
+"Copy Link" = "نسخ الرابط";
+"Open Instagram and copy video link" = "افتح انستغرام وانسخ رابط الفيديو";
+"Paste URL" = "لصق الرابط";
+"Paste the link in the input box" = "الصق الرابط في مربع الإدخال";
+"Download" = "تحميل";
+"Click download and save video" = "انقر على تحميل واحفظ الفيديو";
+
+/* Collection Related */
+"Rename Collection" = "إعادة تسمية المجموعة";
+"New collection name" = "اسم المجموعة الجديد";
+"Rename" = "إعادة تسمية";
+"Delete Collection" = "حذف المجموعة";
+"Collection Name cannot be empty." = "لا يمكن أن يكون اسم المجموعة فارغًا.";
+"No Collections Yet" = "لا توجد مجموعات بعد";
+"Create your first collection to organize your downloads" = "أنشئ مجموعتك الأولى لتنظيم تحميلاتك";
+"Collections" = "المجموعات";
+"Unknown Collection" = "مجموعة غير معروفة";
+"videos" = "مقاطع الفيديو";
+"Create a Collection" = "إنشاء مجموعة";
+"Enter collection name" = "أدخل اسم المجموعة";
+"Collection Name" = "اسم المجموعة";
+"Open on Instagram" = "فتح في انستغرام";
+
+/* Premium Features */
+"Unlock All Features" = "فتح جميع المميزات";
+"Experience Instagram without limitations" = "استمتع بانستغرام بدون قيود";
+"Premium Downloads" = "تحميلات مميزة";
+"Download stories, posts & reels in HD" = "تحميل القصص والمنشورات والريلز بجودة عالية";
+"Unlimited Access" = "وصول غير محدود";
+"No restrictions, download as much as you want" = "بدون قيود، حمّل كما تريد";
+"Ad-Free Experience" = "تجربة خالية من الإعلانات";
+"Enjoy a clean, distraction-free experience" = "استمتع بتجربة نظيفة خالية من المشتتات";
+"Batch Downloads" = "تحميلات متعددة";
+"Save time with multiple downloads at once" = "وفر الوقت مع تحميل عدة ملفات دفعة واحدة";
+"Most Popular" = "الأكثر شعبية";
+"Restore Purchases" = "استعادة المشتريات";
+"Secured by Apple" = "مؤمن بواسطة Apple";
+
+/* Download Related */
+"Download HD" = "تحميل بجودة عالية";
+"Download" = "تحميل";
+"Downloading..." = "جارٍ التحميل...";
+"Video saved successfully!" = "تم حفظ الفيديو بنجاح!";
+"Choose from library" = "اختر من المكتبة";
+"Image selected" = "تم اختيار الصورة";
+"Download Failed" = "فشل التحميل";
+"Please try again later" = "يرجى المحاولة مرة أخرى لاحقًا";
+"Preparing Download..." = "جارٍ تحضير التحميل...";
+"Please wait" = "يرجى الانتظار";
+
+/* Feedback */
+"What type of feedback do you have?" = "ما نوع التعليق الذي لديك؟";
+"Tell us more" = "أخبرنا المزيد";
+"Add a screenshot" = "إضافة لقطة شاشة";
+"Alternative Contact Options" = "خيارات الاتصال البديلة";
+"Copy Feedback" = "نسخ التعليق";
+"General" = "عام";
+"Bug" = "خلل";
+"Feature Request" = "طلب ميزة";
+"Other" = "أخرى";
+"Feedback sent successfully!" = "تم إرسال التعليق بنجاح!";
+"Failed to send feedback" = "فشل إرسال التعليق";
+
+/* Share */
+"Help your friends discover the easiest way\nto save Instagram videos!" = "ساعد أصدقاءك في اكتشاف أسهل طريقة\nلحفظ مقاطع فيديو انستغرام!";
+"Share with Friends" = "مشاركة مع الأصدقاء";
+
+/* Profile */
+"My Account" = "حسابي";
+"Current Plan" = "الخطة الحالية";
+"PRO PLAN" = "الخطة المحترفة";
+"FREE PLAN" = "الخطة المجانية";
+"Upgrade" = "ترقية";
+"No Ads" = "بدون إعلانات";
+"HD Quality" = "جودة عالية";
+"Unlimited" = "غير محدود";
+"Daily Download Limit" = "حد التحميل اليومي";
+"Downloads Today" = "تحميلات اليوم";
+"Remaining Today" = "المتبقي اليوم";
+"Get unlimited downloads" = "احصل على تحميلات غير محدودة";
+"Quick Actions" = "إجراءات سريعة";
+"Restore" = "استعادة";
+"Share App" = "مشاركة التطبيق";
+"Help" = "المساعدة";
+"Support" = "الدعم";
+"Privacy Policy" = "سياسة الخصوصية";
+"Terms of Use" = "شروط الاستخدام";
+
+/* Input */
+"Input Required" = "الإدخال مطلوب";
+"Please enter a URL." = "يرجى إدخال رابط.";
+
+/* History */
+"Clear History" = "مسح السجل";
+"Are you sure?" = "هل أنت متأكد؟";
+"This action cannot be undone" = "لا يمكن التراجع عن هذا الإجراء";
+"No History" = "لا يوجد سجل";
+"Your download history will appear here" = "سيظهر سجل تحميلاتك هنا";
+
+/* Empty States */
+"No Videos" = "لا توجد مقاطع فيديو";
+"This collection has no videos yet" = "لا توجد مقاطع فيديو في هذه المجموعة بعد";
+"No History Available" = "لا يوجد سجل متاح";
+"Your downloaded videos will appear here" = "ستظهر مقاطع الفيديو التي تم تحميلها هنا";
+
+/* Error Messages */
+"You have entered an invalid URL. Please check the URL and try again." = "لقد أدخلت رابطًا غير صالح. يرجى التحقق من الرابط والمحاولة مرة أخرى.";
+"No data was received from the server. Please try again later." = "لم يتم تلقي أي بيانات من الخادم. يرجى المحاولة مرة أخرى لاحقًا.";
+"There was an error processing the data. Please try again." = "حدث خطأ أثناء معالجة البيانات. يرجى المحاولة مرة أخرى.";
+"The request timed out. Please check your internet connection and try again." = "انتهت مهلة الطلب. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.";
+"A network error occurred. Please check your internet connection and try again." = "حدث خطأ في الشبكة. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.";
+"An unknown error occurred. Please try again." = "حدث خطأ غير معروف. يرجى المحاولة مرة أخرى.";
+
+/* Paywall */
+"Unlock Premium Features" = "فتح المميزات المتقدمة";
+"Join thousands of satisfied users" = "انضم إلى آلاف المستخدمين الراضين";
+"HD Quality Downloads" = "تحميلات بجودة عالية";
+"Get the highest quality videos" = "احصل على مقاطع فيديو بأعلى جودة";
+"Unlimited Downloads" = "تحميلات غير محدودة";
+"No daily download limits" = "بدون حدود تحميل يومية";
+"Ad-Free Experience" = "تجربة خالية من الإعلانات";
+"Enjoy without interruptions" = "استمتع بدون مقاطعات";
+"Priority Support" = "دعم ذو أولوية";
+"Get help when you need it" = "احصل على المساعدة عندما تحتاجها";
+"Monthly" = "شهري";
+"Weekly" = "أسبوعي";
+"Yearly" = "سنوي";
+"BEST VALUE" = "أفضل قيمة";
+"FLEXIBLE PLAN" = "خطة مرنة";
+"Save 33%" = "وفر 33%";
+"per year" = "في السنة";
+"per month" = "في الشهر";
+"Annual" = "سنوي";
+"Only %@ per month" = "فقط %@ في الشهر";
+"BEST OFFER" = "أفضل عرض";

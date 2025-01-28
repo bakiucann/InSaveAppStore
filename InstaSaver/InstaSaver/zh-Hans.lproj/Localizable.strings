@@ -1,0 +1,192 @@
+/* 
+  Localizable.strings
+  InstaSaver
+
+  Created by Baki Uçan on 12.01.2025.
+  
+*/
+
+/* General */
+"OK" = "确定";
+"Cancel" = "取消";
+"Error" = "错误";
+"Send" = "发送";
+"Preview" = "预览";
+"Terms" = "条款";
+"Privacy" = "隐私";
+"Version %@" = "版本 %@";
+"Done" = "完成";
+"Delete" = "删除";
+"Save" = "保存";
+"Close" = "关闭";
+"Create" = "创建";
+
+/* Email Content */
+"Feedback Type: %@" = "反馈类型：%@";
+"User Feedback:" = "用户反馈：";
+"Device Info" = "设备信息";
+"App Version: %@ (%@)" = "应用版本：%@ (%@)";
+"iOS Version: %@" = "iOS版本：%@";
+"Device: %@" = "设备：%@";
+"Email not available message" = "电子邮件不可用。您可以通过以下方式联系我们：\n\n• 电子邮件：ucnllc@gmail.com\n• Instagram：@insaveapp\n\n请复制您的反馈并使用以上任一方式。";
+
+/* TabBar */
+"Home" = "首页";
+"History" = "历史";
+"Collections" = "收藏";
+"Profile" = "我的";
+
+/* HomeView */
+"Paste Instagram Link" = "粘贴Instagram链接";
+"Enter Instagram URL" = "输入Instagram网址";
+"Clear" = "清除";
+"Download Now" = "立即下载";
+"Recent Downloads" = "最近下载";
+"No Downloads Yet" = "暂无下载";
+"Start downloading your favorite Instagram content" = "开始下载您喜爱的Instagram内容";
+"Invalid URL" = "无效网址";
+"Please enter a valid Instagram URL" = "请输入有效的Instagram网址";
+"Processing..." = "处理中...";
+"Loading..." = "加载中...";
+"Paste Instagram URL here..." = "在此粘贴Instagram网址...";
+"Paste" = "粘贴";
+"InSave for Instagram" = "InSave for Instagram";
+"Download Reels & Video Posts" = "下载Reels和视频帖子";
+"PRO" = "专业版";
+
+/* Tutorial Steps */
+"Copy Link" = "复制链接";
+"Open Instagram and copy video link" = "打开Instagram并复制视频链接";
+"Paste URL" = "粘贴网址";
+"Paste the link in the input box" = "在输入框中粘贴链接";
+"Download" = "下载";
+"Click download and save video" = "点击下载并保存视频";
+
+/* Collection Related */
+"Rename Collection" = "重命名收藏";
+"New collection name" = "新收藏名称";
+"Rename" = "重命名";
+"Delete Collection" = "删除收藏";
+"Collection Name cannot be empty." = "收藏名称不能为空。";
+"No Collections Yet" = "暂无收藏";
+"Create your first collection to organize your downloads" = "创建您的第一个收藏来整理下载内容";
+"Collections" = "收藏";
+"Unknown Collection" = "未知收藏";
+"videos" = "视频";
+"Create a Collection" = "创建收藏";
+"Enter collection name" = "输入收藏名称";
+"Collection Name" = "收藏名称";
+"Open on Instagram" = "在Instagram中打开";
+
+/* Premium Features */
+"Unlock All Features" = "解锁所有功能";
+"Experience Instagram without limitations" = "无限制体验Instagram";
+"Premium Downloads" = "高级下载";
+"Download stories, posts & reels in HD" = "以HD质量下载故事、帖子和Reels";
+"Unlimited Access" = "无限访问";
+"No restrictions, download as much as you want" = "无限制，想下载多少就下载多少";
+"Ad-Free Experience" = "无广告体验";
+"Enjoy a clean, distraction-free experience" = "享受清爽无干扰的体验";
+"Batch Downloads" = "批量下载";
+"Save time with multiple downloads at once" = "一次性下载多个内容，节省时间";
+"Most Popular" = "最受欢迎";
+"Restore Purchases" = "恢复购买";
+"Secured by Apple" = "由Apple保障安全";
+
+/* Download Related */
+"Download HD" = "HD下载";
+"Download" = "下载";
+"Downloading..." = "下载中...";
+"Video saved successfully!" = "视频保存成功！";
+"Choose from library" = "从相册选择";
+"Image selected" = "已选择图片";
+"Download Failed" = "下载失败";
+"Please try again later" = "请稍后重试";
+"Preparing Download..." = "准备下载...";
+"Please wait" = "请稍候";
+
+/* Feedback */
+"What type of feedback do you have?" = "您有什么类型的反馈？";
+"Tell us more" = "告诉我们更多";
+"Add a screenshot" = "添加截图";
+"Alternative Contact Options" = "其他联系方式";
+"Copy Feedback" = "复制反馈";
+"General" = "常规";
+"Bug" = "问题";
+"Feature Request" = "功能建议";
+"Other" = "其他";
+"Feedback sent successfully!" = "反馈发送成功！";
+"Failed to send feedback" = "发送反馈失败";
+
+/* Share */
+"Help your friends discover the easiest way\nto save Instagram videos!" = "帮助您的朋友发现\n保存Instagram视频的最简单方式！";
+"Share with Friends" = "分享给好友";
+
+/* Profile */
+"My Account" = "我的账户";
+"Current Plan" = "当前套餐";
+"PRO PLAN" = "专业版套餐";
+"FREE PLAN" = "免费套餐";
+"Upgrade" = "升级";
+"No Ads" = "无广告";
+"HD Quality" = "HD质量";
+"Unlimited" = "无限制";
+"Daily Download Limit" = "每日下载限制";
+"Downloads Today" = "今日下载";
+"Remaining Today" = "今日剩余";
+"Get unlimited downloads" = "获取无限下载";
+"Quick Actions" = "快捷操作";
+"Restore" = "恢复";
+"Share App" = "分享应用";
+"Help" = "帮助";
+"Support" = "支持";
+"Privacy Policy" = "隐私政策";
+"Terms of Use" = "使用条款";
+
+/* Input */
+"Input Required" = "需要输入";
+"Please enter a URL." = "请输入网址。";
+
+/* History */
+"Clear History" = "清除历史";
+"Are you sure?" = "确定吗？";
+"This action cannot be undone" = "此操作无法撤销";
+"No History" = "无历史记录";
+"Your download history will appear here" = "您的下载历史将显示在这里";
+
+/* Empty States */
+"No Videos" = "无视频";
+"This collection has no videos yet" = "此收藏暂无视频";
+"No History Available" = "暂无历史记录";
+"Your downloaded videos will appear here" = "您下载的视频将显示在这里";
+
+/* Error Messages */
+"You have entered an invalid URL. Please check the URL and try again." = "您输入的网址无效。请检查网址并重试。";
+"No data was received from the server. Please try again later." = "未从服务器收到数据。请稍后重试。";
+"There was an error processing the data. Please try again." = "处理数据时出错。请重试。";
+"The request timed out. Please check your internet connection and try again." = "请求超时。请检查网络连接并重试。";
+"A network error occurred. Please check your internet connection and try again." = "发生网络错误。请检查网络连接并重试。";
+"An unknown error occurred. Please try again." = "发生未知错误。请重试。";
+
+/* Paywall */
+"Unlock Premium Features" = "解锁高级功能";
+"Join thousands of satisfied users" = "加入数千名满意用户";
+"HD Quality Downloads" = "HD质量下载";
+"Get the highest quality videos" = "获取最高质量视频";
+"Unlimited Downloads" = "无限下载";
+"No daily download limits" = "无每日下载限制";
+"Ad-Free Experience" = "无广告体验";
+"Enjoy without interruptions" = "享受无打扰体验";
+"Priority Support" = "优先支持";
+"Get help when you need it" = "随时获取帮助";
+"Monthly" = "月付";
+"Weekly" = "周付";
+"Yearly" = "年付";
+"BEST VALUE" = "最优惠";
+"FLEXIBLE PLAN" = "灵活套餐";
+"Save 33%" = "节省33%";
+"per year" = "每年";
+"per month" = "每月";
+"Annual" = "年度";
+"Only %@ per month" = "仅 %@ 每月";
+"BEST OFFER" = "最佳优惠";

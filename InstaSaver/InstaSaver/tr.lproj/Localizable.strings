@@ -1,0 +1,192 @@
+/* 
+  Localizable.strings
+  InstaSaver
+
+  Created by Baki Uçan on 12.01.2025.
+  
+*/
+
+/* General */
+"OK" = "Tamam";
+"Cancel" = "İptal";
+"Error" = "Hata";
+"Send" = "Gönder";
+"Preview" = "Önizleme";
+"Terms" = "Koşullar";
+"Privacy" = "Gizlilik";
+"Version %@" = "Versiyon %@";
+"Done" = "Tamam";
+"Delete" = "Sil";
+"Save" = "Kaydet";
+"Close" = "Kapat";
+"Create" = "Oluştur";
+
+/* Email Content */
+"Feedback Type: %@" = "Geri Bildirim Türü: %@";
+"User Feedback:" = "Kullanıcı Geri Bildirimi:";
+"Device Info" = "Cihaz Bilgisi";
+"App Version: %@ (%@)" = "Uygulama Versiyonu: %@ (%@)";
+"iOS Version: %@" = "iOS Versiyonu: %@";
+"Device: %@" = "Cihaz: %@";
+"Email not available message" = "E-posta kullanılamıyor. Bize şu kanallardan ulaşabilirsiniz:\n\n• E-posta: ucnllc@gmail.com\n• Instagram: @insaveapp\n\nLütfen geri bildiriminizi kopyalayın ve bu yöntemlerden birini kullanın.";
+
+/* TabBar */
+"Home" = "Ana Sayfa";
+"History" = "Geçmiş";
+"Collections" = "Koleksiyonlar";
+"Profile" = "Profil";
+
+/* HomeView */
+"Paste Instagram Link" = "Instagram Bağlantısını Yapıştır";
+"Enter Instagram URL" = "Instagram URL'si Girin";
+"Clear" = "Temizle";
+"Download Now" = "Şimdi İndir";
+"Recent Downloads" = "Son İndirilenler";
+"No Downloads Yet" = "Henüz İndirme Yok";
+"Start downloading your favorite Instagram content" = "Favori Instagram içeriklerinizi indirmeye başlayın";
+"Invalid URL" = "Geçersiz URL";
+"Please enter a valid Instagram URL" = "Lütfen geçerli bir Instagram URL'si girin";
+"Processing..." = "İşleniyor...";
+"Loading..." = "Yükleniyor...";
+"Paste Instagram URL here..." = "Instagram URL'sini buraya yapıştırın...";
+"Paste" = "Yapıştır";
+"InSave for Instagram" = "Instagram için InSave";
+"Download Reels & Video Posts" = "Reels ve Video Gönderilerini İndir";
+"PRO" = "PRO";
+
+/* Tutorial Steps */
+"Copy Link" = "Bağlantıyı Kopyala";
+"Open Instagram and copy video link" = "Instagram'ı açın ve video bağlantısını kopyalayın";
+"Paste URL" = "URL'yi Yapıştır";
+"Paste the link in the input box" = "Bağlantıyı giriş kutusuna yapıştırın";
+"Download" = "İndir";
+"Click download and save video" = "İndire tıklayın ve videoyu kaydedin";
+
+/* Collection Related */
+"Rename Collection" = "Koleksiyonu Yeniden Adlandır";
+"New collection name" = "Yeni koleksiyon adı";
+"Rename" = "Yeniden Adlandır";
+"Delete Collection" = "Koleksiyonu Sil";
+"Collection Name cannot be empty." = "Koleksiyon adı boş olamaz.";
+"No Collections Yet" = "Henüz Koleksiyon Yok";
+"Create your first collection to organize your downloads" = "İndirmelerinizi düzenlemek için ilk koleksiyonunuzu oluşturun";
+"Collections" = "Koleksiyonlar";
+"Unknown Collection" = "Bilinmeyen Koleksiyon";
+"videos" = "video";
+"Create a Collection" = "Koleksiyon Oluştur";
+"Enter collection name" = "Koleksiyon adını girin";
+"Collection Name" = "Koleksiyon Adı";
+"Open on Instagram" = "Instagram'da Aç";
+
+/* Premium Features */
+"Unlock All Features" = "Tüm Özellikleri Aç";
+"Experience Instagram without limitations" = "Instagram'ı sınırsız deneyimleyin";
+"Premium Downloads" = "Premium İndirmeler";
+"Download stories, posts & reels in HD" = "Hikayeleri, gönderileri ve reels'leri HD kalitede indirin";
+"Unlimited Access" = "Sınırsız Erişim";
+"No restrictions, download as much as you want" = "Kısıtlama yok, istediğiniz kadar indirin";
+"Ad-Free Experience" = "Reklamsız Deneyim";
+"Enjoy a clean, distraction-free experience" = "Temiz, dikkat dağıtıcı olmayan bir deneyimin keyfini çıkarın";
+"Batch Downloads" = "Toplu İndirmeler";
+"Save time with multiple downloads at once" = "Aynı anda birden fazla indirme yaparak zamandan tasarruf edin";
+"Most Popular" = "En Popüler";
+"Restore Purchases" = "Satın Almaları Geri Yükle";
+"Secured by Apple" = "Apple Güvencesiyle";
+
+/* Download Related */
+"Download HD" = "HD İndir";
+"Download" = "İndir";
+"Downloading..." = "İndiriliyor...";
+"Video saved successfully!" = "Video başarıyla kaydedildi!";
+"Choose from library" = "Kütüphaneden seç";
+"Image selected" = "Görsel seçildi";
+"Download Failed" = "İndirme Başarısız";
+"Please try again later" = "Lütfen daha sonra tekrar deneyin";
+"Preparing Download..." = "İndirme Hazırlanıyor...";
+"Please wait" = "Lütfen bekleyin";
+
+/* Feedback */
+"What type of feedback do you have?" = "Ne tür bir geri bildiriminiz var?";
+"Tell us more" = "Daha fazla anlatın";
+"Add a screenshot" = "Ekran görüntüsü ekle";
+"Alternative Contact Options" = "Alternatif İletişim Seçenekleri";
+"Copy Feedback" = "Geri Bildirimi Kopyala";
+"General" = "Genel";
+"Bug" = "Hata";
+"Feature Request" = "Özellik İsteği";
+"Other" = "Diğer";
+"Feedback sent successfully!" = "Geri bildirim başarıyla gönderildi!";
+"Failed to send feedback" = "Geri bildirim gönderilemedi";
+
+/* Share */
+"Help your friends discover the easiest way\nto save Instagram videos!" = "Arkadaşlarınızın Instagram videolarını kaydetmenin\nen kolay yolunu keşfetmelerine yardımcı olun!";
+"Share with Friends" = "Arkadaşlarınla Paylaş";
+
+/* Profile */
+"My Account" = "Hesabım";
+"Current Plan" = "Mevcut Plan";
+"PRO PLAN" = "PRO PLAN";
+"FREE PLAN" = "ÜCRETSİZ PLAN";
+"Upgrade" = "Yükselt";
+"No Ads" = "Reklamsız";
+"HD Quality" = "HD Kalite";
+"Unlimited" = "Sınırsız";
+"Daily Download Limit" = "Günlük İndirme Limiti";
+"Downloads Today" = "Bugünkü İndirmeler";
+"Remaining Today" = "Bugün Kalan";
+"Get unlimited downloads" = "Sınırsız indirme elde edin";
+"Quick Actions" = "Hızlı İşlemler";
+"Restore" = "Geri Yükle";
+"Share App" = "Uygulamayı Paylaş";
+"Help" = "Yardım";
+"Support" = "Destek";
+"Privacy Policy" = "Gizlilik Politikası";
+"Terms of Use" = "Kullanım Koşulları";
+
+/* Input */
+"Input Required" = "Giriş Gerekli";
+"Please enter a URL." = "Lütfen bir URL girin.";
+
+/* History */
+"Clear History" = "Geçmişi Temizle";
+"Are you sure?" = "Emin misiniz?";
+"This action cannot be undone" = "Bu işlem geri alınamaz";
+"No History" = "Geçmiş Yok";
+"Your download history will appear here" = "İndirme geçmişiniz burada görünecek";
+
+/* Empty States */
+"No Videos" = "Video Yok";
+"This collection has no videos yet" = "Bu koleksiyonda henüz video yok";
+"No History Available" = "Geçmiş Bulunamadı";
+"Your downloaded videos will appear here" = "İndirdiğiniz videolar burada görünecek";
+
+/* Error Messages */
+"You have entered an invalid URL. Please check the URL and try again." = "Geçersiz bir URL girdiniz. Lütfen URL'yi kontrol edip tekrar deneyin.";
+"No data was received from the server. Please try again later." = "Sunucudan veri alınamadı. Lütfen daha sonra tekrar deneyin.";
+"There was an error processing the data. Please try again." = "Veri işlenirken bir hata oluştu. Lütfen tekrar deneyin.";
+"The request timed out. Please check your internet connection and try again." = "İstek zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.";
+"A network error occurred. Please check your internet connection and try again." = "Bir ağ hatası oluştu. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.";
+"An unknown error occurred. Please try again." = "Bilinmeyen bir hata oluştu. Lütfen tekrar deneyin.";
+
+/* Paywall */
+"Unlock Premium Access" = "Premium Özellikleri Aç";
+"Join thousands of satisfied users" = "Binlerce memnun kullanıcıya katılın";
+"HD Quality Downloads" = "HD Kaliteli İndirmeler";
+"Get the highest quality videos" = "En yüksek kaliteli videoları alın";
+"Unlimited Downloads" = "Sınırsız İndirme";
+"No daily download limits" = "Günlük indirme limiti yok";
+"Ad-Free Experience" = "Reklamsız Deneyim";
+"Enjoy without interruptions" = "Kesintisiz keyfini çıkarın";
+"Priority Support" = "Öncelikli Destek";
+"Get help when you need it" = "İhtiyacınız olduğunda yardım alın";
+"Monthly" = "Aylık";
+"Weekly" = "Haftalık";
+"Yearly" = "Yıllık";
+"BEST VALUE" = "EN İYİ DEĞER";
+"FLEXIBLE PLAN" = "ESNEK PLAN";
+"Save 33%" = "33% İndirim";
+"per year" = "yıllık";
+"per month" = "aylık";
+"Annual" = "Yıllık";
+"Only %@ per month" = "Ayda yalnızca %@";
+"BEST OFFER" = "EN İYİ TEKLİF";

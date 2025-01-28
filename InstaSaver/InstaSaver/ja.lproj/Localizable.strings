@@ -1,0 +1,192 @@
+/* 
+  Localizable.strings
+  InstaSaver
+
+  Created by Baki Uçan on 12.01.2025.
+  
+*/
+
+/* General */
+"OK" = "OK";
+"Cancel" = "キャンセル";
+"Error" = "エラー";
+"Send" = "送信";
+"Preview" = "プレビュー";
+"Terms" = "利用規約";
+"Privacy" = "プライバシー";
+"Version %@" = "バージョン %@";
+"Done" = "完了";
+"Delete" = "削除";
+"Save" = "保存";
+"Close" = "閉じる";
+"Create" = "作成";
+
+/* Email Content */
+"Feedback Type: %@" = "フィードバックの種類：%@";
+"User Feedback:" = "ユーザーフィードバック：";
+"Device Info" = "デバイス情報";
+"App Version: %@ (%@)" = "アプリバージョン：%@ (%@)";
+"iOS Version: %@" = "iOSバージョン：%@";
+"Device: %@" = "デバイス：%@";
+"Email not available message" = "メールが利用できません。以下の方法でご連絡ください：\n\n• メール：ucnllc@gmail.com\n• Instagram：@insaveapp\n\nフィードバックをコピーして、いずれかの方法をご利用ください。";
+
+/* TabBar */
+"Home" = "ホーム";
+"History" = "履歴";
+"Collections" = "コレクション";
+"Profile" = "プロフィール";
+
+/* HomeView */
+"Paste Instagram Link" = "Instagramリンクを貼り付け";
+"Enter Instagram URL" = "Instagram URLを入力";
+"Clear" = "クリア";
+"Download Now" = "今すぐダウンロード";
+"Recent Downloads" = "最近のダウンロード";
+"No Downloads Yet" = "ダウンロードはまだありません";
+"Start downloading your favorite Instagram content" = "お気に入りのInstagramコンテンツのダウンロードを開始";
+"Invalid URL" = "無効なURL";
+"Please enter a valid Instagram URL" = "有効なInstagram URLを入力してください";
+"Processing..." = "処理中...";
+"Loading..." = "読み込み中...";
+"Paste Instagram URL here..." = "ここにInstagram URLを貼り付け...";
+"Paste" = "貼り付け";
+"InSave for Instagram" = "InSave for Instagram";
+"Download Reels & Video Posts" = "リールと動画投稿をダウンロード";
+"PRO" = "PRO";
+
+/* Tutorial Steps */
+"Copy Link" = "リンクをコピー";
+"Open Instagram and copy video link" = "Instagramを開いて動画リンクをコピー";
+"Paste URL" = "URLを貼り付け";
+"Paste the link in the input box" = "入力ボックスにリンクを貼り付け";
+"Download" = "ダウンロード";
+"Click download and save video" = "ダウンロードをクリックして動画を保存";
+
+/* Collection Related */
+"Rename Collection" = "コレクション名を変更";
+"New collection name" = "新しいコレクション名";
+"Rename" = "名前を変更";
+"Delete Collection" = "コレクションを削除";
+"Collection Name cannot be empty." = "コレクション名は空にできません。";
+"No Collections Yet" = "コレクションはまだありません";
+"Create your first collection to organize your downloads" = "ダウンロードを整理する最初のコレクションを作成";
+"Collections" = "コレクション";
+"Unknown Collection" = "不明なコレクション";
+"videos" = "動画";
+"Create a Collection" = "コレクションを作成";
+"Enter collection name" = "コレクション名を入力";
+"Collection Name" = "コレクション名";
+"Open on Instagram" = "Instagramで開く";
+
+/* Premium Features */
+"Unlock All Features" = "すべての機能をアンロック";
+"Experience Instagram without limitations" = "制限なしでInstagramを体験";
+"Premium Downloads" = "プレミアムダウンロード";
+"Download stories, posts & reels in HD" = "ストーリー、投稿、リールをHDでダウンロード";
+"Unlimited Access" = "無制限アクセス";
+"No restrictions, download as much as you want" = "制限なし、好きなだけダウンロード可能";
+"Ad-Free Experience" = "広告なし体験";
+"Enjoy a clean, distraction-free experience" = "クリーンで邪魔のない体験を楽しむ";
+"Batch Downloads" = "一括ダウンロード";
+"Save time with multiple downloads at once" = "複数のダウンロードを一度に行って時間を節約";
+"Most Popular" = "最も人気";
+"Restore Purchases" = "購入を復元";
+"Secured by Apple" = "Appleによる安全保障";
+
+/* Download Related */
+"Download HD" = "HDでダウンロード";
+"Download" = "ダウンロード";
+"Downloading..." = "ダウンロード中...";
+"Video saved successfully!" = "動画を保存しました！";
+"Choose from library" = "ライブラリから選択";
+"Image selected" = "画像を選択しました";
+"Download Failed" = "ダウンロード失敗";
+"Please try again later" = "後でもう一度お試しください";
+"Preparing Download..." = "ダウンロードを準備中...";
+"Please wait" = "お待ちください";
+
+/* Feedback */
+"What type of feedback do you have?" = "どのようなフィードバックですか？";
+"Tell us more" = "詳しく教えてください";
+"Add a screenshot" = "スクリーンショットを追加";
+"Alternative Contact Options" = "その他の連絡方法";
+"Copy Feedback" = "フィードバックをコピー";
+"General" = "一般";
+"Bug" = "バグ";
+"Feature Request" = "機能リクエスト";
+"Other" = "その他";
+"Feedback sent successfully!" = "フィードバックを送信しました！";
+"Failed to send feedback" = "フィードバックの送信に失敗しました";
+
+/* Share */
+"Help your friends discover the easiest way\nto save Instagram videos!" = "友達にInstagram動画を保存する\n最も簡単な方法を教えてあげましょう！";
+"Share with Friends" = "友達とシェア";
+
+/* Profile */
+"My Account" = "マイアカウント";
+"Current Plan" = "現在のプラン";
+"PRO PLAN" = "PROプラン";
+"FREE PLAN" = "無料プラン";
+"Upgrade" = "アップグレード";
+"No Ads" = "広告なし";
+"HD Quality" = "HD品質";
+"Unlimited" = "無制限";
+"Daily Download Limit" = "1日のダウンロード制限";
+"Downloads Today" = "今日のダウンロード";
+"Remaining Today" = "今日の残り";
+"Get unlimited downloads" = "無制限ダウンロードを取得";
+"Quick Actions" = "クイックアクション";
+"Restore" = "復元";
+"Share App" = "アプリをシェア";
+"Help" = "ヘルプ";
+"Support" = "サポート";
+"Privacy Policy" = "プライバシーポリシー";
+"Terms of Use" = "利用規約";
+
+/* Input */
+"Input Required" = "入力が必要です";
+"Please enter a URL." = "URLを入力してください。";
+
+/* History */
+"Clear History" = "履歴を消去";
+"Are you sure?" = "本当によろしいですか？";
+"This action cannot be undone" = "この操作は取り消せません";
+"No History" = "履歴なし";
+"Your download history will appear here" = "ダウンロード履歴がここに表示されます";
+
+/* Empty States */
+"No Videos" = "動画なし";
+"This collection has no videos yet" = "このコレクションにはまだ動画がありません";
+"No History Available" = "履歴がありません";
+"Your downloaded videos will appear here" = "ダウンロードした動画がここに表示されます";
+
+/* Error Messages */
+"You have entered an invalid URL. Please check the URL and try again." = "無効なURLが入力されました。URLを確認して再試行してください。";
+"No data was received from the server. Please try again later." = "サーバーからデータを受信できませんでした。後でもう一度お試しください。";
+"There was an error processing the data. Please try again." = "データの処理中にエラーが発生しました。もう一度お試しください。";
+"The request timed out. Please check your internet connection and try again." = "リクエストがタイムアウトしました。インターネット接続を確認して再試行してください。";
+"A network error occurred. Please check your internet connection and try again." = "ネットワークエラーが発生しました。インターネット接続を確認して再試行してください。";
+"An unknown error occurred. Please try again." = "不明なエラーが発生しました。もう一度お試しください。";
+
+/* Paywall */
+"Unlock Premium Features" = "プレミアム機能をアンロック";
+"Join thousands of satisfied users" = "数千人の満足ユーザーに参加";
+"HD Quality Downloads" = "HD品質ダウンロード";
+"Get the highest quality videos" = "最高品質の動画を取得";
+"Unlimited Downloads" = "無制限ダウンロード";
+"No daily download limits" = "1日のダウンロード制限なし";
+"Ad-Free Experience" = "広告なし体験";
+"Enjoy without interruptions" = "中断なしで楽しむ";
+"Priority Support" = "優先サポート";
+"Get help when you need it" = "必要な時にヘルプを受けられます";
+"Monthly" = "月額";
+"Weekly" = "週額";
+"Yearly" = "年額";
+"BEST VALUE" = "ベストバリュー";
+"FLEXIBLE PLAN" = "フレキシブルプラン";
+"Save 33%" = "33%お得";
+"per year" = "年間";
+"per month" = "月額";
+"Annual" = "年間";
+"Only %@ per month" = "月額たったの %@";
+"BEST OFFER" = "ベストオファー";

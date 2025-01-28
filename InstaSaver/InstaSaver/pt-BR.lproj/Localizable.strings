@@ -1,0 +1,192 @@
+/* 
+  Localizable.strings
+  InstaSaver
+
+  Created by Baki Uçan on 12.01.2025.
+  
+*/
+
+/* General */
+"OK" = "OK";
+"Cancel" = "Cancelar";
+"Error" = "Erro";
+"Send" = "Enviar";
+"Preview" = "Visualizar";
+"Terms" = "Termos";
+"Privacy" = "Privacidade";
+"Version %@" = "Versão %@";
+"Done" = "Concluído";
+"Delete" = "Excluir";
+"Save" = "Salvar";
+"Close" = "Fechar";
+"Create" = "Criar";
+
+/* Email Content */
+"Feedback Type: %@" = "Tipo de feedback: %@";
+"User Feedback:" = "Feedback do usuário:";
+"Device Info" = "Informações do dispositivo";
+"App Version: %@ (%@)" = "Versão do app: %@ (%@)";
+"iOS Version: %@" = "Versão do iOS: %@";
+"Device: %@" = "Dispositivo: %@";
+"Email not available message" = "Email não disponível. Você pode nos contatar através de:\n\n• Email: ucnllc@gmail.com\n• Instagram: @insaveapp\n\nPor favor, copie seu feedback e use qualquer um desses métodos.";
+
+/* TabBar */
+"Home" = "Início";
+"History" = "Histórico";
+"Collections" = "Coleções";
+"Profile" = "Perfil";
+
+/* HomeView */
+"Paste Instagram Link" = "Colar link do Instagram";
+"Enter Instagram URL" = "Digite a URL do Instagram";
+"Clear" = "Limpar";
+"Download Now" = "Baixar agora";
+"Recent Downloads" = "Downloads recentes";
+"No Downloads Yet" = "Nenhum download ainda";
+"Start downloading your favorite Instagram content" = "Comece a baixar seu conteúdo favorito do Instagram";
+"Invalid URL" = "URL inválida";
+"Please enter a valid Instagram URL" = "Por favor, insira uma URL válida do Instagram";
+"Processing..." = "Processando...";
+"Loading..." = "Carregando...";
+"Paste Instagram URL here..." = "Cole a URL do Instagram aqui...";
+"Paste" = "Colar";
+"InSave for Instagram" = "InSave para Instagram";
+"Download Reels & Video Posts" = "Baixe Reels e posts de vídeo";
+"PRO" = "PRO";
+
+/* Tutorial Steps */
+"Copy Link" = "Copiar link";
+"Open Instagram and copy video link" = "Abra o Instagram e copie o link do vídeo";
+"Paste URL" = "Colar URL";
+"Paste the link in the input box" = "Cole o link na caixa de entrada";
+"Download" = "Baixar";
+"Click download and save video" = "Clique em baixar e salve o vídeo";
+
+/* Collection Related */
+"Rename Collection" = "Renomear coleção";
+"New collection name" = "Novo nome da coleção";
+"Rename" = "Renomear";
+"Delete Collection" = "Excluir coleção";
+"Collection Name cannot be empty." = "O nome da coleção não pode estar vazio.";
+"No Collections Yet" = "Nenhuma coleção ainda";
+"Create your first collection to organize your downloads" = "Crie sua primeira coleção para organizar seus downloads";
+"Collections" = "Coleções";
+"Unknown Collection" = "Coleção desconhecida";
+"videos" = "vídeos";
+"Create a Collection" = "Criar uma coleção";
+"Enter collection name" = "Digite o nome da coleção";
+"Collection Name" = "Nome da coleção";
+"Open on Instagram" = "Abrir no Instagram";
+
+/* Premium Features */
+"Unlock All Features" = "Desbloqueie todos os recursos";
+"Experience Instagram without limitations" = "Experimente o Instagram sem limitações";
+"Premium Downloads" = "Downloads Premium";
+"Download stories, posts & reels in HD" = "Baixe stories, posts e reels em HD";
+"Unlimited Access" = "Acesso ilimitado";
+"No restrictions, download as much as you want" = "Sem restrições, baixe quanto quiser";
+"Ad-Free Experience" = "Experiência sem anúncios";
+"Enjoy a clean, distraction-free experience" = "Aproveite uma experiência limpa e sem distrações";
+"Batch Downloads" = "Downloads em lote";
+"Save time with multiple downloads at once" = "Economize tempo com vários downloads de uma vez";
+"Most Popular" = "Mais popular";
+"Restore Purchases" = "Restaurar compras";
+"Secured by Apple" = "Protegido pela Apple";
+
+/* Download Related */
+"Download HD" = "Baixar em HD";
+"Download" = "Baixar";
+"Downloading..." = "Baixando...";
+"Video saved successfully!" = "Vídeo salvo com sucesso!";
+"Choose from library" = "Escolher da biblioteca";
+"Image selected" = "Imagem selecionada";
+"Download Failed" = "Falha no download";
+"Please try again later" = "Por favor, tente novamente mais tarde";
+"Preparing Download..." = "Preparando download...";
+"Please wait" = "Por favor, aguarde";
+
+/* Feedback */
+"What type of feedback do you have?" = "Que tipo de feedback você tem?";
+"Tell us more" = "Conte-nos mais";
+"Add a screenshot" = "Adicionar screenshot";
+"Alternative Contact Options" = "Opções alternativas de contato";
+"Copy Feedback" = "Copiar feedback";
+"General" = "Geral";
+"Bug" = "Bug";
+"Feature Request" = "Solicitação de recurso";
+"Other" = "Outro";
+"Feedback sent successfully!" = "Feedback enviado com sucesso!";
+"Failed to send feedback" = "Falha ao enviar feedback";
+
+/* Share */
+"Help your friends discover the easiest way\nto save Instagram videos!" = "Ajude seus amigos a descobrir a maneira mais fácil\nde salvar vídeos do Instagram!";
+"Share with Friends" = "Compartilhar com amigos";
+
+/* Profile */
+"My Account" = "Minha conta";
+"Current Plan" = "Plano atual";
+"PRO PLAN" = "PLANO PRO";
+"FREE PLAN" = "PLANO GRATUITO";
+"Upgrade" = "Atualizar";
+"No Ads" = "Sem anúncios";
+"HD Quality" = "Qualidade HD";
+"Unlimited" = "Ilimitado";
+"Daily Download Limit" = "Limite diário de downloads";
+"Downloads Today" = "Downloads hoje";
+"Remaining Today" = "Restantes hoje";
+"Get unlimited downloads" = "Obtenha downloads ilimitados";
+"Quick Actions" = "Ações rápidas";
+"Restore" = "Restaurar";
+"Share App" = "Compartilhar app";
+"Help" = "Ajuda";
+"Support" = "Suporte";
+"Privacy Policy" = "Política de privacidade";
+"Terms of Use" = "Termos de uso";
+
+/* Input */
+"Input Required" = "Entrada necessária";
+"Please enter a URL." = "Por favor, insira uma URL.";
+
+/* History */
+"Clear History" = "Limpar histórico";
+"Are you sure?" = "Tem certeza?";
+"This action cannot be undone" = "Esta ação não pode ser desfeita";
+"No History" = "Sem histórico";
+"Your download history will appear here" = "Seu histórico de downloads aparecerá aqui";
+
+/* Empty States */
+"No Videos" = "Sem vídeos";
+"This collection has no videos yet" = "Esta coleção ainda não tem vídeos";
+"No History Available" = "Nenhum histórico disponível";
+"Your downloaded videos will appear here" = "Seus vídeos baixados aparecerão aqui";
+
+/* Error Messages */
+"You have entered an invalid URL. Please check the URL and try again." = "Você inseriu uma URL inválida. Por favor, verifique a URL e tente novamente.";
+"No data was received from the server. Please try again later." = "Nenhum dado foi recebido do servidor. Por favor, tente novamente mais tarde.";
+"There was an error processing the data. Please try again." = "Houve um erro ao processar os dados. Por favor, tente novamente.";
+"The request timed out. Please check your internet connection and try again." = "A solicitação expirou. Por favor, verifique sua conexão com a internet e tente novamente.";
+"A network error occurred. Please check your internet connection and try again." = "Ocorreu um erro de rede. Por favor, verifique sua conexão com a internet e tente novamente.";
+"An unknown error occurred. Please try again." = "Ocorreu um erro desconhecido. Por favor, tente novamente.";
+
+/* Paywall */
+"Unlock Premium Features" = "Desbloqueie recursos Premium";
+"Join thousands of satisfied users" = "Junte-se a milhares de usuários satisfeitos";
+"HD Quality Downloads" = "Downloads em qualidade HD";
+"Get the highest quality videos" = "Obtenha vídeos da mais alta qualidade";
+"Unlimited Downloads" = "Downloads ilimitados";
+"No daily download limits" = "Sem limites diários de download";
+"Ad-Free Experience" = "Experiência sem anúncios";
+"Enjoy without interruptions" = "Aproveite sem interrupções";
+"Priority Support" = "Suporte prioritário";
+"Get help when you need it" = "Obtenha ajuda quando precisar";
+"Monthly" = "Mensal";
+"Weekly" = "Semanal";
+"Yearly" = "Anual";
+"BEST VALUE" = "MELHOR VALOR";
+"FLEXIBLE PLAN" = "PLANO FLEXÍVEL";
+"Save 33%" = "Economize 33%";
+"per year" = "por ano";
+"per month" = "por mês";
+"Annual" = "Anual";
+"Only %@ per month" = "Apenas %@ por mês";
+"BEST OFFER" = "MELHOR OFERTA";
