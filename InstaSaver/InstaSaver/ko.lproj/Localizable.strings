@@ -195,3 +195,40 @@
 "Stories" = "스토리";
 "Download Bulk" = "일괄 다운로드";
 "Downloading Stories..." = "스토리 다운로드 중...";
+
+/* New additions */
+"What You'll Get" = "당신이 얻을 것";
+"🎉 EXCLUSIVE OFFER!" = "🎉 독점 제안!";
+"Don't miss out on this incredible deal!" = "이 놀라운 거래를 놓치지 마세요!";
+"Claim Your Offer Now!" = "지금 제안을 청구하세요!";
+"Are you sure you want to clear all history items?" = "모든 기록 항목을 지우시겠습니까?";
+"This content is not available because the account is private." = "이 콘텐츠는 계정이 비공개이므로 사용할 수 없습니다.";
+"Failed to decode the response. Please check the URL or account privacy settings." = "응답을 디코딩하지 못했습니다. URL 또는 계정 개인 정보 설정을 확인하세요.";
+
+/* New String Additions - January 2025 */
+"Username" = "사용자 이름";
+"Enter Instagram username..." = "Instagram 사용자 이름 입력...";
+"Paste the link or enter username in the box" = "링크를 붙여넣거나 상자에 사용자 이름을 입력하세요";
+"Click download and save to your gallery" = "클릭하여 다운로드하고 갤러리에 저장";
+"Paste URL/Username" = "URL/사용자 이름 붙여넣기";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "이 사용자의 활성화된 스토리가 없거나 계정이 비공개입니다";
+"Failed to fetch stories. Please try again." = "스토리를 가져오지 못했습니다. 다시 시도해 주세요.";
+
+/* Input Error Messages */
+"Please enter an Instagram username" = "Instagram 사용자 이름을 입력해주세요";
+"Please enter only the username without URL" = "URL 없이 사용자 이름만 입력해주세요";
+
+/* Restore Alert Messages */
+"Success" = "성공";
+"Your purchases have been successfully restored!" = "구매 내역이 성공적으로 복원되었습니다!";
+"Restore Failed" = "복원 실패";
+"Failed to restore purchases. Please try again later." = "구매 내역을 복원하지 못했습니다. 나중에 다시 시도해 주세요.";
+"No Purchases Found" = "구매 내역 없음";
+"No previous purchases were found to restore." = "복원할 이전 구매 내역을 찾을 수 없습니다.";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "구매 실패";
+"Failed to complete the purchase. Please try again later." = "구매를 완료하지 못했습니다. 나중에 다시 시도해 주세요.";
+"Thank you for your purchase!" = "구매해 주셔서 감사합니다!";

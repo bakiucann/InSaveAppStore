@@ -195,3 +195,40 @@
 "Stories" = "Истории";
 "Download Bulk" = "Массовая загрузка";
 "Downloading Stories..." = "Загрузка историй...";
+
+/* New additions from the code block */
+"What You'll Get" = "Что вы получите";
+"🎉 EXCLUSIVE OFFER!" = "🎉 ЭКСКЛЮЗИВНОЕ ПРЕДЛОЖЕНИЕ!";
+"Don't miss out on this incredible deal!" = "Не упустите это невероятное предложение!";
+"Claim Your Offer Now!" = "Получите свое предложение сейчас!";
+"Are you sure you want to clear all history items?" = "Вы уверены, что хотите очистить все элементы истории?";
+"This content is not available because the account is private." = "Этот контент недоступен, так как аккаунт является приватным.";
+"Failed to decode the response. Please check the URL or account privacy settings." = "Не удалось декодировать ответ. Пожалуйста, проверьте URL или настройки конфиденциальности аккаунта.";
+
+/* New String Additions - January 2025 */
+"Username" = "Имя пользователя";
+"Enter Instagram username..." = "Введите имя пользователя Instagram...";
+"Paste the link or enter username in the box" = "Вставьте ссылку или введите имя пользователя в поле";
+"Click download and save to your gallery" = "Нажмите, чтобы скачать и сохранить в галерею";
+"Paste URL/Username" = "Вставить URL/Имя пользователя";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "Активные истории для этого пользователя не найдены или аккаунт является приватным";
+"Failed to fetch stories. Please try again." = "Не удалось загрузить истории. Пожалуйста, попробуйте снова.";
+
+/* Input Error Messages */
+"Please enter an Instagram username" = "Пожалуйста, введите имя пользователя Instagram";
+"Please enter only the username without URL" = "Пожалуйста, введите только имя пользователя без URL";
+
+/* Restore Alert Messages */
+"Success" = "Успех";
+"Your purchases have been successfully restored!" = "Ваши покупки успешно восстановлены!";
+"Restore Failed" = "Ошибка восстановления";
+"Failed to restore purchases. Please try again later." = "Не удалось восстановить покупки. Пожалуйста, повторите попытку позже.";
+"No Purchases Found" = "Покупки не найдены";
+"No previous purchases were found to restore." = "Не найдено предыдущих покупок для восстановления.";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "Ошибка покупки";
+"Failed to complete the purchase. Please try again later." = "Не удалось завершить покупку. Пожалуйста, повторите попытку позже.";
+"Thank you for your purchase!" = "Спасибо за вашу покупку!";

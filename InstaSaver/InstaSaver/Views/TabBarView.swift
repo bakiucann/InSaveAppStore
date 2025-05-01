@@ -47,6 +47,14 @@ struct TabBarView: View {
         .ignoresSafeArea(.keyboard)
         .onAppear {
             setupActions()
+            // Bildirim gözlemcisini ekle
+            setupSubscriptionObserver()
+        }
+        .onDisappear {
+            // Gözlemciyi kaldır
+            NotificationCenter.default.removeObserver(
+                NSNotification.Name("SubscriptionChanged")
+            )
         }
     }
     
@@ -59,6 +67,17 @@ struct TabBarView: View {
                 print("Delete action triggered")
             }
         ]
+    }
+    
+    private func setupSubscriptionObserver() {
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("SubscriptionChanged"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            print("Abonelik durumu değişti, SubscriptionManager'ı güncelliyorum")
+            subscriptionManager.checkSubscriptionStatus()
+        }
     }
 }
 

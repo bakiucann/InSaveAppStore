@@ -195,3 +195,40 @@
 "Stories" = "Stories";
 "Download Bulk" = "Téléchargement groupé";
 "Downloading Stories..." = "Téléchargement des stories...";
+
+/* New additions */
+"What You'll Get" = "Ce que vous obtiendrez";
+"🎉 EXCLUSIVE OFFER!" = "🎉 OFFRE EXCLUSIVE !";
+"Don't miss out on this incredible deal!" = "Ne manquez pas cette offre incroyable !";
+"Claim Your Offer Now!" = "Réclamez votre offre maintenant !";
+"Are you sure you want to clear all history items?" = "Êtes-vous sûr de vouloir effacer tous les éléments de l'historique ?";
+"This content is not available because the account is private." = "Ce contenu n'est pas disponible car le compte est privé.";
+"Failed to decode the response. Please check the URL or account privacy settings." = "Échec du décodage de la réponse. Veuillez vérifier l'URL ou les paramètres de confidentialité du compte.";
+
+/* New String Additions - January 2025 */
+"Username" = "Nom d'utilisateur";
+"Enter Instagram username..." = "Entrez le nom d'utilisateur Instagram...";
+"Paste the link or enter username in the box" = "Collez le lien ou entrez le nom d'utilisateur dans la case";
+"Click download and save to your gallery" = "Cliquez pour télécharger et enregistrer dans votre galerie";
+"Paste URL/Username" = "Coller URL/Nom d'utilisateur";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "Aucune story active trouvée pour cet utilisateur ou le compte est privé";
+"Failed to fetch stories. Please try again." = "Échec de récupération des stories. Veuillez réessayer.";
+
+/* Input Error Messages */
+"Please enter an Instagram username" = "Veuillez saisir un nom d'utilisateur Instagram";
+"Please enter only the username without URL" = "Veuillez saisir uniquement le nom d'utilisateur sans URL";
+
+/* Restore Alert Messages */
+"Success" = "Succès";
+"Your purchases have been successfully restored!" = "Vos achats ont été restaurés avec succès !";
+"Restore Failed" = "Échec de la restauration";
+"Failed to restore purchases. Please try again later." = "Échec de la restauration des achats. Veuillez réessayer plus tard.";
+"No Purchases Found" = "Aucun achat trouvé";
+"No previous purchases were found to restore." = "Aucun achat antérieur n'a été trouvé à restaurer.";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "Échec de l'achat";
+"Failed to complete the purchase. Please try again later." = "Impossible de finaliser l'achat. Veuillez réessayer plus tard.";
+"Thank you for your purchase!" = "Merci pour votre achat !";

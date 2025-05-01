@@ -195,3 +195,36 @@
 "Stories" = "Stories";
 "Download Bulk" = "Mehrere herunterladen";
 "Downloading Stories..." = "Stories werden heruntergeladen...";
+
+/* New additions from the code block */
+"What You'll Get" = "Was Sie bekommen werden";
+"🎉 EXCLUSIVE OFFER!" = "🎉 EXKLUSIVES ANGEBOT!";
+"Don't miss out on this incredible deal!" = "Verpassen Sie nicht dieses unglaubliche Angebot!";
+"Claim Your Offer Now!" = "Fordern Sie Ihr Angebot jetzt an!";
+"Are you sure you want to clear all history items?" = "Sind Sie sicher, dass Sie alle Verlaufselemente löschen möchten?";
+"This content is not available because the account is private." = "Dieser Inhalt ist nicht verfügbar, da das Konto privat ist.";
+"Failed to decode the response. Please check the URL or account privacy settings." = "Fehler beim Dekodieren der Antwort. Bitte überprüfen Sie die URL oder die Datenschutzeinstellungen des Kontos.";
+
+/* New String Additions - January 2025 */
+"Username" = "Benutzername";
+"Enter Instagram username..." = "Instagram-Benutzername eingeben...";
+"Paste the link or enter username in the box" = "Link einfügen oder Benutzername in das Feld eingeben";
+"Click download and save to your gallery" = "Klicken Sie zum Herunterladen und Speichern in Ihrer Galerie";
+"Paste URL/Username" = "URL/Benutzername einfügen";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "Keine aktiven Stories für diesen Benutzer gefunden oder das Konto ist privat";
+"Failed to fetch stories. Please try again." = "Fehler beim Abrufen der Stories. Bitte versuchen Sie es erneut.";
+
+/* Restore Alert Messages */
+"Success" = "Erfolg";
+"Your purchases have been successfully restored!" = "Ihre Käufe wurden erfolgreich wiederhergestellt!";
+"Restore Failed" = "Wiederherstellung fehlgeschlagen";
+"Failed to restore purchases. Please try again later." = "Käufe konnten nicht wiederhergestellt werden. Bitte versuchen Sie es später erneut.";
+"No Purchases Found" = "Keine Käufe gefunden";
+"No previous purchases were found to restore." = "Es wurden keine früheren Käufe zum Wiederherstellen gefunden.";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "Kauf fehlgeschlagen";
+"Failed to complete the purchase. Please try again later." = "Der Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es später erneut.";
+"Thank you for your purchase!" = "Vielen Dank für Ihren Einkauf!";

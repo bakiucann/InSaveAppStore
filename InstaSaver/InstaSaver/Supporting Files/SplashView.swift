@@ -73,7 +73,7 @@ struct SplashView: View {
                 scale = 1.0
             }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
                 withAnimation(.easeIn(duration: 0.3)) {
                     showProgress = true
                 }
@@ -92,17 +92,19 @@ struct SplashView: View {
     }
     
     private func setupNetworkMonitoring() {
-        monitor.pathUpdateHandler = { path in
-            DispatchQueue.main.async {
-                withAnimation {
-                    isConnected = path.status == .satisfied
-                    if !isConnected {
-                        showAlert = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            self.monitor.pathUpdateHandler = { path in
+                DispatchQueue.main.async {
+                    withAnimation {
+                        isConnected = path.status == .satisfied
+                        if !isConnected {
+                            showAlert = true
+                        }
                     }
                 }
             }
+            monitor.start(queue: queue)
         }
-        monitor.start(queue: queue)
     }
     
     private func retryConnection() {

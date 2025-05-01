@@ -8,6 +8,7 @@ struct HistoryView: View {
     @State private var selectedStories: [InstagramStoryModel] = []
     @State private var showStoryView = false
     @State private var isLoadingStory = false
+    @State private var showClearAlert = false
     
     private let instagramGradient = LinearGradient(
         colors: [
@@ -85,7 +86,9 @@ struct HistoryView: View {
                                                 downloadLink: historyItem.originalUrl ?? "",
                                                 thumbnailUrl: historyItem.originCover ?? "",
                                                 videoTitle: historyItem.title,
-                                                videoQuality: VideoQuality.default
+                                                videoQuality: VideoQuality.default,
+                                                isPhoto: historyItem.type == "photo",
+                                                isCarousel: false
                                             )
                                             videoViewModel.setVideo(video)
                                         }
@@ -106,11 +109,29 @@ struct HistoryView: View {
         .navigationBarBackButtonHidden(true)
         .navigationBarTitleDisplayMode(.inline)
         .navigationTitle("History")
-        .alert(isPresented: $viewModel.showError) {
+        .navigationBarItems(trailing: Button(action: {
+            showClearAlert = true
+        }) {
+            ZStack {
+                Circle()
+                    .fill(instagramGradient)
+                    .frame(width: 36, height: 36)
+                Image(systemName: "xmark.circle.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 20, height: 20)
+                    .foregroundColor(.white)
+            }
+            .accessibilityLabel(NSLocalizedString("Clear All", comment: ""))
+        })
+        .alert(isPresented: $showClearAlert) {
             Alert(
-                title: Text("Error"),
-                message: Text(viewModel.errorMessage),
-                dismissButton: .default(Text("OK"))
+                title: Text("Clear History"),
+                message: Text("Are you sure you want to clear all history items?"),
+                primaryButton: .destructive(Text("Clear")) {
+                    viewModel.clearAllHistory()
+                },
+                secondaryButton: .cancel()
             )
         }
         .fullScreenCover(isPresented: $showStoryView) {
@@ -214,10 +235,10 @@ struct HistoryItemRow: View {
             
             Spacer()
             
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 Button(action: onDelete) {
                     Image(systemName: "trash")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(Color("igPink"))
                         .frame(width: 36, height: 36)
                         .background(Color("igPink").opacity(0.1))
@@ -228,7 +249,7 @@ struct HistoryItemRow: View {
                     ZStack {
                         Circle()
                             .fill(instagramGradient)
-                            .frame(width: 36, height: 36)
+                            .frame(width: 35, height: 35)
                         
                         Image(systemName: "play.fill")
                             .font(.system(size: 14, weight: .semibold))

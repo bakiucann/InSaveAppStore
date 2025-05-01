@@ -10,6 +10,14 @@ struct PaywallView: View {
     @State private var showLoading = false
     @State private var animateGradient = false
     @State private var isLoadingOfferings = true
+    @StateObject private var specialOfferViewModel = SpecialOfferViewModel()
+    @StateObject private var subscriptionManager = SubscriptionManager()
+    @StateObject private var configManager = ConfigManager.shared
+    
+    // Alert için state değişkenleri
+    @State private var showAlert = false
+    @State private var alertTitle = ""
+    @State private var alertMessage = ""
     
     private let premiumGradient = LinearGradient(
         colors: [
@@ -73,6 +81,10 @@ struct PaywallView: View {
                     Spacer()
                     Button {
                         presentationMode.wrappedValue.dismiss()
+                        // Comment out the notification post to prevent showing Special Offer after closing Paywall
+                        // DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        //     NotificationCenter.default.post(name: Notification.Name("ShowSpecialOffer"), object: nil)
+                        // }
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 16, weight: .bold))
@@ -133,26 +145,31 @@ struct PaywallView: View {
                             .padding(.top, 12)
                             
                             // MARK: - Features Section
-                            VStack(spacing: 16) {
-                                PremiumFeatureRow(
-                                    icon: "arrow.down.circle.fill",
-                                    title: NSLocalizedString("Premium Downloads", comment: ""),
-                                    subtitle: NSLocalizedString("Download stories, posts & reels in HD", comment: "")
-                                )
+                            VStack(spacing: 20) {
+                                if Locale.current.languageCode != "en" || configManager.showDownloadButtons {
+                                    PremiumFeatureRow(
+                                        icon: "arrow.down.circle.fill",
+                                        title: NSLocalizedString("Premium Downloads", comment: ""),
+                                        subtitle: NSLocalizedString("Download stories, posts & reels in HD", comment: "")
+                                    )
+                                    
+                                    PremiumFeatureRow(
+                                        icon: "square.stack.fill",
+                                        title: NSLocalizedString("Batch Downloads", comment: ""),
+                                        subtitle: NSLocalizedString("Save time with multiple downloads at once", comment: "")
+                                    )
+                                }
+                                
                                 PremiumFeatureRow(
                                     icon: "infinity.circle.fill",
                                     title: NSLocalizedString("Unlimited Access", comment: ""),
                                     subtitle: NSLocalizedString("No restrictions, download as much as you want", comment: "")
                                 )
+                                
                                 PremiumFeatureRow(
                                     icon: "xmark.circle.fill",
                                     title: NSLocalizedString("Ad-Free Experience", comment: ""),
                                     subtitle: NSLocalizedString("Enjoy a clean, distraction-free experience", comment: "")
-                                )
-                                PremiumFeatureRow(
-                                    icon: "square.stack.fill",
-                                    title: NSLocalizedString("Batch Downloads", comment: ""),
-                                    subtitle: NSLocalizedString("Save time with multiple downloads at once", comment: "")
                                 )
                             }
                             .padding(.horizontal)
@@ -236,10 +253,10 @@ struct PaywallView: View {
                             
                             // MARK: - Terms Section
                             HStack(spacing: 5) {
-                                linkButton(NSLocalizedString("Terms", comment: ""), urlString: "https://tiktokget.netlify.app/terms-of-use")
+                                linkButton(NSLocalizedString("Terms", comment: ""), urlString: "https://kitgetapp.netlify.app/terms-of-use")
                                 Text("•")
                                     .foregroundColor(.white.opacity(0.5))
-                                linkButton(NSLocalizedString("Privacy", comment: ""), urlString: "https://tiktokget.netlify.app/privacy-policy")
+                                linkButton(NSLocalizedString("Privacy", comment: ""), urlString: "https://kitgetapp.netlify.app/privacy-policy")
                                 Text("•")
                                     .foregroundColor(.white.opacity(0.5))
                                 linkButton("EULA", urlString: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")
@@ -262,8 +279,19 @@ struct PaywallView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
+            configManager.reloadConfig()
             fetchOfferings()
             animateGradient = true
+        }
+        // .sheet(isPresented: $specialOfferViewModel.isPresented) {
+        //     SpecialOfferView(viewModel: specialOfferViewModel)
+        // }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text(alertTitle),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
         }
     }
 }
@@ -510,10 +538,10 @@ extension PaywallView {
 extension PaywallView {
     private var termsSection: some View {
         HStack(spacing: 5) {
-            linkButton(NSLocalizedString("Terms", comment: ""), urlString: "https://tiktokget.netlify.app/terms-of-use")
+            linkButton(NSLocalizedString("Terms", comment: ""), urlString: "https://kitgetapp.netlify.app/terms-of-use")
             Text("•")
                 .foregroundColor(.white.opacity(0.5))
-            linkButton(NSLocalizedString("Privacy", comment: ""), urlString: "https://tiktokget.netlify.app/privacy-policy")
+            linkButton(NSLocalizedString("Privacy", comment: ""), urlString: "https://kitgetapp.netlify.app/privacy-policy")
         }
         .font(.system(size: 12))
         .foregroundColor(.white.opacity(0.7))
@@ -550,14 +578,41 @@ extension PaywallView {
     }
     
     private func restorePurchases() {
+        showLoading = true
         Purchases.shared.restorePurchases { (customerInfo, error) in
-            if let error = error {
-                print("Error restoring purchases: \(error.localizedDescription)")
-            } else if let customerInfo = customerInfo,
-                      customerInfo.entitlements["pro"]?.isActive == true {
-                presentationMode.wrappedValue.dismiss()
-            } else {
-                print("No active entitlement found during restore.")
+            DispatchQueue.main.async {
+                self.showLoading = false
+                
+                if let error = error {
+                    print("Error restoring purchases: \(error.localizedDescription)")
+                    self.alertTitle = NSLocalizedString("Restore Failed", comment: "")
+                    self.alertMessage = NSLocalizedString("Failed to restore purchases. Please try again later.", comment: "")
+                    self.showAlert = true
+                } else if let customerInfo = customerInfo,
+                          customerInfo.entitlements["pro"]?.isActive == true {
+                    // Başarılı restore
+                    self.alertTitle = NSLocalizedString("Success", comment: "")
+                    self.alertMessage = NSLocalizedString("Your purchases have been successfully restored!", comment: "")
+                    self.showAlert = true
+                    
+                    // Abonelik durumunu güncelle
+                    self.subscriptionManager.isUserSubscribed = true
+                    self.subscriptionManager.checkSubscriptionStatus()
+                    
+                    // Abonelik değişikliğini bildir
+                    NotificationCenter.default.post(name: NSNotification.Name("SubscriptionChanged"), object: nil)
+                    
+                    // Alert kapandıktan sonra view'i kapat
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        self.presentationMode.wrappedValue.dismiss()
+                    }
+                } else {
+                    // Restore edilecek satın alım bulunamadı
+                    print("No active entitlement found during restore.")
+                    self.alertTitle = NSLocalizedString("No Purchases Found", comment: "")
+                    self.alertMessage = NSLocalizedString("No previous purchases were found to restore.", comment: "")
+                    self.showAlert = true
+                }
             }
         }
     }
@@ -565,14 +620,34 @@ extension PaywallView {
     private func purchasePackage(package: Package) {
         showLoading = true
         Purchases.shared.purchase(package: package) { (transaction, customerInfo, error, userCancelled) in
-            showLoading = false
-            if let error = error {
-                print("Error purchasing package: \(error.localizedDescription)")
-            } else if let customerInfo = customerInfo,
-                      customerInfo.entitlements["pro"]?.isActive == true {
-                presentationMode.wrappedValue.dismiss()
-            } else if userCancelled {
-                print("User cancelled the purchase.")
+            DispatchQueue.main.async {
+                self.showLoading = false
+                
+                if let error = error {
+                    print("Error purchasing package: \(error.localizedDescription)")
+                    self.alertTitle = NSLocalizedString("Purchase Failed", comment: "")
+                    self.alertMessage = NSLocalizedString("Failed to complete the purchase. Please try again later.", comment: "")
+                    self.showAlert = true
+                } else if let customerInfo = customerInfo,
+                          customerInfo.entitlements["pro"]?.isActive == true {
+                    self.alertTitle = NSLocalizedString("Success", comment: "")
+                    self.alertMessage = NSLocalizedString("Thank you for your purchase!", comment: "")
+                    self.showAlert = true
+                    
+                    // Abonelik durumunu güncelle
+                    self.subscriptionManager.isUserSubscribed = true
+                    self.subscriptionManager.checkSubscriptionStatus()
+                    
+                    // Abonelik değişikliğini bildir
+                    NotificationCenter.default.post(name: NSNotification.Name("SubscriptionChanged"), object: nil)
+                    
+                    // Alert kapandıktan sonra view'i kapat
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        self.presentationMode.wrappedValue.dismiss()
+                    }
+                } else if userCancelled {
+                    print("User cancelled the purchase.")
+                }
             }
         }
     }

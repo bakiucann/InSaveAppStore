@@ -1,5 +1,6 @@
 import SwiftUI
 import Photos
+import StoreKit
 
 struct StoryView: View {
     let stories: [InstagramStoryModel]
@@ -17,6 +18,16 @@ struct StoryView: View {
     @State private var loadingTimer: Timer?
     @State private var downloadProgress = (current: 0, total: 0)
     @State private var showingBulkProgress = false
+    @State private var downloadCount = 0
+    @StateObject private var configManager = ConfigManager.shared
+    @StateObject private var downloadManager = DownloadManager.shared
+    @State private var singleDownloadProgress: Double = 0
+    @AppStorage("lastReviewRequestDate") private var lastReviewRequestDateDouble: Double = Date.distantPast.timeIntervalSince1970
+    
+    private var lastReviewRequestDate: Date {
+        get { Date(timeIntervalSince1970: lastReviewRequestDateDouble) }
+        set { lastReviewRequestDateDouble = newValue.timeIntervalSince1970 }
+    }
     
     var body: some View {
         ZStack {
@@ -31,67 +42,96 @@ struct StoryView: View {
             )
             .ignoresSafeArea()
             
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    // Story Preview Card
-                    TabView(selection: $currentPage) {
-                        ForEach(Array(stories.enumerated()), id: \.element.id) { index, story in
-                            StoryPreviewCard(story: story)
-                                .tag(index)
-                        }
-                    }
-                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                    .frame(height: UIScreen.main.bounds.height * 0.6)
-                    .customPageIndicator(numberOfPages: stories.count, currentPage: $currentPage)
+            // Ana içerik
+            VStack(spacing: 0) {
+                // Custom NavBar
+                HStack {
+                    // Back button
+                    backButton
                     
-                    // Action Buttons
-                    VStack(spacing: 12) {
-                        if !isFromHistory {
-                            if subscriptionManager.isUserSubscribed {
-                                ActionButton(
-                                    title: NSLocalizedString("Download Bulk", comment: ""),
-                                    icon: "square.and.arrow.down.fill",
-                                    gradient: [Color("igPurple"), Color("igPink")],
-                                    action: {
-                                        downloadAllStories()
-                                    }
-                                )
-                            } else {
-                                ActionButton(
-                                    title: NSLocalizedString("Download Bulk", comment: ""),
-                                    icon: "square.and.arrow.down.fill",
-                                    gradient: [Color("igPurple"), Color("igPink")],
-                                    action: {
-                                        showPaywallView = true
-                                    }
-                                )
-                            }
-                        }
-                        
-                        ActionButton(
-                            title: NSLocalizedString("Download", comment: ""),
-                            icon: "arrow.down.circle",
-                            gradient: [Color("igPurple").opacity(0.8), Color("igPink").opacity(0.8)],
-                            action: {
-                                if let story = stories[safe: currentPage] {
-                                    downloadStory(story)
-                                }
-                            }
-                        )
-                    }
-                    .padding(.horizontal, 20)
+                    Spacer()
                     
-                    if !subscriptionManager.isUserSubscribed {
-                        BannerAdView()
-                            .frame(height: 50)
-                            .padding(.top, 4)
-                    }
+                    // Title
+                    toolbarTitle
+                    
+                    Spacer()
+                    
+                    // Sağ tarafa boşluk bırakmak için
+                    Circle()
+                        .fill(Color.clear)
+                        .frame(width: 36, height: 36)
                 }
-                .padding(.top, 4)
-                .padding(.bottom, 32)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .zIndex(1)
+                
+                // Scroll View ve içindeki elemanlar
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        // Story Preview Card
+                        TabView(selection: $currentPage) {
+                            ForEach(Array(stories.enumerated()), id: \.element.id) { index, story in
+                                StoryPreviewCard(story: story)
+                                    .tag(index)
+                            }
+                        }
+                        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                        .frame(height: UIScreen.main.bounds.height * 0.6)
+                        .customPageIndicator(numberOfPages: stories.count, currentPage: $currentPage)
+                        
+                        // Action Buttons
+                        VStack(spacing: 12) {
+                            if Locale.current.languageCode != "en" || configManager.showDownloadButtons {
+                                if !isFromHistory {
+                                    // Bulk Download Button
+                                    if subscriptionManager.isUserSubscribed {
+                                        ActionButton(
+                                            title: NSLocalizedString("Download Bulk", comment: ""),
+                                            icon: "square.and.arrow.down.fill",
+                                            gradient: [Color("igPurple"), Color("igPink")],
+                                            action: {
+                                                downloadAllStories()
+                                            }
+                                        )
+                                    } else {
+                                        ActionButton(
+                                            title: NSLocalizedString("Download Bulk", comment: ""),
+                                            icon: "square.and.arrow.down.fill",
+                                            gradient: [Color("igPurple"), Color("igPink")],
+                                            action: {
+                                                showPaywallView = true
+                                            }
+                                        )
+                                    }
+                                }
+                                
+                                // Download Button
+                                ActionButton(
+                                    title: NSLocalizedString("Download", comment: ""),
+                                    icon: "arrow.down.circle",
+                                    gradient: [Color("igPurple").opacity(0.8), Color("igPink").opacity(0.8)],
+                                    action: {
+                                        if let story = stories[safe: currentPage] {
+                                            downloadStory(story)
+                                        }
+                                    }
+                                )
+                            }
+                            
+                            if !subscriptionManager.isUserSubscribed {
+                                BannerAdView()
+                                    .frame(height: 50)
+                                    .padding(.top, 4)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    .padding(.top, 4)
+                    .padding(.bottom, 32)
+                }
             }
             
-            // Overlay Views
+            // Overlay Views - Tüm ekranı kaplamalı
             if isLoading {
                 if showingBulkProgress {
                     bulkDownloadLoadingOverlay
@@ -101,18 +141,22 @@ struct StoryView: View {
             }
             if showSuccessMessage { successMessage }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                backButton
-            }
-            ToolbarItem(placement: .principal) {
-                toolbarTitle
-            }
-        }
+        .navigationBarHidden(true) // Navigation bar'ı gizle
         .fullScreenCover(isPresented: $showPaywallView) {
             PaywallView()
+        }
+        .onAppear {
+            configManager.reloadConfig()
+            // Abonelik değişikliği bildirimini dinle
+            setupSubscriptionObserver()
+        }
+        .onDisappear {
+            // Gözlemciyi kaldır
+            NotificationCenter.default.removeObserver(
+                NSNotification.Name("SubscriptionChanged")
+            )
+            // İndirmeleri iptal et
+            downloadManager.cancelAllDownloads()
         }
     }
     
@@ -142,19 +186,25 @@ struct StoryView: View {
             Color.white.opacity(0.5)
                 .ignoresSafeArea()
             
-            VStack(spacing: 16) {
-                ProgressView()
-                    .accentColor(.white)
-                    .foregroundColor(.white)
+            VStack(spacing: 12) {
+                ProgressView(value: singleDownloadProgress)
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color("igPurple")))
+                    .scaleEffect(1.5)
+                    .padding(.bottom, 8)
                 
-                Text("Downloading...")
+                Text("Downloading")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color("igPurple"))
+                
+                Text("\(Int(singleDownloadProgress * 100))%")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color("igPurple"))
             }
             .padding(24)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.black.opacity(0.7))
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
             )
         }
     }
@@ -165,22 +215,24 @@ struct StoryView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {
-                ProgressView()
-                    .accentColor(.white)
-                    .foregroundColor(.white)
+                ProgressView(value: Double(downloadProgress.current) / Double(downloadProgress.total))
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color("igPurple")))
+                    .scaleEffect(1.5)
+                    .padding(.bottom, 8)
                 
                 Text("Downloading Stories...")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color("igPurple"))
                 
                 Text("\(downloadProgress.current)/\(downloadProgress.total)")
-                    .font(.system(size: 14))
-                    .foregroundColor(.white.opacity(0.9))
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(Color("igPurple"))
             }
             .padding(24)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.black.opacity(0.7))
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
             )
         }
     }
@@ -212,6 +264,7 @@ struct StoryView: View {
     
     private func startLoading() {
         isLoading = true
+        singleDownloadProgress = 0
         loadingTimer?.invalidate()
         loadingTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: false) { _ in
             if isLoading {
@@ -232,11 +285,60 @@ struct StoryView: View {
                 showPaywallView = true
                 return
             }
+            
+            // Premium kullanıcı değilse, içerik ne olursa olsun reklam göster
+            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+                interstitialAd.showAd(from: rootViewController) {
+                    // Reklam gösterildikten sonra indirme işlemine başla
+                    startDownloadProcess(story)
+                }
+            }
+        } else {
+            // Premium kullanıcı ise direkt indirme başlat
+            startDownloadProcess(story)
         }
-        
+    }
+    
+    private func startDownloadProcess(_ story: InstagramStoryModel) {
         startLoading()
-        downloadAndSaveVideo(from: story.url, isBulkDownload: false)
-        CoreDataManager.shared.saveStoryInfo(story: story)
+        
+        // DownloadManager'ı kullanarak indirme işlemi
+        let isPhoto = story.type != "video"
+        downloadManager.downloadContent(
+            urlString: story.url,
+            isPhoto: isPhoto
+        ) { progress in
+            // İlerleme güncellemesi
+            DispatchQueue.main.async {
+                self.singleDownloadProgress = progress
+            }
+        } completion: { result in
+            DispatchQueue.main.async {
+                self.stopLoading()
+                
+                switch result {
+                case .success(let fileURL):
+                    // İndirme başarılı, galeriye kaydet
+                    if !self.subscriptionManager.isUserSubscribed {
+                        CoreDataManager.shared.incrementDailyDownloadCount()
+                    }
+                    
+                    if isPhoto {
+                        self.saveImageToGallery(from: fileURL)
+                    } else {
+                        self.saveVideoToGallery(from: fileURL)
+                    }
+                    
+                    // Story bilgilerini Core Data'ya kaydet
+                    CoreDataManager.shared.saveStoryInfo(story: story)
+                    
+                case .failure(let error):
+                    // Hata durumu
+                    print("❌ İndirme hatası: \(error.localizedDescription)")
+                    self.showAlert = true
+                }
+            }
+        }
     }
     
     private func downloadAllStories() {
@@ -249,57 +351,43 @@ struct StoryView: View {
         showingBulkProgress = true
         downloadProgress = (0, stories.count)
         
+        // Toplu indirme işlemi
         Task {
             for (index, story) in stories.enumerated() {
-                // Her story için indirme işlemi
                 await withCheckedContinuation { continuation in
-                    guard let url = URL(string: story.url) else {
-                        continuation.resume()
-                        return
-                    }
+                    let isPhoto = story.type != "video"
                     
-                    URLSession.shared.downloadTask(with: url) { location, response, error in
-                        if let error = error {
-                            print("Error downloading: \(error.localizedDescription)")
-                            continuation.resume()
-                            return
-                        }
-                        
-                        guard let location = location else {
-                            print("No file location returned from server.")
-                            continuation.resume()
-                            return
-                        }
-                        
-                        do {
-                            let isVideo = story.type == "video"
-                            let fileExtension = isVideo ? "mp4" : "jpg"
-                            let tmpUrl = FileManager.default.temporaryDirectory.appendingPathComponent("downloadedStory_\(index).\(fileExtension)")
+                    downloadManager.downloadContent(
+                        urlString: story.url,
+                        isPhoto: isPhoto
+                    ) { progress in
+                        // Tek dosya indirme ilerlemesi - göstermiyoruz
+                    } completion: { result in
+                        DispatchQueue.main.async {
+                            // İndirilen dosya sayısını artır
+                            self.downloadProgress.current = index + 1
                             
-                            if FileManager.default.fileExists(atPath: tmpUrl.path) {
-                                try FileManager.default.removeItem(at: tmpUrl)
-                            }
-                            try FileManager.default.moveItem(at: location, to: tmpUrl)
-                            
-                            // Gallery'ye kaydet
-                            Task {
-                                if isVideo {
-                                    await self.saveVideoToGalleryAsync(from: tmpUrl)
-                                } else {
-                                    await self.saveImageToGalleryAsync(from: tmpUrl)
-                                }
+                            switch result {
+                            case .success(let fileURL):
+                                // Story bilgilerini kaydet
                                 CoreDataManager.shared.saveStoryInfo(story: story)
                                 
-                                DispatchQueue.main.async {
-                                    self.downloadProgress.current = index + 1
+                                // Galeriye kaydet
+                                Task {
+                                    if isPhoto {
+                                        await self.saveImageToGalleryAsync(from: fileURL)
+                                    } else {
+                                        await self.saveVideoToGalleryAsync(from: fileURL)
+                                    }
+                                    continuation.resume()
                                 }
+                                
+                            case .failure(let error):
+                                print("❌ Bulk indirme hatası: \(error.localizedDescription)")
                                 continuation.resume()
                             }
-                        } catch {
-                            print("File handling error: \(error.localizedDescription)")
-                            continuation.resume()
                         }
-                    }.resume()
+                    }
                 }
                 
                 // Her indirme arasında kısa bir bekleme
@@ -317,59 +405,9 @@ struct StoryView: View {
         }
     }
     
-    private func downloadAndSaveVideo(from urlString: String, isBulkDownload: Bool = false) {
-        guard let url = URL(string: urlString) else {
-            stopLoading()
-            return
-        }
-        
-        URLSession.shared.downloadTask(with: url) { location, response, error in
-            if let error = error {
-                print("Error downloading: \(error.localizedDescription)")
-                DispatchQueue.main.async { stopLoading() }
-                return
-            }
-            
-            guard let location = location else {
-                print("No file location returned from server.")
-                DispatchQueue.main.async { stopLoading() }
-                return
-            }
-            
-            do {
-                let isVideo = stories[currentPage].type == "video"
-                let fileExtension = isVideo ? "mp4" : "jpg"
-                let tmpUrl = FileManager.default.temporaryDirectory.appendingPathComponent("downloadedStory.\(fileExtension)")
-                
-                if FileManager.default.fileExists(atPath: tmpUrl.path) {
-                    try FileManager.default.removeItem(at: tmpUrl)
-                }
-                try FileManager.default.moveItem(at: location, to: tmpUrl)
-                
-                DispatchQueue.main.async {
-                    if !isBulkDownload {
-                        stopLoading()
-                    }
-                    if !subscriptionManager.isUserSubscribed {
-                        CoreDataManager.shared.incrementDailyDownloadCount()
-                    }
-                    if isVideo {
-                        saveVideoToGallery(from: tmpUrl, isBulkDownload: isBulkDownload)
-                    } else {
-                        saveImageToGallery(from: tmpUrl, isBulkDownload: isBulkDownload)
-                    }
-                }
-            } catch {
-                print("File handling error: \(error.localizedDescription)")
-                DispatchQueue.main.async { stopLoading() }
-            }
-        }.resume()
-    }
-    
     private func saveVideoToGallery(from fileURL: URL, isBulkDownload: Bool = false) {
         PHPhotoLibrary.requestAuthorization { status in
             guard status == .authorized else { return }
-            
             PHPhotoLibrary.shared().performChanges({
                 let creationRequest = PHAssetCreationRequest.forAsset()
                 creationRequest.addResource(with: .video, fileURL: fileURL, options: nil)
@@ -377,21 +415,29 @@ struct StoryView: View {
                 DispatchQueue.main.async {
                     if success {
                         if !isBulkDownload {
-                            showSuccessMessage = true
+                            // İndirme sayacını artır
+                            self.downloadCount += 1
                             
+                            showSuccessMessage = true
+                            // Check if a review request has been shown today
+                            let calendar = Calendar.current
+                            if !calendar.isDateInToday(self.lastReviewRequestDate) {
+                                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                                    SKStoreReviewController.requestReview(in: windowScene)
+                                    self.lastReviewRequestDateDouble = Date().timeIntervalSince1970 // Update last request date
+                                }
+                            }
                             // Success message'ı 2 saniye göster, sonra reklamı göster
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                 showSuccessMessage = false
-                                
                                 // Success message kapandıktan 0.5 saniye sonra reklamı göster
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    if !subscriptionManager.isUserSubscribed {
-                                        if let windowScene = UIApplication.shared.windows.first?.rootViewController {
-                                            let presenter = windowScene.presentedViewController ?? windowScene
-                                            if presenter.presentedViewController == nil {
-                                                interstitialAd.showAd(from: presenter) {
-                                                    print("Ad shown successfully")
-                                                }
+                                    if !subscriptionManager.isUserSubscribed && self.downloadCount % 2 == 0 {
+                                        // Doğrudan güncel ve görünür view controller'ı bul
+                                        if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+                                            let topVC = self.findTopViewController(rootVC)
+                                            self.interstitialAd.showAd(from: topVC) {
+                                                print("Ad shown successfully from video")
                                             }
                                         }
                                     }
@@ -419,6 +465,9 @@ struct StoryView: View {
                 DispatchQueue.main.async {
                     if success {
                         if !isBulkDownload {
+                            // İndirme sayacını artır
+                            self.downloadCount += 1
+                            
                             showSuccessMessage = true
                             
                             // Success message'ı 2 saniye göster, sonra reklamı göster
@@ -427,13 +476,12 @@ struct StoryView: View {
                                 
                                 // Success message kapandıktan 0.5 saniye sonra reklamı göster
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    if !subscriptionManager.isUserSubscribed {
-                                        if let windowScene = UIApplication.shared.windows.first?.rootViewController {
-                                            let presenter = windowScene.presentedViewController ?? windowScene
-                                            if presenter.presentedViewController == nil {
-                                                interstitialAd.showAd(from: presenter) {
-                                                    print("Ad shown successfully")
-                                                }
+                                    if !subscriptionManager.isUserSubscribed && self.downloadCount % 2 == 0 {
+                                        // Doğrudan güncel ve görünür view controller'ı bul
+                                        if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+                                            let topVC = self.findTopViewController(rootVC)
+                                            self.interstitialAd.showAd(from: topVC) {
+                                                print("Ad shown successfully from image")
                                             }
                                         }
                                     }
@@ -489,6 +537,42 @@ struct StoryView: View {
                     continuation.resume()
                 }
             }
+        }
+    }
+    
+    // En üst görünür view controller'ı bulan yardımcı fonksiyon
+    private func findTopViewController(_ viewController: UIViewController) -> UIViewController {
+        if let presentedVC = viewController.presentedViewController {
+            return findTopViewController(presentedVC)
+        }
+        
+        if let navigationController = viewController as? UINavigationController {
+            if let visibleVC = navigationController.visibleViewController {
+                return findTopViewController(visibleVC)
+            }
+            return viewController
+        }
+        
+        if let tabBarController = viewController as? UITabBarController {
+            if let selectedVC = tabBarController.selectedViewController {
+                return findTopViewController(selectedVC)
+            }
+            return viewController
+        }
+        
+        return viewController
+    }
+    
+    // MARK: - Subscription Observer
+    
+    private func setupSubscriptionObserver() {
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("SubscriptionChanged"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            print("Abonelik durumu değişti, StoryView SubscriptionManager'ı güncelliyorum")
+            subscriptionManager.checkSubscriptionStatus()
         }
     }
 }
@@ -584,3 +668,4 @@ extension Collection {
         return indices.contains(index) ? self[index] : nil
     }
 } 
+ 

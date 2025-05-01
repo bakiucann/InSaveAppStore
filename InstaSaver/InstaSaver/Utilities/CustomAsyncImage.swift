@@ -30,29 +30,29 @@ struct CustomAsyncImage: View {
     let placeholder: Image
     
     var body: some View {
-        if let url = url {
-            ZStack {
-                if let image = loader.image {
-                    Image(uiImage: image)
-                        .resizable()
-                        .scaledToFill()
-                } else {
-                    placeholder
-                        .resizable()
-                        .scaledToFit()
+            if let url = url {
+                ZStack {
+                    if let image = loader.image {
+                        Image(uiImage: image)
+                            .resizable()
+                            .scaledToFill()
+                    } else {
+                        placeholder
+                            .resizable()
+                            .scaledToFit()
                         .frame(width: 50, height: 50)
-                        .onAppear {
-                            loader.loadImage(from: url)
-                        }
+                            .onAppear {
+                                loader.loadImage(from: url)
+                            }
+                    }
                 }
-            }
-            .frame(width: 50, height: 50)
-            .background(Color.gray.opacity(0.3))
-            .cornerRadius(8)
-        } else {
-            placeholder
-                .resizable()
-                .scaledToFit()
+                .frame(width: 50, height: 50)
+                .background(Color.gray.opacity(0.3))
+                .cornerRadius(8)
+            } else {
+                placeholder
+                    .resizable()
+                    .scaledToFit()
                 .frame(width: 50, height: 50)
                 .background(Color.gray.opacity(0.3))
                 .cornerRadius(8)

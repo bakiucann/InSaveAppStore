@@ -195,3 +195,40 @@
 "Stories" = "Hikayeler";
 "Download Bulk" = "Toplu İndir";
 "Downloading Stories..." = "Hikayeler İndiriliyor...";
+
+/* New translations */
+"What You'll Get" = "Ne Alacaksınız";
+"🎉 EXCLUSIVE OFFER!" = "🎉 ÖZEL TEKLİF!";
+"Don't miss out on this incredible deal!" = "Bu muhteşem fırsatı kaçırmayın!";
+"Claim Your Offer Now!" = "Teklifinizi Şimdi Alın!";
+"Are you sure you want to clear all history items?" = "Tüm geçmiş öğelerini silmek istediğinize emin misiniz?";
+"This content is not available because the account is private." = "Bu içerik, hesap özel olduğu için mevcut değil.";
+"Failed to decode the response. Please check the URL or account privacy settings." = "Yanıtı çözümleme başarısız oldu. Lütfen URL'yi veya hesap gizlilik ayarlarını kontrol edin.";
+
+/* New String Additions - January 2025 */
+"Username" = "Kullanıcı Adı";
+"Enter Instagram username..." = "Instagram kullanıcı adını girin...";
+"Paste the link or enter username in the box" = "Bağlantıyı yapıştırın veya kutuya kullanıcı adını girin";
+"Click download and save to your gallery" = "İndirmek ve galerinize kaydetmek için tıklayın";
+"Paste URL/Username" = "URL/Kullanıcı Adı Yapıştır";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "Bu kullanıcı için aktif hikaye bulunamadı veya hesap gizli";
+"Failed to fetch stories. Please try again." = "Hikayeler alınamadı. Lütfen tekrar deneyin.";
+
+/* Input Error Messages */
+"Please enter an Instagram username" = "Lütfen bir Instagram kullanıcı adı girin";
+"Please enter only the username without URL" = "Lütfen URL olmadan sadece kullanıcı adını girin";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "Satın Alma Başarısız";
+"Failed to complete the purchase. Please try again later." = "Satın alma işlemi tamamlanamadı. Lütfen daha sonra tekrar deneyin.";
+"Thank you for your purchase!" = "Satın almanız için teşekkürler!";
+
+/* Restore Alert Messages */
+"Success" = "Başarılı";
+"Your purchases have been successfully restored!" = "Satın alımlarınız başarıyla geri yüklendi!";
+"Restore Failed" = "Geri Yükleme Başarısız";
+"Failed to restore purchases. Please try again later." = "Satın alımlar geri yüklenemedi. Lütfen daha sonra tekrar deneyin.";
+"No Purchases Found" = "Satın Alım Bulunamadı";
+"No previous purchases were found to restore." = "Geri yüklenecek önceki satın alım bulunamadı.";

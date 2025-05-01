@@ -2,8 +2,11 @@
 
 import SwiftUI
 import Photos
+import StoreKit
+import Alamofire
 
 struct PreviewView: View {
+    // MARK: - Properties
     let video: InstagramVideoModel
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var collectionsViewModel = CollectionsViewModel()
@@ -17,8 +20,31 @@ struct PreviewView: View {
     @State private var showSuccessMessage = false
     @State private var showPaywallView = false
     @State private var showAlert = false
+    @State private var alertTitle = "Download Error"
+    @State private var alertMessage = "An error occurred during download."
     @State private var loadingTimer: Timer?
     @State private var showPaywall = false
+    @State private var isPhotoContent: Bool = false
+    @AppStorage("lastReviewRequestDate") private var lastReviewRequestDateDouble: Double = Date.distantPast.timeIntervalSince1970
+    @State private var collectionSuccessMessage = false
+    @StateObject private var configManager = ConfigManager.shared
+    @State private var selectedCollectionID: String?
+    @State private var isCollectionSaveSuccess = false
+    @State private var isShowingSuccess = false
+    @State private var currentCarouselIndex: Int = 0
+    @State private var showCarouselControls: Bool = false
+    @State private var downloadProgress: Double = 0
+    @StateObject private var downloadManager = DownloadManager.shared
+    
+    // MARK: - Initializer - public erişim için açıkça tanımlandı
+    init(video: InstagramVideoModel) {
+        self.video = video
+    }
+    
+    private var lastReviewRequestDate: Date {
+        get { Date(timeIntervalSince1970: lastReviewRequestDateDouble) }
+        set { lastReviewRequestDateDouble = newValue.timeIntervalSince1970 }
+    }
     
     var body: some View {
         ZStack {
@@ -33,44 +59,72 @@ struct PreviewView: View {
             )
             .ignoresSafeArea()
             
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 24) {
-                    // Video Preview Card
-                    videoPreviewCard
+            // Ana içerik
+            VStack(spacing: 0) {
+                // Custom NavBar (butonlar ile birlikte)
+                HStack {
+                    // Back button
+                    backButton
                     
-                    // Video Info Card
-                    videoInfoCard
+                    Spacer()
                     
-                    // Action Buttons
-                    actionButtons
+                    // Title
+                    toolbarTitle
                     
-                    if !subscriptionManager.isUserSubscribed {
-                        BannerAdView()
-                            .frame(height: 50)
-                            .padding(.top, 4)
-                    }
+                    Spacer()
+                    
+                    // Bookmark button
+                    bookmarkButton
                 }
-                .padding(.top, 4)
-                .padding(.bottom, 32)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+                .zIndex(1) // Navigation bar'ın diğer elemanların üzerinde olmasını sağlar
+                
+                // ScrollView ve içindeki elemanlar
+                ScrollView(showsIndicators: false) {
+                    VStack(spacing: 24) {
+                        // Video Preview Card
+                        videoPreviewCard
+                        
+                        // Carousel Controls
+                        if let isCarousel = video.isCarousel, isCarousel, video.totalItems ?? 0 > 1 {
+                            carouselControlsView
+                        }
+                        
+                        // Video Info Card
+                        videoInfoCard
+                        
+                        // Action Buttons
+                        if Locale.current.languageCode != "en" || configManager.showDownloadButtons {
+                            actionButtons
+                        }
+                        
+                        if !subscriptionManager.isUserSubscribed {
+                            BannerAdView()
+                                .frame(height: 50)
+                                .padding(.top, 4)
+                        }
+                    }
+                    .padding(.top, 4)
+                    .padding(.bottom, 32)
+                }
             }
             
-            // Overlay Views
-            if isLoading { loadingOverlay }
-            if showSuccessMessage { successMessage }
+            // Overlay Views - SuccessMessage ve LoadingOverlay tüm ekranı kaplamalı
+            if isLoading { 
+                loadingOverlay 
+            }
+            
+            if showSuccessMessage { 
+                successMessage 
+            }
+            
+            if collectionSuccessMessage { 
+                collectionSuccessMessageView 
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                backButton
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                bookmarkButton
-            }
-            ToolbarItem(placement: .principal) {
-                toolbarTitle
-            }
-        }
+        .navigationBarHidden(true) // Navigation bar'ı gizle çünkü kendi custom bar'ımızı kullanacağız
         .sheet(isPresented: $showCollectionsSheet) {
             collectionsSheet
         }
@@ -80,9 +134,55 @@ struct PreviewView: View {
         .fullScreenCover(isPresented: $showPaywall) {
             PaywallView()
         }
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text(alertTitle),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
         .onAppear {
             isBookmarked = CoreDataManager.shared.isBookmarked(videoID: video.id)
             loadCoverImage()
+            setupSubscriptionObserver()
+            checkContentType()
+        }
+        .onDisappear {
+            NotificationCenter.default.removeObserver(
+                NSNotification.Name("SubscriptionChanged")
+            )
+            downloadManager.cancelAllDownloads()
+        }
+    }
+    
+    private func checkContentType() {
+        // Bu içerik bir resim veya video olabilir. Şu kriterlere göre kontrol edelim:
+        // 1. API yanıtından gelen isPhoto değeri true ise bu bir fotoğraftır
+        // 2. allVideoVersions boş ise ve downloadLink bir resim formatı içeriyorsa (jpg, jpeg, png) bu bir fotoğraftır
+        
+        // API isPhoto değeri
+        let isPhotoFromAPI = video.isPhoto ?? false
+        
+        // downloadLink içinde resim formatı var mı kontrol et
+        let imageExtensions = [".jpg", ".jpeg", ".png"]
+        let downloadLinkHasImageExt = imageExtensions.contains { video.downloadLink.lowercased().contains($0) }
+        
+        // allVideoVersions boş mu kontrol et
+        let hasNoVideoVersions = video.allVideoVersions.isEmpty
+        
+        // Kriterlere göre içerik türünü belirle
+        isPhotoContent = isPhotoFromAPI || hasNoVideoVersions || downloadLinkHasImageExt
+        
+        print("📸 İçerik türü: \(isPhotoContent ? "Fotoğraf" : "Video")")
+        print("📸 API isPhoto değeri: \(isPhotoFromAPI)")
+        print("📸 Boş video versiyonları: \(hasNoVideoVersions)")
+        print("📸 İndirme linki resim içeriyor: \(downloadLinkHasImageExt)")
+        print("📸 İndirme linki: \(video.downloadLink)")
+        
+        // Carousel kontrolünü göster
+        if let isCarousel = video.isCarousel, isCarousel {
+            showCarouselControls = true
+            print("🎠 Carousel içeriği: \(video.totalItems ?? 0) öğe içeriyor")
         }
     }
     
@@ -91,28 +191,51 @@ struct PreviewView: View {
     private var videoPreviewCard: some View {
         VStack(spacing: 0) {
             if let data = imageData, let uiImage = UIImage(data: data) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: UIScreen.main.bounds.height * 0.45)
-                    .background(Color.black.opacity(0.05))
-                    .clipShape(RoundedRectangle(cornerRadius: 24))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 24)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [
-                                        Color("igPurple").opacity(0.3),
-                                        Color("igPink").opacity(0.3)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1
-                            )
-                    )
-                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                ZStack(alignment: .bottom) {
+                    // Ana görüntü
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: UIScreen.main.bounds.height * 0.45)
+                        .background(Color.black.opacity(0.05))
+                        .clipShape(RoundedRectangle(cornerRadius: 24))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 24)
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [
+                                            Color("igPurple").opacity(0.3),
+                                            Color("igPink").opacity(0.3)
+                                        ],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1
+                                )
+                        )
+                        .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                        // Kaydırma için gesture ekle
+                        .gesture(
+                            DragGesture(minimumDistance: 20)
+                                .onEnded { value in
+                                    // Sola kaydırma -> Sonraki öğe
+                                    if value.translation.width < 0 {
+                                        nextCarouselItem()
+                                    }
+                                    // Sağa kaydırma -> Önceki öğe
+                                    else if value.translation.width > 0 {
+                                        previousCarouselItem()
+                                    }
+                                }
+                        )
+                    
+                    // Alt kısımda page control göster (carousel varsa)
+                    if let isCarousel = video.isCarousel, isCarousel, let totalItems = video.totalItems, totalItems > 1 {
+                        pageControl
+                            .padding(.bottom, 16)
+                    }
+                }
             } else {
                 ProgressView()
                     .frame(height: UIScreen.main.bounds.height * 0.45)
@@ -129,7 +252,7 @@ struct PreviewView: View {
                     .fill(Color("igPink").opacity(0.1))
                     .frame(width: 40, height: 40)
                     .overlay(
-                        Image(systemName: "play.circle.fill")
+                        Image(systemName: isPhotoContent ? "photo.fill" : "play.circle.fill")
                             .font(.system(size: 20))
                             .foregroundColor(Color("igPink"))
                     )
@@ -157,17 +280,134 @@ struct PreviewView: View {
     
     private var actionButtons: some View {
         VStack(spacing: 12) {
-            //MARK: nglice
-         
+            if Locale.current.languageCode == "en" {
+                // Download HD Button
                 ActionButton(
                     title: NSLocalizedString("Download HD", comment: ""),
                     icon: "arrow.down.circle.fill",
                     gradient: [Color("igPurple"), Color("igPink")],
                     action: {
                         if subscriptionManager.isUserSubscribed {
-                            if let hdVersion = video.allVideoVersions.first(where: { $0.type == 101 }) {
-                                startLoading()
-                                downloadAndSaveVideo(urlString: hdVersion.url)
+                            startLoading()
+                            
+                            // Carousel içeriği ise şu anki öğeyi kullan
+                            if let isCarousel = video.isCarousel, isCarousel, 
+                               let currentItem = getCurrentCarouselItem() {
+                                // Fotoğraf mı yoksa video mu kontrolü
+                                if currentItem.isPhoto {
+                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                } else if let hdVersion = currentItem.allVideoVersions.first(where: { $0.type == 101 }) {
+                                    downloadAndSaveContent(urlString: hdVersion.url)
+                                } else if !currentItem.allVideoVersions.isEmpty {
+                                    downloadAndSaveContent(urlString: currentItem.allVideoVersions.first!.url)
+                                } else {
+                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                }
+                            } else {
+                                // Normal içerik için orijinal davranış
+                                if isPhotoContent {
+                                    downloadAndSaveContent(urlString: video.downloadLink)
+                                } else if let hdVersion = video.allVideoVersions.first(where: { $0.type == 101 }) {
+                                    downloadAndSaveContent(urlString: hdVersion.url)
+                                }
+                            }
+                        } else {
+                            showPaywallView = true
+                        }
+                    }
+                )
+                
+                // Download Button
+                ActionButton(
+                    title: NSLocalizedString("Download", comment: ""),
+                    icon: "arrow.down.circle",
+                    gradient: [Color("igPurple").opacity(0.8), Color("igPink").opacity(0.8)],
+                    action: {
+                        // Premium kullanıcı değilse, içerik ne olursa olsun reklam göster
+                        if !subscriptionManager.isUserSubscribed {
+                            // Önce reklamı göster, sonra indirme işlemini yap
+                            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+                                interstitialAd.showAd(from: rootViewController) {
+                                    // Reklam gösterildikten sonra indirme işlemine başla
+                                    startLoading()
+                                    
+                                    // Carousel içeriği ise şu anki öğeyi kullan
+                                    if let isCarousel = video.isCarousel, isCarousel, 
+                                       let currentItem = getCurrentCarouselItem() {
+                                        // Fotoğraf mı yoksa video mu kontrolü
+                                        if currentItem.isPhoto {
+                                            downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                        } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
+                                            downloadAndSaveContent(urlString: lowVersion.url)
+                                        } else {
+                                            downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                        }
+                                    } else {
+                                        // Normal içerik için orijinal davranış
+                                        if isPhotoContent {
+                                            downloadAndSaveContent(urlString: video.downloadLink)
+                                        } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
+                                            downloadAndSaveContent(urlString: lowVersion.url)
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // Premium kullanıcı ise direkt indirme başlat
+                            startLoading()
+                            
+                            // Carousel içeriği ise şu anki öğeyi kullan
+                            if let isCarousel = video.isCarousel, isCarousel, 
+                               let currentItem = getCurrentCarouselItem() {
+                                // Fotoğraf mı yoksa video mu kontrolü
+                                if currentItem.isPhoto {
+                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
+                                    downloadAndSaveContent(urlString: lowVersion.url)
+                                } else {
+                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                }
+                            } else {
+                                // Normal içerik için orijinal davranış
+                                if isPhotoContent {
+                                    downloadAndSaveContent(urlString: video.downloadLink)
+                                } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
+                                    downloadAndSaveContent(urlString: lowVersion.url)
+                                }
+                            }
+                        }
+                    }
+                )
+            } else {
+                // İngilizce dışındaki diller için butonları her zaman göster
+                ActionButton(
+                    title: NSLocalizedString("Download HD", comment: ""),
+                    icon: "arrow.down.circle.fill",
+                    gradient: [Color("igPurple"), Color("igPink")],
+                    action: {
+                        if subscriptionManager.isUserSubscribed {
+                            startLoading()
+                            
+                            // Carousel içeriği ise şu anki öğeyi kullan
+                            if let isCarousel = video.isCarousel, isCarousel, 
+                               let currentItem = getCurrentCarouselItem() {
+                                // Fotoğraf mı yoksa video mu kontrolü
+                                if currentItem.isPhoto {
+                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                } else if let hdVersion = currentItem.allVideoVersions.first(where: { $0.type == 101 }) {
+                                    downloadAndSaveContent(urlString: hdVersion.url)
+                                } else if !currentItem.allVideoVersions.isEmpty {
+                                    downloadAndSaveContent(urlString: currentItem.allVideoVersions.first!.url)
+                                } else {
+                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                }
+                            } else {
+                                // Normal içerik için orijinal davranış
+                                if isPhotoContent {
+                                    downloadAndSaveContent(urlString: video.downloadLink)
+                                } else if let hdVersion = video.allVideoVersions.first(where: { $0.type == 101 }) {
+                                    downloadAndSaveContent(urlString: hdVersion.url)
+                                }
                             }
                         } else {
                             showPaywallView = true
@@ -180,14 +420,63 @@ struct PreviewView: View {
                     icon: "arrow.down.circle",
                     gradient: [Color("igPurple").opacity(0.8), Color("igPink").opacity(0.8)],
                     action: {
-                        if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) {
+                        // Premium kullanıcı değilse, içerik ne olursa olsun reklam göster
+                        if !subscriptionManager.isUserSubscribed {
+                            // Önce reklamı göster, sonra indirme işlemini yap
+                            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+                                interstitialAd.showAd(from: rootViewController) {
+                                    // Reklam gösterildikten sonra indirme işlemine başla
+                                    startLoading()
+                                    
+                                    // Carousel içeriği ise şu anki öğeyi kullan
+                                    if let isCarousel = video.isCarousel, isCarousel, 
+                                       let currentItem = getCurrentCarouselItem() {
+                                        // Fotoğraf mı yoksa video mu kontrolü
+                                        if currentItem.isPhoto {
+                                            downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                        } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
+                                            downloadAndSaveContent(urlString: lowVersion.url)
+                                        } else {
+                                            downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                        }
+                                    } else {
+                                        // Normal içerik için orijinal davranış
+                                        if isPhotoContent {
+                                            downloadAndSaveContent(urlString: video.downloadLink)
+                                        } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
+                                            downloadAndSaveContent(urlString: lowVersion.url)
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            // Premium kullanıcı ise direkt indirme başlat
                             startLoading()
-                            downloadAndSaveVideo(urlString: lowVersion.url)
+                            
+                            // Carousel içeriği ise şu anki öğeyi kullan
+                            if let isCarousel = video.isCarousel, isCarousel, 
+                               let currentItem = getCurrentCarouselItem() {
+                                // Fotoğraf mı yoksa video mu kontrolü
+                                if currentItem.isPhoto {
+                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
+                                    downloadAndSaveContent(urlString: lowVersion.url)
+                                } else {
+                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
+                                }
+                            } else {
+                                // Normal içerik için orijinal davranış
+                                if isPhotoContent {
+                                    downloadAndSaveContent(urlString: video.downloadLink)
+                                } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
+                                    downloadAndSaveContent(urlString: lowVersion.url)
+                                }
+                            }
                         }
                     }
                 )
             }
-        
+        }
         .padding(.horizontal, 20)
     }
     
@@ -233,34 +522,35 @@ struct PreviewView: View {
             Color.white.opacity(0.5)
                 .ignoresSafeArea()
             
-            VStack(spacing: 16) {
-                ProgressView()
-                    .accentColor(.white)
-                    .foregroundColor(.white)
+            VStack(spacing: 12) {
+                ProgressView(value: downloadProgress)
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color("igPurple")))
+                    .scaleEffect(1.5)
+                    .padding(.bottom, 8)
                 
-                Text("Downloading...")
+                Text("Downloading")
                     .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(.white)
+                    .foregroundColor(Color("igPurple"))
+                
+                Text("\(Int(downloadProgress * 100))%")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(Color("igPurple"))
             }
             .padding(24)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.black.opacity(0.7))
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
             )
         }
     }
-    
-//        private func thisButtonsNotAccepted() -> Bool {
-//        let currentLanguage = Locale.current.languageCode
-//        return currentLanguage == "en"
-//    }
     
     private var successMessage: some View {
         ZStack {
             Color.black.opacity(0.5)
                 .ignoresSafeArea()
             
-            Text("Video saved successfully!")
+            Text(isPhotoContent ? "Photo saved successfully!" : "Video saved successfully!")
                 .font(.system(size: 16, weight: .medium))
                 .foregroundColor(.white)
                 .padding(.horizontal, 24)
@@ -280,6 +570,36 @@ struct PreviewView: View {
         .transition(.opacity)
     }
     
+    private var collectionSuccessMessageView: some View {
+        ZStack {
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+            
+            Text(isPhotoContent ? "Photo successfully added to the collection!" : "Video successfully added to the collection!")
+                .font(.system(size: 16, weight: .medium))
+                .foregroundColor(.white)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 16)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color("igPurple"), Color("igPink")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                )
+                .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
+        }
+        .transition(.opacity)
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                collectionSuccessMessage = false
+            }
+        }
+    }
+    
     private var collectionsSheet: some View {
         NavigationView {
             CollectionsView(
@@ -288,6 +608,7 @@ struct PreviewView: View {
                     saveToCollection(collection: collection)
                     showCollectionsSheet = false
                     isBookmarked = true
+                    collectionSuccessMessage = true
                 },
                 isPresentedModally: true
             )
@@ -312,6 +633,7 @@ struct PreviewView: View {
     // MARK: - Video Download & Gallery Save Operations
     private func startLoading() {
         isLoading = true
+        downloadProgress = 0
         loadingTimer?.invalidate()
         loadingTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: false) { _ in
             if isLoading {
@@ -326,7 +648,8 @@ struct PreviewView: View {
         loadingTimer?.invalidate()
     }
     
-    private func downloadAndSaveVideo(urlString: String) {
+    // Yeni birleştirilmiş fonksiyon: Hem video hem fotoğraf indirme (Alamofire ile)
+    private func downloadAndSaveContent(urlString: String) {
         // Önce abonelik ve indirme limiti kontrolü
         if !subscriptionManager.isUserSubscribed {
             if !CoreDataManager.shared.canDownloadMore() {
@@ -335,58 +658,82 @@ struct PreviewView: View {
             }
         }
         
-        guard let url = URL(string: urlString) else {
-            stopLoading()
-            return
+        // İndirme işlemini başlat
+        startLoading()
+        
+        // İçerik türünü belirle (Carousel içeriği veya normal içerik için)
+        var isCurrentItemPhoto = isPhotoContent
+        if let isCarousel = video.isCarousel, isCarousel, let currentItem = getCurrentCarouselItem() {
+            isCurrentItemPhoto = currentItem.isPhoto
         }
         
-        URLSession.shared.downloadTask(with: url) { location, response, error in
-            if let error = error {
-                print("Error downloading: \(error.localizedDescription)")
-                DispatchQueue.main.async { self.stopLoading() }
-                return
+        // Alamofire ile indirme işlemi
+        downloadManager.downloadContent(
+            urlString: urlString,
+            isPhoto: isCurrentItemPhoto
+        ) { progress in
+            // İlerleme güncellemesi
+            DispatchQueue.main.async {
+                self.downloadProgress = progress
             }
-            
-            if let httpResponse = response as? HTTPURLResponse {
-                print("HTTP status code: \(httpResponse.statusCode)")
-            }
-            let mimeType = response?.mimeType ?? "nil"
-            print("MIME type: \(mimeType)")
-            
-            guard let location = location else {
-                print("No file location returned from server.")
-                DispatchQueue.main.async { self.stopLoading() }
-                return
-            }
-            
-            do {
-                let data = try Data(contentsOf: location)
-                print("Data size:", data.count)
+        } completion: { result in
+            DispatchQueue.main.async {
+                self.stopLoading()
                 
-                if mimeType.contains("video") && !data.isEmpty {
-                    let tmpUrl = FileManager.default.temporaryDirectory.appendingPathComponent("downloadedVideo.mp4")
-                    if FileManager.default.fileExists(atPath: tmpUrl.path) {
-                        try FileManager.default.removeItem(at: tmpUrl)
+                switch result {
+                case .success(let fileURL):
+                    // İndirme başarılı, galeriye kaydet
+                    if !self.subscriptionManager.isUserSubscribed {
+                        CoreDataManager.shared.incrementDailyDownloadCount()
                     }
-                    try FileManager.default.moveItem(at: location, to: tmpUrl)
                     
-                    DispatchQueue.main.async {
-                        self.stopLoading()
-                        // İndirme başarılı olduğunda sayacı artır
-                        if !self.subscriptionManager.isUserSubscribed {
-                            CoreDataManager.shared.incrementDailyDownloadCount()
-                        }
-                        self.saveVideoToGallery(from: tmpUrl)
+                    if isCurrentItemPhoto {
+                        self.saveImageToGallery(from: fileURL)
+                    } else {
+                        self.saveVideoToGallery(from: fileURL)
                     }
-                } else {
-                    print("Received data is not a valid video or is empty.")
-                    DispatchQueue.main.async { self.stopLoading() }
+                    
+                case .failure(let error):
+                    // Hata durumu
+                    print("❌ İndirme hatası: \(error.localizedDescription)")
+                    self.showAlert = true
+                    
+                    // Kullanıcıya daha iyi geri bildirim
+                    self.presentErrorAlert(with: error)
                 }
-            } catch {
-                print("File handling error: \(error.localizedDescription)")
-                DispatchQueue.main.async { self.stopLoading() }
             }
-        }.resume()
+        }
+    }
+    
+    // Hata durumu için daha iyi geri bildirim
+    private func presentErrorAlert(with error: Error) {
+        // DownloadManager'daki yardımcı metodu kullan
+        alertMessage = downloadManager.getErrorMessage(from: error)
+        alertTitle = "Download Error"
+        
+        // Uyarı mesajını göster
+        DispatchQueue.main.async {
+            self.showAlert = true
+        }
+    }
+    
+    // Fotoğrafları galeriye kaydetme
+    private func saveImageToGallery(from fileURL: URL) {
+        PHPhotoLibrary.requestAuthorization { status in
+            guard status == .authorized else { return }
+            
+            PHPhotoLibrary.shared().performChanges({
+                PHAssetCreationRequest.forAsset().addResource(with: .photo, fileURL: fileURL, options: nil)
+            }) { success, error in
+                DispatchQueue.main.async {
+                    if success {
+                        self.handleContentSaveSuccess()
+                    } else if let error = error {
+                        print("Error saving image: \(error)")
+                    }
+                }
+            }
+        }
     }
     
     private func saveVideoToGallery(from fileURL: URL) {
@@ -398,7 +745,7 @@ struct PreviewView: View {
             }) { success, error in
                 DispatchQueue.main.async {
                     if success {
-                        self.handleVideoSaveSuccess()
+                        self.handleContentSaveSuccess()
                     } else {
                         if let error = error {
                             print("Error: \(error)")
@@ -409,20 +756,16 @@ struct PreviewView: View {
         }
     }
     
-    private func handleVideoSaveSuccess() {
+    private func handleContentSaveSuccess() {
         showSuccessMessage = true
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             showSuccessMessage = false
-            
-            // Show interstitial ad for non-subscribed users after success message is dismissed
-            if !subscriptionManager.isUserSubscribed {
-                if let windowScene = UIApplication.shared.windows.first?.rootViewController {
-                    let presenter = windowScene.presentedViewController ?? windowScene
-                    if presenter.presentedViewController == nil {
-                        self.interstitialAd.showAd(from: presenter) {
-                            print("Ad shown successfully")
-                        }
-                    }
+            // Check if a review request has been shown today
+            let calendar = Calendar.current
+            if !calendar.isDateInToday(lastReviewRequestDate) {
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                    SKStoreReviewController.requestReview(in: windowScene)
+                    lastReviewRequestDateDouble = Date().timeIntervalSince1970 // Update last request date
                 }
             }
         }
@@ -468,15 +811,113 @@ struct PreviewView: View {
     
     // MARK: - Image Loading
     private func loadCoverImage() {
-        guard let url = URL(string: video.thumbnailUrl) else { return }
-        
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            if let data = data {
-                DispatchQueue.main.async {
-                    self.imageData = data
+        if let url = URL(string: video.thumbnailUrl) {
+            URLSession.shared.dataTask(with: url) { data, _, _ in
+                if let data = data {
+                    DispatchQueue.main.async {
+                        self.imageData = data
+                    }
                 }
+            }.resume()
+        }
+        
+        // Carousel içeriği ise güncel öğe için ön yükleme yap
+        if let isCarousel = video.isCarousel, isCarousel,
+           let currentItem = getCurrentCarouselItem() {
+            if let url = URL(string: currentItem.thumbnailUrl) {
+                URLSession.shared.dataTask(with: url) { data, _, _ in
+                    if let data = data {
+                        DispatchQueue.main.async {
+                            self.imageData = data
+                        }
+                    }
+                }.resume()
             }
-        }.resume()
+        }
+    }
+    
+    // MARK: - Subscription Observer
+    
+    private func setupSubscriptionObserver() {
+        NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("SubscriptionChanged"),
+            object: nil,
+            queue: .main
+        ) { _ in
+            print("Abonelik durumu değişti, PreviewView SubscriptionManager'ı güncelliyorum")
+            subscriptionManager.checkSubscriptionStatus()
+        }
+    }
+    
+    // MARK: - Carousel İşlevleri
+    
+    // Yeni kompakt page control
+    private var pageControl: some View {
+        HStack(spacing: 8) {
+            ForEach(0..<(video.totalItems ?? 0), id: \.self) { index in
+                Circle()
+                    .fill(currentCarouselIndex == index ? Color("igPurple") : Color.gray.opacity(0.3))
+                    .frame(width: currentCarouselIndex == index ? 10 : 8, height: currentCarouselIndex == index ? 10 : 8)
+                    .animation(.spring(), value: currentCarouselIndex)
+                    .onTapGesture {
+                        currentCarouselIndex = index
+                        updatePreviewForCarouselItem()
+                    }
+            }
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .background(
+            Capsule()
+                .fill(Color.white.opacity(0.7))
+                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+        )
+    }
+    
+    // Eski carouselControlsView yerine bu fonksiyon kullanılacak
+    private var carouselControlsView: some View {
+        // Boş bir view dönüyoruz çünkü page control artık videoPreviewCard içinde
+        EmptyView()
+    }
+    
+    private func getCurrentCarouselItem() -> CarouselItem? {
+        guard let carouselItems = video.carouselItems,
+              currentCarouselIndex < carouselItems.count else {
+            return nil
+        }
+        return carouselItems[currentCarouselIndex]
+    }
+    
+    private func previousCarouselItem() {
+        if currentCarouselIndex > 0 {
+            currentCarouselIndex -= 1
+            updatePreviewForCarouselItem()
+        }
+    }
+    
+    private func nextCarouselItem() {
+        if let totalItems = video.totalItems, currentCarouselIndex < totalItems - 1 {
+            currentCarouselIndex += 1
+            updatePreviewForCarouselItem()
+        }
+    }
+    
+    private func updatePreviewForCarouselItem() {
+        guard let item = getCurrentCarouselItem() else { return }
+        
+        // Önizleme resmi yeniden yükle
+        if let url = URL(string: item.thumbnailUrl) {
+            URLSession.shared.dataTask(with: url) { data, _, _ in
+                if let data = data {
+                    DispatchQueue.main.async {
+                        self.imageData = data
+                    }
+                }
+            }.resume()
+        }
+        
+        // İçerik tipini güncelle
+        isPhotoContent = item.isPhoto
     }
 }
 
@@ -524,3 +965,7 @@ extension View {
         )
     }
 }
+
+
+
+

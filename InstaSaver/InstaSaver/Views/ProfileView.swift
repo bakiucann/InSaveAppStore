@@ -2,6 +2,7 @@
 
 import SwiftUI
 import RevenueCat
+import UserMessagingPlatform
 
 struct ProfileView: View {
     @State private var isProUser: Bool = false
@@ -13,6 +14,7 @@ struct ProfileView: View {
     @State private var showTermsOfUseSheet = false
     @EnvironmentObject var bottomSheetManager: BottomSheetManager
     @StateObject private var subscriptionManager = SubscriptionManager()
+    @State private var privacyOptionsStatus: UMPPrivacyOptionsRequirementStatus = .unknown
     
     private let instagramGradient = LinearGradient(
         colors: [
@@ -54,6 +56,7 @@ struct ProfileView: View {
             }
         }
         .onAppear { fetchSubscriptionStatus() }
+        .onAppear { checkPrivacyOptionsStatus() }
         .sheet(isPresented: $showShareSheet) {
             CustomShareView(isPresented: $showShareSheet)
         }
@@ -245,6 +248,14 @@ struct ProfileView: View {
                     icon: "doc.text",
                     action: { showTermsOfUseSheet.toggle() }
                 )
+
+                if privacyOptionsStatus == .required {
+                    MenuLink(
+                        title: NSLocalizedString("Privacy Options", comment: "Menu link title for Privacy Options"),
+                        icon: "gearshape",
+                        action: { presentPrivacyOptions() }
+                    )
+                }
             }
             .background(Color.white)
             .cornerRadius(16)
@@ -295,6 +306,49 @@ struct ProfileView: View {
                 print("Error fetching subscription status: \(error.localizedDescription)")
             } else if let customerInfo = customerInfo {
                 isProUser = customerInfo.entitlements["pro"]?.isActive == true
+            }
+        }
+    }
+
+    private func checkPrivacyOptionsStatus() {
+        self.privacyOptionsStatus = UMPConsentInformation.sharedInstance.privacyOptionsRequirementStatus
+        print("Checked Privacy Options Status: \(self.privacyOptionsStatus.rawValue)")
+    }
+
+    private func presentPrivacyOptions() {
+        // Create request parameters and set debug settings for testing
+        let parameters = UMPRequestParameters()
+        // #if DEBUG
+        // let debugSettings = UMPDebugSettings()
+        // // Force geography to EEA only for testing the options form presentation
+        // // debugSettings.geography = .EEA // <--- COMMENTED OUT for release
+        // parameters.debugSettings = debugSettings
+        // #endif
+
+        // Request the latest consent info before presenting the form, using debug parameters if applicable.
+        UMPConsentInformation.sharedInstance.requestConsentInfoUpdate(with: parameters) { requestError in // Pass parameters here
+            if let error = requestError {
+                print("UMP Error requesting consent info update for options form: \(error)")
+                // Optionally show an alert to the user
+                // We might still try to present the form below,
+                // as sometimes it might work even with a request error.
+            }
+
+            DispatchQueue.main.async { // Ensure UI operations are on the main thread
+                guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                      let rootViewController = windowScene.windows.first?.rootViewController else {
+                    print("UMP Error: Could not find root view controller when presenting options form.")
+                    return
+                }
+
+                UMPConsentForm.presentPrivacyOptionsForm(from: rootViewController) { formError in
+                    if let error = formError {
+                        print("UMP Error presenting privacy options form: \(error)")
+                        // Optionally show an alert to the user if the form fails to present
+                    } else {
+                        print("UMP Privacy options form presented successfully.")
+                    }
+                }
             }
         }
     }

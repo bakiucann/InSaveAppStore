@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22758" systemVersion="23F79" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="BookmarkedPhoto" representedClassName="BookmarkedPhoto" syncable="YES" codeGenerationType="class">
+        <attribute name="authorID" optional="YES" attributeType="String"/>
+        <attribute name="coverImageData" optional="YES" attributeType="Binary"/>
+        <attribute name="dateAdded" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <relationship name="collection" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="CollectionModel" inverseName="photos" inverseEntity="CollectionModel"/>
+    </entity>
     <entity name="BookmarkedVideo" representedClassName="BookmarkedVideo" syncable="YES" codeGenerationType="class">
         <attribute name="authorID" optional="YES" attributeType="String"/>
         <attribute name="cover" optional="YES" attributeType="String"/>
@@ -15,6 +22,7 @@
         <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
         <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="photos" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="BookmarkedPhoto" inverseName="collection" inverseEntity="BookmarkedPhoto"/>
         <relationship name="videos" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="BookmarkedVideo" inverseName="collection" inverseEntity="BookmarkedVideo"/>
     </entity>
     <entity name="DailyDownloadLimit" representedClassName="DailyDownloadLimit" syncable="YES" codeGenerationType="class">

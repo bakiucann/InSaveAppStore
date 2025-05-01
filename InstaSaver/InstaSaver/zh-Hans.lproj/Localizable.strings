@@ -195,3 +195,40 @@
 "Stories" = "故事";
 "Download Bulk" = "批量下载";
 "Downloading Stories..." = "正在下载故事...";
+
+/* New translations */
+"What You'll Get" = "你将获得什么";
+"🎉 EXCLUSIVE OFFER!" = "🎉 独家优惠！";
+"Don't miss out on this incredible deal!" = "不要错过这个不可思议的交易！";
+"Claim Your Offer Now!" = "立即领取您的优惠！";
+"Are you sure you want to clear all history items?" = "您确定要清除所有历史项吗？";
+"This content is not available because the account is private." = "此内容不可用，因为帐户是私密的。";
+"Failed to decode the response. Please check the URL or account privacy settings." = "解码响应失败。请检查URL或帐户隐私设置。";
+
+/* New String Additions - January 2025 */
+"Username" = "用户名";
+"Enter Instagram username..." = "输入 Instagram 用户名...";
+"Paste the link or enter username in the box" = "粘贴链接或在框中输入用户名";
+"Click download and save to your gallery" = "点击下载并保存到相册";
+"Paste URL/Username" = "粘贴 URL/用户名";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "未找到此用户的活跃故事或账号为私密账号";
+"Failed to fetch stories. Please try again." = "获取故事失败。请重试。";
+
+/* Input Error Messages */
+"Please enter an Instagram username" = "请输入Instagram用户名";
+"Please enter only the username without URL" = "请仅输入用户名，不要包含URL";
+
+/* Restore Alert Messages */
+"Success" = "成功";
+"Your purchases have been successfully restored!" = "您的购买已成功恢复！";
+"Restore Failed" = "恢复失败";
+"Failed to restore purchases. Please try again later." = "恢复购买失败。请稍后再试。";
+"No Purchases Found" = "未找到购买记录";
+"No previous purchases were found to restore." = "未找到可恢复的购买记录。";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "购买失败";
+"Failed to complete the purchase. Please try again later." = "无法完成购买。请稍后再试。";
+"Thank you for your purchase!" = "感谢您的购买！";

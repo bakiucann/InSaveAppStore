@@ -51,7 +51,7 @@
 "Paste Instagram URL here..." = "Paste Instagram URL here...";
 "Paste" = "Paste";
 "InSave for Instagram" = "InSave for Instagram";
-"Download Reels, Stories & Video Posts" = "Download Reels, Stories & Video Posts";
+"Download Reels, Stories & Video Posts" = "Save Reels, Stories & Video Posts";
 "PRO" = "PRO";
 
 /* Tutorial Steps */
@@ -91,7 +91,7 @@
 "Save time with multiple downloads at once" = "Save time with multiple files at once";
 "Most Popular" = "Most Popular";
 "Restore Purchases" = "Restore Purchases";
-"Secured by Apple" = "Secured by Apple";
+"Secured by Apple" = "Secured payments";
 
 /* Download Related */
 "Download HD" = "Save HD";
@@ -167,6 +167,7 @@
 "The request timed out. Please check your internet connection and try again." = "The request timed out. Please check your internet connection and try again.";
 "A network error occurred. Please check your internet connection and try again." = "A network error occurred. Please check your internet connection and try again.";
 "An unknown error occurred. Please try again." = "An unknown error occurred. Please try again.";
+"You don't have permission to access this content. The account might be private or the content has been removed." = "You don't have permission to access this content. The account might be private or the content has been removed.";
 
 /* Paywall */
 "Unlock Premium Features" = "Unlock Premium Features";
@@ -193,5 +194,42 @@
 
 /* StoryView */
 "Stories" = "Stories";
-"Download Bulk" = "Download Bulk";
-"Downloading Stories..." = "Downloading Stories...";
+"Download Bulk" = "Save Bulk";
+"Downloading Stories..." = "Save Stories...";
+
+/* New additions */
+"What You'll Get" = "What You'll Get";
+"🎉 EXCLUSIVE OFFER!" = "🎉 EXCLUSIVE OFFER!";
+"Don't miss out on this incredible deal!" = "Don't miss out on this incredible deal!";
+"Claim Your Offer Now!" = "Claim Your Offer Now!";
+"Are you sure you want to clear all history items?" = "Are you sure you want to clear all history items?";
+"This content is not available because the account is private." = "This content is not available because the account is private.";
+"Failed to decode the response. Please check the URL or account privacy settings." = "Failed to decode the response. Please check the URL or account privacy settings.";
+
+/* New String Additions - January 2025 */
+"Username" = "Username";
+"Enter Instagram username..." = "Enter Instagram username...";
+"Paste the link or enter username in the box" = "Paste the link or enter username in the box";
+"Click download and save to your gallery" = "Click search and save to your gallery";
+"Paste URL/Username" = "Paste URL/Username";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "No active stories found for this user or the account is private";
+"Failed to fetch stories. Please try again." = "Failed to fetch stories. Please try again.";
+
+/* Input Error Messages */
+"Please enter an Instagram username" = "Please enter an Instagram username";
+"Please enter only the username without URL" = "Please enter only the username without URL";
+
+/* Restore Alert Messages */
+"Success" = "Success";
+"Your purchases have been successfully restored!" = "Your purchases have been successfully restored!";
+"Restore Failed" = "Restore Failed";
+"Failed to restore purchases. Please try again later." = "Failed to restore purchases. Please try again later.";
+"No Purchases Found" = "No Purchases Found";
+"No previous purchases were found to restore." = "No previous purchases were found to restore.";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "Purchase Failed";
+"Failed to complete the purchase. Please try again later." = "Failed to complete the purchase. Please try again later.";
+"Thank you for your purchase!" = "Thank you for your purchase!";

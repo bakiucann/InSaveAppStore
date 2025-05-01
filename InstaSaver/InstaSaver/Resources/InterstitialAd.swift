@@ -34,6 +34,7 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             
             if let error = error {
                 print("Interstitial ad failed to load: \(error.localizedDescription)")
+                print("Ad is not available.")
                 
                 // Always retry if we haven't reached max attempts
                 if self.loadAttempts < self.maxAttempts {
@@ -51,6 +52,7 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             self.interstitial = ad
             self.interstitial?.fullScreenContentDelegate = self
             self.loadAttempts = 0
+            print("Ad is now available.")
         }
     }
     
@@ -59,9 +61,7 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
         self.rootViewController = rootViewController
         
         if interstitial == nil {
-            // If no ad is available, try to load one
-            loadInterstitial()
-            // Wait a bit to see if we can load an ad
+            loadInterstitial() // If no ad is available, load one
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
                 self?.tryPresentAd()
             }
@@ -79,17 +79,26 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             return
         }
         
-        // Check if the view controller is already presenting
+        // İyileştirilmiş sunum kontrolü
         if rootViewController.presentedViewController != nil {
-            print("View controller is already presenting, waiting...")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.tryPresentAd()
+            print("View controller is already presenting, trying to find top-most controller...")
+            
+            // En üst controller'ı bulmaya çalış
+            var topVC = rootViewController
+            while let presented = topVC.presentedViewController {
+                topVC = presented
             }
+            
+            // En üst controller üzerinden reklamı göster
+            print("Presenting ad from top-most controller")
+            interstitial.present(fromRootViewController: topVC)
+            print("Ad is being presented from top controller.")
             return
         }
         
         print("Showing interstitial ad")
         interstitial.present(fromRootViewController: rootViewController)
+        print("Ad is being presented.")
     }
     
     // MARK: - GADFullScreenContentDelegate

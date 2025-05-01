@@ -195,3 +195,40 @@
 "Stories" = "ストーリー";
 "Download Bulk" = "一括ダウンロード";
 "Downloading Stories..." = "ストーリーをダウンロード中...";
+
+/* New additions from the code block */
+"What You'll Get" = "あなたが得るもの";
+"🎉 EXCLUSIVE OFFER!" = "🎉 限定オファー！";
+"Don't miss out on this incredible deal!" = "この素晴らしい取引を見逃さないでください！";
+"Claim Your Offer Now!" = "今すぐオファーを請求してください！";
+"Are you sure you want to clear all history items?" = "すべての履歴項目をクリアしてもよろしいですか？";
+"This content is not available because the account is private." = "このコンテンツはアカウントがプライベートのため利用できません。";
+"Failed to decode the response. Please check the URL or account privacy settings." = "応答のデコードに失敗しました。URLまたはアカウントのプライバシー設定を確認してください。";
+
+/* New String Additions - January 2025 */
+"Username" = "ユーザー名";
+"Enter Instagram username..." = "Instagramのユーザー名を入力...";
+"Paste the link or enter username in the box" = "リンクを貼り付けるか、ボックスにユーザー名を入力してください";
+"Click download and save to your gallery" = "クリックしてダウンロードし、ギャラリーに保存";
+"Paste URL/Username" = "URL/ユーザー名を貼り付け";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "このユーザーのアクティブなストーリーが見つからないか、アカウントがプライベートです";
+"Failed to fetch stories. Please try again." = "ストーリーの取得に失敗しました。もう一度お試しください。";
+
+/* Input Error Messages */
+"Please enter an Instagram username" = "Instagramのユーザー名を入力してください";
+"Please enter only the username without URL" = "URLなしでユーザー名のみを入力してください";
+
+/* Restore Alert Messages */
+"Success" = "成功";
+"Your purchases have been successfully restored!" = "購入内容が正常に復元されました！";
+"Restore Failed" = "復元に失敗しました";
+"Failed to restore purchases. Please try again later." = "購入内容の復元に失敗しました。後でもう一度お試しください。";
+"No Purchases Found" = "購入履歴が見つかりません";
+"No previous purchases were found to restore." = "復元する以前の購入履歴が見つかりませんでした。";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "購入に失敗しました";
+"Failed to complete the purchase. Please try again later." = "購入を完了できませんでした。後でもう一度お試しください。";
+"Thank you for your purchase!" = "ご購入ありがとうございました！";

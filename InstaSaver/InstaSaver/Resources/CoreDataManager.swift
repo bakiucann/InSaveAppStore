@@ -215,11 +215,26 @@ class CoreDataManager {
     
     func canDownloadMore() -> Bool {
         let currentCount = getTodayDownloadCount()
-        return currentCount < 30
+        return currentCount < 10
     }
     
     func getRemainingDownloads() -> Int {
         let currentCount = getTodayDownloadCount()
-        return max(0, 30 - currentCount)
+        return max(0, 10 - currentCount)
+    }
+    
+    func clearAllSavedVideos() {
+        let fetchRequest: NSFetchRequest<SavedVideo> = SavedVideo.fetchRequest()
+        
+        do {
+            let savedVideos = try context.fetch(fetchRequest)
+            for video in savedVideos {
+                context.delete(video)
+            }
+            try context.save()
+            print("All saved videos cleared successfully.")
+        } catch {
+            print("Failed to clear saved videos: \(error.localizedDescription)")
+        }
     }
 }

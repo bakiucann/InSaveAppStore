@@ -195,3 +195,40 @@
 "Stories" = "القصص";
 "Download Bulk" = "تحميل متعدد";
 "Downloading Stories..." = "جارٍ تحميل القصص...";
+
+/* New additions */
+"What You'll Get" = "ما ستحصل عليه";
+"🎉 EXCLUSIVE OFFER!" = "🎉 عرض حصري!";
+"Don't miss out on this incredible deal!" = "لا تفوت هذه الصفقة الرائعة!";
+"Claim Your Offer Now!" = "احصل على عرضك الآن!";
+"Are you sure you want to clear all history items?" = "هل أنت متأكد أنك تريد مسح جميع عناصر السجل؟";
+"This content is not available because the account is private." = "هذا المحتوى غير متاح لأن الحساب خاص.";
+"Failed to decode the response. Please check the URL or account privacy settings." = "فشل في فك تشفير الاستجابة. يرجى التحقق من URL أو إعدادات خصوصية الحساب.";
+
+/* New String Additions - January 2025 */
+"Username" = "اسم المستخدم";
+"Enter Instagram username..." = "أدخل اسم مستخدم انستغرام...";
+"Paste the link or enter username in the box" = "الصق الرابط أو أدخل اسم المستخدم في المربع";
+"Click download and save to your gallery" = "انقر للتحميل والحفظ في معرض الصور";
+"Paste URL/Username" = "الصق الرابط/اسم المستخدم";
+
+/* Story Error Messages */
+"No active stories found for this user or the account is private" = "لم يتم العثور على قصص نشطة لهذا المستخدم أو أن الحساب خاص";
+"Failed to fetch stories. Please try again." = "فشل في جلب القصص. يرجى المحاولة مرة أخرى.";
+
+/* Input Error Messages */
+"Please enter an Instagram username" = "يرجى إدخال اسم مستخدم انستغرام";
+"Please enter only the username without URL" = "يرجى إدخال اسم المستخدم فقط بدون رابط URL";
+
+/* Restore Alert Messages */
+"Success" = "نجاح";
+"Your purchases have been successfully restored!" = "تمت استعادة مشترياتك بنجاح!";
+"Restore Failed" = "فشلت الاستعادة";
+"Failed to restore purchases. Please try again later." = "فشل استعادة المشتريات. يرجى المحاولة مرة أخرى لاحقًا.";
+"No Purchases Found" = "لم يتم العثور على مشتريات";
+"No previous purchases were found to restore." = "لم يتم العثور على مشتريات سابقة لاستعادتها.";
+
+/* Purchase Alert Messages */
+"Purchase Failed" = "فشل الشراء";
+"Failed to complete the purchase. Please try again later." = "فشل إتمام عملية الشراء. يرجى المحاولة مرة أخرى لاحقًا.";
+"Thank you for your purchase!" = "شكرًا لك على الشراء!";

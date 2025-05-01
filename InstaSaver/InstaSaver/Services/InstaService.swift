@@ -53,6 +53,18 @@ class InstagramService {
                 return
             }
             
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completion(.failure(.serverError("Invalid server response")))
+                return
+            }
+            
+            // HTTP durum kodunu kontrol et
+            if httpResponse.statusCode == 403 {
+                print("403 Forbidden Error")
+                completion(.failure(.serverError("You don't have permission to access this content. The account might be private or the content has been removed.")))
+                return
+            }
+            
             guard let data = data else {
                 print("No data received")
                 completion(.failure(.noData))
@@ -94,6 +106,54 @@ class InstagramService {
         }.resume()
     }
     
+    // İsteğin yeniden denenmesi için
+    private func fetchWithRetry<T: Codable>(
+        urlString: String,
+        method: String = "POST",
+        body: Data?,
+        responseType: T.Type,
+        currentRetryCount: Int = 0,
+        maxRetryCount: Int = 3,
+        completion: @escaping (Result<T, InstagramServiceError>) -> Void
+    ) {
+        let retryDelay: TimeInterval = pow(2.0, Double(currentRetryCount)) // Exponential backoff: 1, 2, 4 saniye
+        
+        performRequest(with: urlString, method: method, body: body, responseType: responseType) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let response):
+                // Başarılı sonuç, direkt döndür
+                completion(.success(response))
+                
+            case .failure(let error):
+                // 403 hatası alındı ve maksimum deneme sayısına ulaşılmadıysa yeniden dene
+                if case .serverError(let message) = error, message.contains("403") || message.contains("permission") {
+                    if currentRetryCount < maxRetryCount {
+                        print("🔄 403 hatası alındı, \(retryDelay) saniye sonra tekrar deneniyor (\(currentRetryCount + 1)/\(maxRetryCount))...")
+                        
+                        // Gecikme süresi ile tekrar dene
+                        DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) {
+                            self.fetchWithRetry(
+                                urlString: urlString,
+                                method: method,
+                                body: body,
+                                responseType: responseType,
+                                currentRetryCount: currentRetryCount + 1,
+                                maxRetryCount: maxRetryCount,
+                                completion: completion
+                            )
+                        }
+                        return
+                    }
+                }
+                
+                // Diğer tüm hatalar veya maksimum deneme sayısı aşıldıysa hatayı döndür
+                completion(.failure(error))
+            }
+        }
+    }
+    
     func fetchReelInfo(
         url: String,
         quality: Int? = nil,
@@ -110,19 +170,14 @@ class InstagramService {
             return
         }
         
-        performRequest(
-            with: endpoint,
+        // Retry mekanizması ile isteği gönder
+        fetchWithRetry(
+            urlString: endpoint,
             method: "POST",
             body: bodyData,
-            responseType: InstagramAPIResponse.self
-        ) { result in
-            switch result {
-            case .success(let response):
-                completion(.success(response))
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
+            responseType: InstagramAPIResponse.self,
+            completion: completion
+        )
     }
 }
 

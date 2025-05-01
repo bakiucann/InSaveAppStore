@@ -104,3 +104,11 @@ struct Author: Codable {
     let nickname: String
     let avatar: String?  // Avatar can be null
 }
+import Foundation
+
+struct IdentifiableError: Identifiable {
+    let id = UUID()
+    let error: Error
+}
+
+

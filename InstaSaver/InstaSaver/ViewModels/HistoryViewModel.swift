@@ -100,4 +100,11 @@ class HistoryViewModel: ObservableObject {
             type: savedVideo.type ?? "video"
         )
     }
+    
+    func clearAllHistory() {
+        // Clear the history array
+        history.removeAll()
+        // Clear all items from Core Data
+        CoreDataManager.shared.clearAllSavedVideos()
+    }
 }
