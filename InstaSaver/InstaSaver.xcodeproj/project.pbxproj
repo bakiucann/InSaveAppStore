@@ -14,11 +14,6 @@
 		004D79B72D6A19E40002C994 /* TimerPulseAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D79B62D6A19E40002C994 /* TimerPulseAnimation.swift */; };
 		00690D162D7F110600E55550 /* ConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00690D152D7F110600E55550 /* ConfigService.swift */; };
 		00690D492D86F2D600E55550 /* LocalizationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00690D472D86F2D600E55550 /* LocalizationHelper.swift */; };
-		00922A9A2DC3FD8B00464A60 /* InstagramProfileModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00922A992DC3FD8B00464A60 /* InstagramProfileModel.swift */; };
-		00922A9C2DC3FD9500464A60 /* ProfileService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00922A9B2DC3FD9500464A60 /* ProfileService.swift */; };
-		00922A9E2DC3FE7500464A60 /* UserProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00922A9D2DC3FE7500464A60 /* UserProfileViewModel.swift */; };
-		00922AA12DC3FFB500464A60 /* UserProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00922A9F2DC3FFB500464A60 /* UserProfileView.swift */; };
-		00922AA32DC401B800464A60 /* mock_mrbeast_profile.json in Resources */ = {isa = PBXBuildFile; fileRef = 00922AA22DC401B800464A60 /* mock_mrbeast_profile.json */; };
 		00922AA72DC43B6000464A60 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 00922AA62DC43B6000464A60 /* Kingfisher */; };
 		00A81D482D2B27A500ABA492 /* InstaSaverApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A81D472D2B27A500ABA492 /* InstaSaverApp.swift */; };
 		00A81D4A2D2B27A500ABA492 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00A81D492D2B27A500ABA492 /* ContentView.swift */; };
@@ -116,11 +111,6 @@
 		004D79B62D6A19E40002C994 /* TimerPulseAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerPulseAnimation.swift; sourceTree = "<group>"; };
 		00690D152D7F110600E55550 /* ConfigService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigService.swift; sourceTree = "<group>"; };
 		00690D472D86F2D600E55550 /* LocalizationHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalizationHelper.swift; sourceTree = "<group>"; };
-		00922A992DC3FD8B00464A60 /* InstagramProfileModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstagramProfileModel.swift; sourceTree = "<group>"; };
-		00922A9B2DC3FD9500464A60 /* ProfileService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileService.swift; sourceTree = "<group>"; };
-		00922A9D2DC3FE7500464A60 /* UserProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileViewModel.swift; sourceTree = "<group>"; };
-		00922A9F2DC3FFB500464A60 /* UserProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileView.swift; sourceTree = "<group>"; };
-		00922AA22DC401B800464A60 /* mock_mrbeast_profile.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = mock_mrbeast_profile.json; sourceTree = "<group>"; };
 		00A81D442D2B27A500ABA492 /* InstaSaver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstaSaver.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		00A81D472D2B27A500ABA492 /* InstaSaverApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InstaSaverApp.swift; sourceTree = "<group>"; };
 		00A81D492D2B27A500ABA492 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -238,18 +228,9 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
-		00922AA02DC3FFB500464A60 /* Profile */ = {
-			isa = PBXGroup;
-			children = (
-				00922A9F2DC3FFB500464A60 /* UserProfileView.swift */,
-			);
-			path = Profile;
-			sourceTree = "<group>";
-		};
 		00A81D3B2D2B27A500ABA492 = {
 			isa = PBXGroup;
 			children = (
-				00922AA22DC401B800464A60 /* mock_mrbeast_profile.json */,
 				00A81D462D2B27A500ABA492 /* InstaSaver */,
 				00CA5C902D3287EB0059B896 /* OneSignalNotificationServiceExtension */,
 				00A81D452D2B27A500ABA492 /* Products */,
@@ -312,7 +293,6 @@
 		00A81D672D2B282D00ABA492 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				00922AA02DC3FFB500464A60 /* Profile */,
 				004D79B62D6A19E40002C994 /* TimerPulseAnimation.swift */,
 				004D79B22D690B1A0002C994 /* SpecialOfferView.swift */,
 				00FE76172D49216800384281 /* StoryView.swift */,
@@ -353,7 +333,6 @@
 		00A81D752D2B282D00ABA492 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
-				00922A9D2DC3FE7500464A60 /* UserProfileViewModel.swift */,
 				004D79B02D690B130002C994 /* SpecialOfferViewModel.swift */,
 				00A81D712D2B282D00ABA492 /* CollectionsViewModel.swift */,
 				00A81D722D2B282D00ABA492 /* HistoryViewModel.swift */,
@@ -366,7 +345,6 @@
 		00A81D7A2D2B282E00ABA492 /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				00922A992DC3FD8B00464A60 /* InstagramProfileModel.swift */,
 				00FE76132D49214400384281 /* InstagramStoryModel.swift */,
 				00CA5C882D3041CC0059B896 /* Tab.swift */,
 				00A81D762D2B282E00ABA492 /* CollectionModel.swift */,
@@ -396,7 +374,6 @@
 		00A81D862D2B282E00ABA492 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				00922A9B2DC3FD9500464A60 /* ProfileService.swift */,
 				00690D152D7F110600E55550 /* ConfigService.swift */,
 				00FE76152D49215F00384281 /* StoryService.swift */,
 				00A81D842D2B282E00ABA492 /* InstaService.swift */,
@@ -556,7 +533,6 @@
 			files = (
 				00A81D4F2D2B27A600ABA492 /* Preview Assets.xcassets in Resources */,
 				00CA5CCC2D3449960059B896 /* LaunchScreen.storyboard in Resources */,
-				00922AA32DC401B800464A60 /* mock_mrbeast_profile.json in Resources */,
 				00CA5CAF2D3319FF0059B896 /* Localizable.strings in Resources */,
 				00A81D4C2D2B27A600ABA492 /* Assets.xcassets in Resources */,
 			);
@@ -620,18 +596,14 @@
 				00CA5C892D3041CC0059B896 /* Tab.swift in Sources */,
 				00A81D482D2B27A500ABA492 /* InstaSaverApp.swift in Sources */,
 				00A81DA82D2B282E00ABA492 /* DetailImageLoader.swift in Sources */,
-				00922A9E2DC3FE7500464A60 /* UserProfileViewModel.swift in Sources */,
 				00A81D982D2B282E00ABA492 /* TermsOfUseView.swift in Sources */,
-				00922A9C2DC3FD9500464A60 /* ProfileService.swift in Sources */,
 				00690D492D86F2D600E55550 /* LocalizationHelper.swift in Sources */,
 				00A81DC12D2BF5C300ABA492 /* ScreenSizeKey.swift in Sources */,
 				00A81D942D2B282E00ABA492 /* BottomSheetManager.swift in Sources */,
 				00A81D8C2D2B282E00ABA492 /* HistoryView.swift in Sources */,
-				00922A9A2DC3FD8B00464A60 /* InstagramProfileModel.swift in Sources */,
 				00FE76142D49214400384281 /* InstagramStoryModel.swift in Sources */,
 				00A81DBF2D2BF5BC00ABA492 /* HomeTrailingToolbarView.swift in Sources */,
 				004D79B72D6A19E40002C994 /* TimerPulseAnimation.swift in Sources */,
-				00922AA12DC3FFB500464A60 /* UserProfileView.swift in Sources */,
 				00A81D542D2B27A600ABA492 /* InstaSaver.xcdatamodeld in Sources */,
 				00690D162D7F110600E55550 /* ConfigService.swift in Sources */,
 				004D79AF2D690B010002C994 /* UserDefaults+Extension.swift in Sources */,

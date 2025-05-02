@@ -27,10 +27,6 @@ struct SearchSectionView: View {
     @State private var searchMode: SearchMode = .url
     @StateObject private var configManager = ConfigManager.shared
     
-    // State variables for Profile View Navigation
-    @State private var showUserProfileView = false // Controls the NavigationLink
-    @State private var selectedUsername: String? = nil // Holds the username for the profile view
-    
     @ObservedObject var subscriptionManager: SubscriptionManager
     let interstitial: InterstitialAd
     @ObservedObject var videoViewModel: VideoViewModel
@@ -70,15 +66,6 @@ struct SearchSectionView: View {
     
     var body: some View {
         VStack(spacing: 15) {
-            // NavigationLink for navigating to UserProfileView
-            // It's activated programmatically by changing showUserProfileView
-            if let username = selectedUsername {
-                NavigationLink(destination: UserProfileView(username: username),
-                               isActive: $showUserProfileView) {
-                    EmptyView() // Invisible link
-                }
-            }
-            
             // Animated Header Section
             VStack(spacing: 12) {
                 ZStack {
@@ -248,60 +235,44 @@ struct SearchSectionView: View {
                         return
                     }
                     
-                    // Extract username or determine action based on input type
-                    let cleanedInput = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-                    let potentialUsername = extractPotentialUsername(from: cleanedInput)
+                    withAnimation {
+                        searchCount += 1
+                        videoViewModel.clearVideoData()
+                        isUrlSearch = true
+                        isLoading = true
+                    }
 
-                    // Reset state for new search
-                    videoViewModel.clearVideoData()
-                    isUrlSearch = false // Reset this, specific logic will set it if needed
-                    isLoading = true
-                    showPreview = false
-                    showUserProfileView = false // Reset navigation state
-                    selectedUsername = nil
-
-                    // --- Input Handling Logic ---
-                    if searchMode == .username {
-                        // If username mode is selected, directly treat input as username
-                        if isPotentialURL(cleanedInput) {
-                            // If user entered URL in username mode, show error
-                            errorMessage = NSLocalizedString("Please enter only the username, not a URL.", comment: "Error when URL is entered in username field")
+                    // Kullanıcı adı veya URL kontrolü
+                    switch searchMode {
+                    case .username:
+                        // Username modunda URL kontrolü
+                        if inputText.contains("instagram.com") || inputText.contains("http") || inputText.contains("/") {
+                            errorMessage = NSLocalizedString("Please enter only the username without URL", comment: "")
                             showError = true
                             isLoading = false
-                        } else {
-                            // Check if it looks like a story URL anyway (e.g., pasted by mistake)
-                            if isStoryURL(cleanedInput) {
-                                handleStoryURL(input: cleanedInput) // Process as story
-                            } else {
-                                // Assume it's a profile username
-                                navigateToUserProfile(username: cleanedInput)
-                            }
-                        }
-                    } else { // URL Mode
-                        // First, check if it's a valid URL structure
-                         guard let url = URL(string: cleanedInput), url.host?.contains("instagram.com") == true else {
-                            errorMessage = NSLocalizedString("Please enter a valid Instagram URL.", comment: "Error for invalid URL structure")
-                            showError = true
-                            isLoading = false
+                            isUrlSearch = false
                             return
                         }
-
-                        // Check specific URL types
-                        if isStoryURL(cleanedInput) {
-                            handleStoryURL(input: cleanedInput)
-                        } else if isProfileURL(cleanedInput) {
-                            // If it's a simple profile URL (e.g., instagram.com/username)
-                            if let username = potentialUsername {
-                                 navigateToUserProfile(username: username)
-                            } else {
-                                 // Fallback or error if username extraction fails from profile URL
-                                 errorMessage = NSLocalizedString("Could not extract username from profile URL.", comment: "Error extracting username from profile URL")
-                                 showError = true
-                                 isLoading = false
-                            }
+                        handleStoryURL()
+                        
+                    case .url:
+                        // URL kontrolü
+                        if !inputText.contains("instagram.com") {
+                            errorMessage = NSLocalizedString("Please enter a valid Instagram URL", comment: "")
+                            showError = true
+                            isLoading = false
+                            isUrlSearch = false
+                            return
+                        }
+                        
+                        // URL formatını düzenle
+                        if !inputText.hasPrefix("http://") && !inputText.hasPrefix("https://") {
+                            inputText = "https://www." + inputText
+                        }
+                        
+                        if isStoryURL(inputText) {
+                            handleStoryURL()
                         } else {
-                            // Assume it's a Post/Reel URL
-                            isUrlSearch = true // Set for VideoViewModel
                             if !subscriptionManager.isUserSubscribed {
                                 interstitial.showAd(
                                     from: UIApplication.shared.windows.first?.rootViewController ?? UIViewController()
@@ -313,7 +284,6 @@ struct SearchSectionView: View {
                             }
                         }
                     }
-                    // --- End Input Handling Logic ---
                 }) {
                     HStack(spacing: 12) {
                         Image(systemName: "arrow.down.circle")
@@ -413,99 +383,71 @@ struct SearchSectionView: View {
         }
     }
     
-    // MARK: - Helper Functions for URL/Username Detection
-
-    private func isPotentialURL(_ text: String) -> Bool {
-        // Basic check if the string contains elements typical of a URL
-        return text.contains("/") || text.contains(".") || text.contains("http")
-    }
-
-    private func isProfileURL(_ urlString: String) -> Bool {
-        guard let url = URL(string: urlString.trimmingCharacters(in: CharacterSet(charactersIn: "/"))) else { return false }
-        // Check if host is instagram.com
-        guard url.host?.lowercased().contains("instagram.com") == true else { return false }
-        // Check path components: Should be 1 (the username) or 0 if just domain
-        let pathComponents = url.pathComponents.filter { $0 != "/" }
-        // Allow only domain or domain/username
-        return pathComponents.count <= 1 && !pathComponents.contains("stories") && !pathComponents.contains("p") && !pathComponents.contains("reel")
-    }
-
-    private func extractPotentialUsername(from input: String) -> String? {
-        let cleanedInput = input.trimmingCharacters(in: .whitespacesAndNewlines)
-
-        // If it's not a URL-like structure, assume it's a username
-        if !isPotentialURL(cleanedInput) {
-            return cleanedInput
-        }
-
-        // Try extracting from URL
-        guard let url = URL(string: cleanedInput.trimmingCharacters(in: CharacterSet(charactersIn: "/"))) else { return nil }
-        guard url.host?.lowercased().contains("instagram.com") == true else { return nil }
-
-        let pathComponents = url.pathComponents.filter { $0 != "/" }
-
-        // If there's exactly one path component, it's likely the username
-        if pathComponents.count == 1 && !["stories", "p", "reel", "explore", "accounts", "s"].contains(pathComponents.first?.lowercased()) {
-            return pathComponents.first
-        }
-
-        return nil // Cannot determine username from this input
-    }
-
     private func isStoryURL(_ url: String) -> Bool {
-        // Keep existing story/highlight detection
-        return url.contains("/stories/") || StoryService.shared.isHighlightURL(url)
+        return url.contains("instagram.com/stories/") || StoryService.shared.isHighlightURL(url)
     }
-
-    // Renamed and accepting input parameter
-    private func handleStoryURL(input: String) {
-        // Extract username specifically for stories/highlights
-        if let username = extractStoryUsername(from: input) {
-            print("🔍 Extracted story username: \(username)")
+    
+    private func extractUsername(from url: String) -> String? {
+        // Highlight URL kontrolü - bu durumda direkt URL'i döndür
+        if StoryService.shared.isHighlightURL(url) {
+            return url
+        }
+        
+        // SearchMode.username seçildiğinde, direkt kullanıcı adını döndür
+        if searchMode == .username {
+            return url.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        // Direkt kullanıcı adı girişi
+        if !url.contains("/") && !url.contains(".") {
+            return url.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+        
+        // Instagram story URL pattern: https://www.instagram.com/stories/USERNAME/
+        if url.contains("instagram.com/stories/") && !url.contains("/highlights/") {
+            let components = url.components(separatedBy: "/")
+            if let storiesIndex = components.firstIndex(of: "stories"),
+               storiesIndex + 1 < components.count {
+                let username = components[storiesIndex + 1]
+                return username.isEmpty ? nil : username
+            }
+        }
+        
+        return nil
+    }
+    
+    private func handleStoryURL() {
+        if let username = extractUsername(from: inputText) {
+            print("🔍 Extracted username: \(username)")
             Task {
+                // Reklam kontrolü
                 if !subscriptionManager.isUserSubscribed {
                     await MainActor.run {
                         interstitial.showAd(
                             from: UIApplication.shared.windows.first?.rootViewController ?? UIViewController()
                         ) {
+                            // Reklam gösterildikten sonra story'leri yükle
                             Task {
                                 await loadStories(username: username)
                             }
                         }
                     }
                 } else {
+                    // Premium kullanıcı için direkt yükle
                     await loadStories(username: username)
                 }
             }
         } else {
-            print("❌ Failed to extract username from story URL: \(input)")
-            errorMessage = NSLocalizedString("Invalid story or highlight URL format", comment: "Error for invalid story URL")
+            print("❌ Failed to extract username from: \(inputText)")
+            errorMessage = NSLocalizedString("Invalid username format", comment: "")
             showError = true
+            videoViewModel.isLoading = false
             isLoading = false
+            isUrlSearch = false
         }
     }
-
-    // Helper to extract username specifically from story/highlight URLs
-    private func extractStoryUsername(from url: String) -> String? {
-        if StoryService.shared.isHighlightURL(url) {
-            return url // Pass the full highlight URL to the service
-        }
-        // Original story URL extraction logic
-        if url.contains("instagram.com/stories/") {
-             let components = url.components(separatedBy: "/")
-             if let storiesIndex = components.firstIndex(of: "stories"), storiesIndex + 1 < components.count {
-                 let username = components[storiesIndex + 1]
-                 // Ensure it's not trying to get highlights this way
-                 if storiesIndex + 2 < components.count, components[storiesIndex + 2] == "highlights" {
-                     return nil // Let highlight logic handle this
-                 }
-                 return username.isEmpty ? nil : username
-             }
-         }
-         return nil
-    }
-
-    // Extracted story loading logic
+    
+    // Story'leri yükleyip gösteren yardımcı fonksiyon
     private func loadStories(username: String) async {
         videoViewModel.isLoading = true
         
@@ -532,38 +474,9 @@ struct SearchSectionView: View {
         isLoading = false
         isUrlSearch = false
     }
-
-    // Renamed for clarity
-    private func performPostReelSearch() {
-        // Ensure inputText is used for Post/Reel search
-        videoViewModel.fetchVideoInfo(url: inputText.trimmingCharacters(in: .whitespacesAndNewlines))
-    }
-
-    // Function to trigger navigation to the profile view
-    private func navigateToUserProfile(username: String) {
-        print("Navigating to profile for: \(username)")
-        // Simulate ad display logic if needed, similar to stories/posts
-        if !subscriptionManager.isUserSubscribed {
-             interstitial.showAd(
-                 from: UIApplication.shared.windows.first?.rootViewController ?? UIViewController()
-             ) {
-                 // Set state variables AFTER ad potentially dismisses
-                 self.selectedUsername = username
-                 self.showUserProfileView = true
-                 self.isLoading = false // Stop loading indicator
-             }
-         } else {
-             // Premium user, navigate directly
-             self.selectedUsername = username
-             self.showUserProfileView = true
-             self.isLoading = false // Stop loading indicator
-         }
-    }
-
-    // Renamed performSearch to be more specific
+    
     private func performSearch() {
-        // This now specifically handles Post/Reel searches
-        videoViewModel.fetchVideoInfo(url: inputText.trimmingCharacters(in: .whitespacesAndNewlines))
+        videoViewModel.fetchVideoInfo(url: inputText)
     }
 }
 
