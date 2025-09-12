@@ -8,27 +8,37 @@
 import Foundation
 import RevenueCat
 
-class SubscriptionManager: ObservableObject {
+final class SubscriptionManager: NSObject, ObservableObject, PurchasesDelegate {
+    static let shared = SubscriptionManager()
+    
     @Published var isUserSubscribed: Bool = false
     
-    init() {
+    private override init() {
+        super.init()
+        Purchases.shared.delegate = self
         checkSubscriptionStatus()
     }
     
-    func checkSubscriptionStatus() {
+    func purchases(_ purchases: Purchases, receivedUpdated customerInfo: CustomerInfo) {
+        updateSubscriptionStatus(with: customerInfo)
+    }
+    
+    private func checkSubscriptionStatus() {
         Purchases.shared.getCustomerInfo { [weak self] (customerInfo, error) in
             if let customerInfo = customerInfo {
-                // Abonelik durumu kontrolü ve terminale yazdırma
-                if customerInfo.entitlements.active["pro"] != nil {
-                    self?.isUserSubscribed = true
-                    print("Kullanıcı pro abonelik aktif: \(self?.isUserSubscribed ?? false)")
-                } else {
-                    self?.isUserSubscribed = false
-                    print("Kullanıcı pro abonelik yok: \(self?.isUserSubscribed ?? false)")
-                }
-            } else {
-                print("Abonelik durumu alınırken hata oluştu: \(String(describing: error))")
+                self?.updateSubscriptionStatus(with: customerInfo)
+            } else if let error = error {
+                print("Error fetching customer info: \(error.localizedDescription)")
             }
+        }
+    }
+    
+    private func updateSubscriptionStatus(with customerInfo: CustomerInfo) {
+        let isSubscribed = customerInfo.entitlements.active.keys.contains("pro")
+        
+        if self.isUserSubscribed != isSubscribed {
+            self.isUserSubscribed = isSubscribed
+            print("Subscription status updated: \(isSubscribed)")
         }
     }
 }

@@ -22,7 +22,7 @@ extension Notification.Name {
 struct InstaSaverApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     let persistenceController = PersistenceController.shared
-    @StateObject private var subscriptionManager = SubscriptionManager()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var interstitialAd = InterstitialAd()
     @Environment(\.screenSize) var screenSize
     @State private var isConnected = false
@@ -69,22 +69,22 @@ struct InstaSaverApp: App {
                     NotificationCenter.default.addObserver(forName: .umpFlowDidComplete, object: nil, queue: .main) { _ in
                         print("UMP flow completed notification received.")
                         // PRO kullanıcı kontrolü - Paywall ve Special Offer gösterme mantığını UMP tamamlandıktan sonra çalıştır
-                        if !subscriptionManager.isUserSubscribed {
-                            // Sadece ücretsiz kullanıcılar için paywall göster
+                    if !subscriptionManager.isUserSubscribed {
+                        // Sadece ücretsiz kullanıcılar için paywall göster
                             if !hasScheduledPaywall { // Avoid scheduling multiple times
-                                hasScheduledPaywall = true
+                            hasScheduledPaywall = true
                                 // Schedule Paywall presentation (e.g., after 2 seconds)
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    // Double-check subscription status before showing
-                                    if !subscriptionManager.isUserSubscribed {
-                                        showPaywall = true
-                                    }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                // Double-check subscription status before showing
+                                if !subscriptionManager.isUserSubscribed {
+                                    showPaywall = true
                                 }
                             }
-                        } else {
+                        }
+                    } else {
                             // PRO user, ensure paywall and special offer are hidden
-                            showPaywall = false
-                            specialOfferViewModel.isPresented = false
+                        showPaywall = false
+                        specialOfferViewModel.isPresented = false
                         }
                     }
                     
@@ -96,9 +96,6 @@ struct InstaSaverApp: App {
                         isAppInBackground = false // Uygulama ön plana alındı
                         // Uygulama geri döndüğünde config'i güncelle
                         configManager.fetchConfig()
-                        
-                        // ÖNEMLİ: Önce abonelik durumunu RevenueCat'ten yeniden kontrol et
-                        subscriptionManager.checkSubscriptionStatus()
                         
                         // Kısa bir gecikme ile abonelik durumunun güncellenmesini bekle
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -114,7 +111,7 @@ struct InstaSaverApp: App {
                         // Eğer 1 hafta geçmediyse gösterme
                         if !specialOfferViewModel.isPresented && 
                            specialOfferViewModel.shouldShowSpecialOffer() && 
-                           (Locale.current.languageCode != "en" || configManager.showDownloadButtons) &&
+                           (Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons) &&
                            !subscriptionManager.isUserSubscribed { // PRO kullanıcı kontrolü ekledik
                             specialOfferViewModel.isPresented = true
                         } else {
@@ -131,7 +128,7 @@ struct InstaSaverApp: App {
                             // Paywall kapandığında ve daha önce gösterilmediyse Special Offer'ı göster
                             // if !specialOfferViewModel.defaults.specialOfferShown &&
                             //    specialOfferViewModel.shouldShowSpecialOffer() &&
-                            //    (Locale.current.languageCode != "en" || configManager.showDownloadButtons) &&
+                            //    (Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons) &&
                             //    !subscriptionManager.isUserSubscribed { // PRO kullanıcı kontrolü ekledik
                             //     specialOfferViewModel.isPresented = true
                             // }

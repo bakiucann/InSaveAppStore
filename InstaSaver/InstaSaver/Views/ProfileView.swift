@@ -13,7 +13,7 @@ struct ProfileView: View {
     @State private var showPrivacyPolicySheet = false
     @State private var showTermsOfUseSheet = false
     @EnvironmentObject var bottomSheetManager: BottomSheetManager
-    @StateObject private var subscriptionManager = SubscriptionManager()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var privacyOptionsStatus: UMPPrivacyOptionsRequirementStatus = .unknown
     
     private let instagramGradient = LinearGradient(

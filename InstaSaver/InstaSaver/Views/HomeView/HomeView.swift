@@ -4,7 +4,6 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var videoViewModel = VideoViewModel()
-    @StateObject private var subscriptionManager = SubscriptionManager()
     @Binding var selectedTab: Tab
     
     // State variables
@@ -40,7 +39,6 @@ struct HomeView: View {
                                 isLoading: $isLoading,
                                 showPreview: $showPreview,
                                 showCustomAlert: $showCustomAlert,
-                                subscriptionManager: subscriptionManager,
                                 interstitial: interstitial,
                                 videoViewModel: videoViewModel
                             )
@@ -154,7 +152,6 @@ struct HomeView_Previews: PreviewProvider {
             selectedTab: .constant(.home)
         )
         .environmentObject(BottomSheetManager())
-        .environmentObject(SubscriptionManager())
         .previewDevice("iPhone 15 Pro")
     }
 }

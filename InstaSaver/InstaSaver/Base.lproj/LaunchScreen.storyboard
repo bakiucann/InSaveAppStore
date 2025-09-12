@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="23504" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
     <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23506"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -18,23 +18,19 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="insaver2" translatesAutoresizingMaskIntoConstraints="NO" id="YQc-wF-h8d">
-                                <rect key="frame" x="136.66666666666666" y="326" width="120" height="120"/>
-                                <constraints>
-                                    <constraint firstAttribute="width" constant="120" id="8Yg-f3-dg4"/>
-                                    <constraint firstAttribute="height" constant="120" id="vgf-Nh-e5f"/>
-                                </constraints>
+                                <rect key="frame" x="136.66666666666666" y="326" width="119.66666666666666" height="120"/>
                             </imageView>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gNb-91-AaH">
                                 <rect key="frame" x="155.33333333333334" y="466" width="82.333333333333343" height="32"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="InSave" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="text-label">
-                                        <rect key="frame" x="0.0" y="0.0" width="82.333333333333343" height="32"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="82.333333333333329" height="32"/>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="26"/>
                                         <color key="textColor" name="igPurple"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="InSave" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gradient-label">
-                                        <rect key="frame" x="0.0" y="0.0" width="82.333333333333343" height="32"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="82.333333333333329" height="32"/>
                                         <fontDescription key="fontDescription" type="boldSystem" pointSize="26"/>
                                         <color key="textColor" name="igPink"/>
                                         <nil key="highlightedColor"/>
@@ -42,24 +38,25 @@
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <constraints>
-                                    <constraint firstItem="text-label" firstAttribute="leading" secondItem="gNb-91-AaH" secondAttribute="leading" id="1"/>
-                                    <constraint firstItem="text-label" firstAttribute="top" secondItem="gNb-91-AaH" secondAttribute="top" id="2"/>
-                                    <constraint firstAttribute="trailing" secondItem="text-label" secondAttribute="trailing" id="3"/>
-                                    <constraint firstAttribute="bottom" secondItem="text-label" secondAttribute="bottom" id="4"/>
-                                    <constraint firstItem="gradient-label" firstAttribute="leading" secondItem="gNb-91-AaH" secondAttribute="leading" id="5"/>
-                                    <constraint firstItem="gradient-label" firstAttribute="top" secondItem="gNb-91-AaH" secondAttribute="top" id="6"/>
-                                    <constraint firstAttribute="trailing" secondItem="gradient-label" secondAttribute="trailing" id="7"/>
-                                    <constraint firstAttribute="bottom" secondItem="gradient-label" secondAttribute="bottom" id="8"/>
+                                    <constraint firstItem="text-label" firstAttribute="leading" secondItem="gradient-label" secondAttribute="leading" id="EAj-wi-icf"/>
+                                    <constraint firstItem="text-label" firstAttribute="firstBaseline" secondItem="gradient-label" secondAttribute="firstBaseline" id="Kcr-XY-oTo"/>
+                                    <constraint firstItem="text-label" firstAttribute="baseline" secondItem="gradient-label" secondAttribute="baseline" id="jjU-P7-1Be"/>
+                                    <constraint firstItem="gradient-label" firstAttribute="centerY" secondItem="gNb-91-AaH" secondAttribute="centerY" id="nb2-9e-YfF"/>
+                                    <constraint firstItem="text-label" firstAttribute="centerX" secondItem="gNb-91-AaH" secondAttribute="centerX" id="t0b-GW-uNo"/>
+                                    <constraint firstItem="text-label" firstAttribute="top" secondItem="gNb-91-AaH" secondAttribute="top" id="tik-Se-JXf"/>
                                 </constraints>
                             </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" name="inSaveBackground"/>
                         <constraints>
-                            <constraint firstItem="YQc-wF-h8d" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="2Yd-bi-hgf"/>
-                            <constraint firstItem="gNb-91-AaH" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="BgL-h4-aYf"/>
-                            <constraint firstItem="YQc-wF-h8d" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-40" id="Kf2-g9-hc5"/>
-                            <constraint firstItem="gNb-91-AaH" firstAttribute="top" secondItem="YQc-wF-h8d" secondAttribute="bottom" constant="20" id="wgc-f6-JeE"/>
+                            <constraint firstItem="YQc-wF-h8d" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="136.66666666666666" id="CB4-xQ-DLF"/>
+                            <constraint firstItem="gNb-91-AaH" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="155.33333333333331" id="GsW-dN-nBF"/>
+                            <constraint firstItem="YQc-wF-h8d" firstAttribute="centerX" secondItem="gNb-91-AaH" secondAttribute="centerX" id="Pry-c2-41r"/>
+                            <constraint firstItem="gNb-91-AaH" firstAttribute="top" secondItem="YQc-wF-h8d" secondAttribute="bottom" constant="20" id="SaM-Qq-LFT"/>
+                            <constraint firstItem="YQc-wF-h8d" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="267" id="WnO-dd-4jM"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="gNb-91-AaH" secondAttribute="bottom" constant="320" id="bN6-Of-xlo"/>
+                            <constraint firstItem="YQc-wF-h8d" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="y0x-mQ-xcW"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -71,10 +68,10 @@
     <resources>
         <image name="insaver2" width="2048" height="2048"/>
         <namedColor name="igPink">
-            <color red="0.97647058823529409" green="0.26666666666666666" blue="0.45882352941176469" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.75700002908706665" green="0.20800000429153442" blue="0.51800000667572021" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="igPurple">
-            <color red="0.49019607843137253" green="0.34901960784313724" blue="0.94117647058823528" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+            <color red="0.51399999856948853" green="0.22699999809265137" blue="0.70599997043609619" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
         <namedColor name="inSaveBackground">
             <color red="0.97600001096725464" green="0.97600001096725464" blue="0.97600001096725464" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

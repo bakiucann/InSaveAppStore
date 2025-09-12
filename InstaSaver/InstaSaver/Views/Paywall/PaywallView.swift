@@ -11,7 +11,7 @@ struct PaywallView: View {
     @State private var animateGradient = false
     @State private var isLoadingOfferings = true
     @StateObject private var specialOfferViewModel = SpecialOfferViewModel()
-    @StateObject private var subscriptionManager = SubscriptionManager()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @StateObject private var configManager = ConfigManager.shared
     
     // Alert için state değişkenleri
@@ -146,7 +146,7 @@ struct PaywallView: View {
                             
                             // MARK: - Features Section
                             VStack(spacing: 20) {
-                                if Locale.current.languageCode != "en" || configManager.showDownloadButtons {
+                                if Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons {
                                     PremiumFeatureRow(
                                         icon: "arrow.down.circle.fill",
                                         title: NSLocalizedString("Premium Downloads", comment: ""),
@@ -597,7 +597,6 @@ extension PaywallView {
                     
                     // Abonelik durumunu güncelle
                     self.subscriptionManager.isUserSubscribed = true
-                    self.subscriptionManager.checkSubscriptionStatus()
                     
                     // Abonelik değişikliğini bildir
                     NotificationCenter.default.post(name: NSNotification.Name("SubscriptionChanged"), object: nil)
@@ -636,7 +635,6 @@ extension PaywallView {
                     
                     // Abonelik durumunu güncelle
                     self.subscriptionManager.isUserSubscribed = true
-                    self.subscriptionManager.checkSubscriptionStatus()
                     
                     // Abonelik değişikliğini bildir
                     NotificationCenter.default.post(name: NSNotification.Name("SubscriptionChanged"), object: nil)

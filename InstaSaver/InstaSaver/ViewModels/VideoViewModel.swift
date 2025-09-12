@@ -20,9 +20,14 @@ class VideoViewModel: ObservableObject {
             return pathComponents[shareIndex + 1]
         }
         
-        // Check for reel
+        // Check for reel (singular)
         if let reelIndex = pathComponents.firstIndex(of: "reel"), reelIndex + 1 < pathComponents.count {
             return pathComponents[reelIndex + 1]
+        }
+        
+        // Check for reels (plural)
+        if let reelsIndex = pathComponents.firstIndex(of: "reels"), reelsIndex + 1 < pathComponents.count {
+            return pathComponents[reelsIndex + 1]
         }
         
         // Check for post

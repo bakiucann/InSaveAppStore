@@ -27,7 +27,7 @@ class SpecialOfferViewModel: ObservableObject {
     private var timer: AnyCancellable?
     
     // SubscriptionManager nesnesi
-    @ObservedObject var subscriptionManager = SubscriptionManager()
+    @ObservedObject var subscriptionManager = SubscriptionManager.shared
     
     init() {
         fetchSpecialOfferPackages()
@@ -130,7 +130,6 @@ class SpecialOfferViewModel: ObservableObject {
                     
                     // Abonelik durumunu güncelle
                     self?.subscriptionManager.isUserSubscribed = true
-                    self?.subscriptionManager.checkSubscriptionStatus()
                     
                     // Abonelik değişikliğini bildir
                     NotificationCenter.default.post(name: NSNotification.Name("SubscriptionChanged"), object: nil)
@@ -170,7 +169,6 @@ class SpecialOfferViewModel: ObservableObject {
                     
                     // Abonelik durumunu güncelle
                     self.subscriptionManager.isUserSubscribed = true
-                    self.subscriptionManager.checkSubscriptionStatus()
                     
                     // Abonelik değişikliğini bildir
                     NotificationCenter.default.post(name: NSNotification.Name("SubscriptionChanged"), object: nil)

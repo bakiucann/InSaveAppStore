@@ -126,8 +126,8 @@ struct CollectionDetailView: View {
                     let cleanID = videoID.components(separatedBy: "?").first ?? videoID
                     let cleanerID = cleanID.components(separatedBy: "/").last ?? cleanID
                     
-                    // Check if the original URL contains "reel" to determine the type
-                    let urlString = videoID.contains("reel") ? 
+                    // Check if the original URL contains "reel" or "reels" to determine the type
+                    let urlString = (videoID.contains("reel") || videoID.contains("reels")) ? 
                         "https://www.instagram.com/reel/\(cleanerID)/" :
                         "https://www.instagram.com/p/\(cleanerID)/"
                         

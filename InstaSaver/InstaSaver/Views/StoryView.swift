@@ -6,7 +6,7 @@ struct StoryView: View {
     let stories: [InstagramStoryModel]
     let isFromHistory: Bool
     @Environment(\.presentationMode) var presentationMode
-    @StateObject private var subscriptionManager = SubscriptionManager()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     private let interstitialAd = InterstitialAd()
     
     // State variables
@@ -81,7 +81,7 @@ struct StoryView: View {
                         
                         // Action Buttons
                         VStack(spacing: 12) {
-                            if Locale.current.languageCode != "en" || configManager.showDownloadButtons {
+                            if Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons {
                                 if !isFromHistory {
                                     // Bulk Download Button
                                     if subscriptionManager.isUserSubscribed {
@@ -147,14 +147,8 @@ struct StoryView: View {
         }
         .onAppear {
             configManager.reloadConfig()
-            // Abonelik değişikliği bildirimini dinle
-            setupSubscriptionObserver()
         }
         .onDisappear {
-            // Gözlemciyi kaldır
-            NotificationCenter.default.removeObserver(
-                NSNotification.Name("SubscriptionChanged")
-            )
             // İndirmeleri iptal et
             downloadManager.cancelAllDownloads()
         }
@@ -572,7 +566,6 @@ struct StoryView: View {
             queue: .main
         ) { _ in
             print("Abonelik durumu değişti, StoryView SubscriptionManager'ı güncelliyorum")
-            subscriptionManager.checkSubscriptionStatus()
         }
     }
 }

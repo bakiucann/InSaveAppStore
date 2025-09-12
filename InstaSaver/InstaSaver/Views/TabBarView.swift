@@ -5,7 +5,7 @@ import SwiftUI
 struct TabBarView: View {
     @EnvironmentObject var bottomSheetManager: BottomSheetManager
     @StateObject private var collectionsViewModel = CollectionsViewModel()
-    @StateObject private var subscriptionManager = SubscriptionManager()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var selectedTab: Tab = .home
     
     var body: some View {
@@ -47,14 +47,6 @@ struct TabBarView: View {
         .ignoresSafeArea(.keyboard)
         .onAppear {
             setupActions()
-            // Bildirim gözlemcisini ekle
-            setupSubscriptionObserver()
-        }
-        .onDisappear {
-            // Gözlemciyi kaldır
-            NotificationCenter.default.removeObserver(
-                NSNotification.Name("SubscriptionChanged")
-            )
         }
     }
     
@@ -76,7 +68,6 @@ struct TabBarView: View {
             queue: .main
         ) { _ in
             print("Abonelik durumu değişti, SubscriptionManager'ı güncelliyorum")
-            subscriptionManager.checkSubscriptionStatus()
         }
     }
 }

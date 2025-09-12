@@ -10,7 +10,7 @@ struct PreviewView: View {
     let video: InstagramVideoModel
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var collectionsViewModel = CollectionsViewModel()
-    @StateObject private var subscriptionManager = SubscriptionManager()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     private let interstitialAd = InterstitialAd()
     // State variables
     @State private var imageData: Data?
@@ -95,7 +95,7 @@ struct PreviewView: View {
                         videoInfoCard
                         
                         // Action Buttons
-                        if Locale.current.languageCode != "en" || configManager.showDownloadButtons {
+                        if Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons {
                             actionButtons
                         }
                         
@@ -144,13 +144,9 @@ struct PreviewView: View {
         .onAppear {
             isBookmarked = CoreDataManager.shared.isBookmarked(videoID: video.id)
             loadCoverImage()
-            setupSubscriptionObserver()
             checkContentType()
         }
         .onDisappear {
-            NotificationCenter.default.removeObserver(
-                NSNotification.Name("SubscriptionChanged")
-            )
             downloadManager.cancelAllDownloads()
         }
     }
@@ -837,17 +833,6 @@ struct PreviewView: View {
     }
     
     // MARK: - Subscription Observer
-    
-    private func setupSubscriptionObserver() {
-        NotificationCenter.default.addObserver(
-            forName: NSNotification.Name("SubscriptionChanged"),
-            object: nil,
-            queue: .main
-        ) { _ in
-            print("Abonelik durumu değişti, PreviewView SubscriptionManager'ı güncelliyorum")
-            subscriptionManager.checkSubscriptionStatus()
-        }
-    }
     
     // MARK: - Carousel İşlevleri
     

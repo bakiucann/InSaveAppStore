@@ -27,7 +27,7 @@ struct SearchSectionView: View {
     @State private var searchMode: SearchMode = .url
     @StateObject private var configManager = ConfigManager.shared
     
-    @ObservedObject var subscriptionManager: SubscriptionManager
+    @ObservedObject var subscriptionManager = SubscriptionManager.shared
     let interstitial: InterstitialAd
     @ObservedObject var videoViewModel: VideoViewModel
     
@@ -125,7 +125,7 @@ struct SearchSectionView: View {
             // URL Input Section
             VStack(spacing: 15) {
                 // Custom Segmented control
-                if Locale.current.languageCode != "en" || configManager.showDownloadButtons {
+                if Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons {
                     CustomSegmentedControl(
                         selectedOption: $searchMode,
                         options: SearchMode.allCases
@@ -272,7 +272,27 @@ struct SearchSectionView: View {
                         
                         if isStoryURL(inputText) {
                             handleStoryURL()
+                        } else if let profileUsername = extractProfileUsername(from: inputText) {
+                            // It's a profile URL, load stories
+                            print("🔍 Detected profile URL for username: \(profileUsername)")
+                            // Check ads before loading stories
+                           if !subscriptionManager.isUserSubscribed {
+                               interstitial.showAd(
+                                   from: UIApplication.shared.windows.first?.rootViewController ?? UIViewController()
+                               ) {
+                                    // Load stories after ad
+                                   Task {
+                                       await loadStories(username: profileUsername)
+                                   }
+                               }
+                           } else {
+                               // Premium user, load stories directly
+                               Task {
+                                    await loadStories(username: profileUsername)
+                               }
+                           }
                         } else {
+                            // It's likely a post/reel URL
                             if !subscriptionManager.isUserSubscribed {
                                 interstitial.showAd(
                                     from: UIApplication.shared.windows.first?.rootViewController ?? UIViewController()
@@ -374,7 +394,7 @@ struct SearchSectionView: View {
             // ConfigManager zaten init sırasında yükleniyor, burada çağrılmasına gerek yok
             // configManager.reloadConfig()
         }
-        .onChange(of: configManager.showDownloadButtons) { newValue in
+        .onChange(of: configManager.shouldShowDownloadButtons) { newValue in
             // Segmented control gizlenecekse ve dil İngilizce ise
             if !newValue && Locale.current.languageCode == "en" {
                 // Default olarak URL mode'unu ayarla
@@ -385,6 +405,24 @@ struct SearchSectionView: View {
     
     private func isStoryURL(_ url: String) -> Bool {
         return url.contains("instagram.com/stories/") || StoryService.shared.isHighlightURL(url)
+    }
+    
+    private func extractProfileUsername(from url: String) -> String? {
+        // Ensure it's an instagram URL but not a story/highlight/post/reel
+        guard url.contains("instagram.com") else { return nil }
+        guard !url.contains("/p/") && !url.contains("/reel/") && !url.contains("/reels/") && !url.contains("/tv/") && !url.contains("/stories/") && !url.contains("/s/") else {
+            return nil // It's likely a post, reel, story, or highlight share URL
+        }
+
+        // Pattern: instagram.com/username or instagram.com/username?params
+        let components = url.components(separatedBy: "instagram.com/")
+        guard components.count > 1 else { return nil }
+
+        let pathPart = components[1]
+        // Take the part before the first '/' or '?'
+        let usernamePart = pathPart.components(separatedBy: CharacterSet(charactersIn: "/?")).first ?? pathPart
+
+        return usernamePart.isEmpty ? nil : usernamePart.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     private func extractUsername(from url: String) -> String? {
