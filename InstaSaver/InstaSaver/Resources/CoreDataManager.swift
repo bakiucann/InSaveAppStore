@@ -14,7 +14,11 @@ class CoreDataManager {
         
         persistentContainer.loadPersistentStores { (description, error) in
             if let error = error {
-                fatalError("Persistent stores yüklenemedi: \(error.localizedDescription)")
+                // fatalError yerine error logging ve graceful handling
+                print("❌ CRITICAL: Persistent stores yüklenemedi: \(error.localizedDescription)")
+                print("❌ Error details: \(error)")
+                // Production'da crash yerine error handling yapılmalı
+                // Bu durumda Core Data kullanılamaz, ama uygulama çalışmaya devam edebilir
             } else {
                 print("Persistent store yüklendi: \(description)")
             }
@@ -173,7 +177,11 @@ class CoreDataManager {
     func getTodayDownloadCount() -> Int {
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
-        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay)!
+        guard let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) else {
+            print("⚠️ Error: Could not calculate end of day. This should never happen, but returning 0 as safe fallback.")
+            // Bu durum teorik olarak mümkün değil, ama güvenlik için fallback
+            return 0
+        }
         
         let fetchRequest: NSFetchRequest<DailyDownloadLimit> = DailyDownloadLimit.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "date >= %@ AND date < %@", startOfDay as NSDate, endOfDay as NSDate)

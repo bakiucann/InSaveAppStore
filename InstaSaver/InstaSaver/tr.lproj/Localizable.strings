@@ -104,6 +104,10 @@
 "Please try again later" = "Lütfen daha sonra tekrar deneyin";
 "Preparing Download..." = "İndirme Hazırlanıyor...";
 "Please wait" = "Lütfen bekleyin";
+"Fetching video info..." = "Video bilgileri alınıyor...";
+"Processing content..." = "İçerik işleniyor...";
+"Analyzing quality..." = "Kalite analiz ediliyor...";
+"Almost there..." = "Neredeyse hazır...";
 
 /* Feedback */
 "What type of feedback do you have?" = "Ne tür bir geri bildiriminiz var?";

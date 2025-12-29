@@ -93,18 +93,52 @@ class VideoViewModel: ObservableObject {
                         self?.errorMessage = "Could not extract Instagram ID from URL"
                     }
                 case .failure(let error):
-                    self?.errorMessage = error.localizedDescription
-                    print("Error fetching video info: \(error.localizedDescription)")
+                    print("❌ Error fetching video info: \(error.localizedDescription)")
+                    print("❌ Error type: \(error)")
                     
-                    // Check for specific error from API response
+                    // Map errors to user-friendly messages
                     switch error {
+                    case InstagramServiceError.networkError(let networkError):
+                        // Check for timeout or connection errors
+                        if let urlError = networkError as? URLError {
+                            print("❌ URLError code: \(urlError.code.rawValue)")
+                            switch urlError.code {
+                            case .timedOut, .networkConnectionLost:
+                                self?.errorMessage = NSLocalizedString("error_connection_timeout", comment: "")
+                                print("✅ Mapped to: error_connection_timeout")
+                            default:
+                                // Other network errors - check if it's a timeout-related error
+                                self?.errorMessage = NSLocalizedString("error_connection_timeout", comment: "")
+                                print("✅ Mapped to: error_connection_timeout (default network error)")
+                            }
+                        } else {
+                            self?.errorMessage = NSLocalizedString("error_connection_timeout", comment: "")
+                            print("✅ Mapped to: error_connection_timeout (non-URLError)")
+                        }
+                    case InstagramServiceError.serverError(let message):
+                        // ALL 4xx and 5xx errors map to private account message
+                        print("❌ Server error message: \(message)")
+                        self?.errorMessage = NSLocalizedString("error_private_or_server", comment: "")
+                        print("✅ Mapped to: error_private_or_server")
                     case InstagramServiceError.decodingError:
-                        self?.errorMessage = NSLocalizedString("Failed to decode the response. Please check the URL or account privacy settings.", comment: "")
-                    case InstagramServiceError.serverError(let message) where message.contains("Not found"):
-                        self?.errorMessage = NSLocalizedString("This content is not available because the account is private.", comment: "")
+                        // Decoding errors might indicate private account or invalid response
+                        self?.errorMessage = NSLocalizedString("error_private_or_server", comment: "")
+                        print("✅ Mapped to: error_private_or_server (decoding error)")
+                    case InstagramServiceError.noData:
+                        // No data might be due to private account
+                        self?.errorMessage = NSLocalizedString("error_private_or_server", comment: "")
+                        print("✅ Mapped to: error_private_or_server (no data)")
+                    case InstagramServiceError.invalidURL:
+                        // Invalid URL - use localized description
+                        self?.errorMessage = InstagramServiceError.invalidURL.localizedDescription + "#\(UUID())"
+                        print("✅ Mapped to: invalidURL localized description")
                     default:
-                        self?.errorMessage = error.localizedDescription
+                        // Unknown errors - default to private account message
+                        self?.errorMessage = NSLocalizedString("error_private_or_server", comment: "")
+                        print("✅ Mapped to: error_private_or_server (unknown error)")
                     }
+                    
+                    print("📱 Final error message set: \(self?.errorMessage ?? "nil")")
                 }
             }
         }

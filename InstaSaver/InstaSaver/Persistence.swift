@@ -20,10 +20,11 @@ struct PersistenceController {
         do {
             try viewContext.save()
         } catch {
-            // Replace this implementation with code to handle the error appropriately.
-            // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
+            // fatalError yerine error logging ve graceful handling
             let nsError = error as NSError
-            fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
+            print("❌ CRITICAL: Preview context save failed")
+            print("❌ Error: \(nsError), \(nsError.userInfo)")
+            // Preview context'te save hatası kritik değil, sadece log'la
         }
         return result
     }()
@@ -33,13 +34,20 @@ struct PersistenceController {
     init(inMemory: Bool = false) {
         container = NSPersistentContainer(name: "InstaSaver")
         if inMemory {
-            container.persistentStoreDescriptions.first!.url = URL(fileURLWithPath: "/dev/null")
+            // Force unwrapping yerine optional binding kullan
+            if let firstDescription = container.persistentStoreDescriptions.first {
+                firstDescription.url = URL(fileURLWithPath: "/dev/null")
+            } else {
+                print("⚠️ Warning: No persistent store descriptions found for in-memory store")
+            }
         }
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
-                // Replace this implementation with code to handle the error appropriately.
-                // fatalError() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
-
+                // fatalError yerine error logging ve graceful handling
+                print("❌ CRITICAL: Core Data persistent store yüklenemedi")
+                print("❌ Error: \(error), \(error.userInfo)")
+                print("❌ Store Description: \(storeDescription)")
+                
                 /*
                  Typical reasons for an error here include:
                  * The parent directory does not exist, cannot be created, or disallows writing.
@@ -48,7 +56,9 @@ struct PersistenceController {
                  * The store could not be migrated to the current model version.
                  Check the error message to determine what the actual problem was.
                  */
-                fatalError("Unresolved error \(error), \(error.userInfo)")
+                
+                // Production'da crash yerine error handling yapılmalı
+                // Bu durumda Core Data kullanılamaz, ama uygulama çalışmaya devam edebilir
             }
         })
         container.viewContext.automaticallyMergesChangesFromParent = true

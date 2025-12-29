@@ -20,6 +20,14 @@ class InstagramService {
     static let shared = InstagramService()
     static let baseURL = "https://instagram-apis.vercel.app/api/video"
     
+    // Custom URLSession with optimized timeout configuration
+    private let session: URLSession = {
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 60 // 60 seconds
+        configuration.timeoutIntervalForResource = 300 // 300 seconds (5 minutes)
+        return URLSession(configuration: configuration)
+    }()
+    
     private func performRequest<T: Codable>(
         with urlString: String,
         method: String = "POST",
@@ -34,23 +42,25 @@ class InstagramService {
         
         var request = URLRequest(url: url)
         request.httpMethod = method
-        request.timeoutInterval = 15 // 15 saniye zaman aşımı
+        // Timeout is handled by URLSessionConfiguration
         if let body = body {
             request.httpBody = body
         }
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        URLSession.shared.dataTask(with: request) { data, response, error in
-            if let error = error as? URLError, error.code == .timedOut {
-                print("Request timed out")
-                completion(.failure(.serverError("İstek zaman aşımına uğradı. Lütfen tekrar deneyin.")))
-                return
-            }
-            
+        session.dataTask(with: request) { data, response, error in
+            // Handle network errors first
             if let error = error {
-                print("Network error: \(error.localizedDescription)")
-                completion(.failure(.networkError(error)))
-                return
+                if let urlError = error as? URLError {
+                    print("Network error: \(urlError.localizedDescription) (code: \(urlError.code.rawValue))")
+                    // Timeout and connection lost will be retried by fetchWithRetry
+                    completion(.failure(.networkError(error)))
+                    return
+                } else {
+                    print("Network error: \(error.localizedDescription)")
+                    completion(.failure(.networkError(error)))
+                    return
+                }
             }
             
             guard let httpResponse = response as? HTTPURLResponse else {
@@ -58,10 +68,55 @@ class InstagramService {
                 return
             }
             
-            // HTTP durum kodunu kontrol et
-            if httpResponse.statusCode == 403 {
-                print("403 Forbidden Error")
-                completion(.failure(.serverError("You don't have permission to access this content. The account might be private or the content has been removed.")))
+            // 5xx errors: Retryable server errors
+            if self.isServerError(statusCode: httpResponse.statusCode) {
+                print("⚠️ HTTP \(httpResponse.statusCode) Server Error - Will retry if retry count allows")
+                
+                // Try to decode error message from response body if available
+                // API may return: { error: "message" } or { error: { error: "message" } }
+                if let data = data {
+                    // First try: Standard APIErrorResponse format
+                    if let errorResponse = try? JSONDecoder().decode(APIErrorResponse.self, from: data) {
+                        print("⚠️ API Error (structured): \(errorResponse.error.error)")
+                        completion(.failure(.serverError(errorResponse.error.error)))
+                        return
+                    }
+                    
+                    // Second try: Simple error format { error: "message", message: "..." }
+                    if let errorDict = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let errorMessage = errorDict["error"] as? String ?? errorDict["message"] as? String {
+                        print("⚠️ API Error (simple): \(errorMessage)")
+                        completion(.failure(.serverError(errorMessage)))
+                        return
+                    }
+                    
+                    // Third try: Plain text error
+                    if let errorString = String(data: data, encoding: .utf8) {
+                        print("⚠️ API Error Response (text): \(errorString)")
+                    }
+                }
+                
+                // Generic 5xx error (will be mapped to "error_private_or_server" in ViewModels)
+                // Note: All 5xx errors indicate server issues, which often means private account or service unavailable
+                completion(.failure(.serverError("Server error \(httpResponse.statusCode). All services failed.")))
+                return
+            }
+            
+            // 4xx errors: Do NOT retry, return immediately
+            if (400...499).contains(httpResponse.statusCode) {
+                let statusCode = httpResponse.statusCode
+                print("❌ HTTP \(statusCode) Error - No retry for 4xx errors")
+                
+                // Try to decode error message if available
+                // Note: All 4xx errors will be mapped to "error_private_or_server" in ViewModels
+                if let data = data,
+                   let errorResponse = try? JSONDecoder().decode(APIErrorResponse.self, from: data) {
+                    completion(.failure(.serverError(errorResponse.error.error)))
+                } else {
+                    // Generic 4xx error message (will be mapped in ViewModels)
+                    let errorMessage = "Server returned error code \(statusCode)"
+                    completion(.failure(.serverError(errorMessage)))
+                }
                 return
             }
             
@@ -77,14 +132,6 @@ class InstagramService {
             
             do {
                 let decoder = JSONDecoder()
-                
-                // Önce hata yanıtını kontrol et
-                if let errorResponse = try? decoder.decode(APIErrorResponse.self, from: data) {
-                    completion(.failure(.serverError(errorResponse.error.error)))
-                    return
-                }
-                
-                // Hata yoksa normal yanıtı decode et
                 let decodedResponse = try decoder.decode(T.self, from: data)
                 completion(.success(decodedResponse))
             } catch {
@@ -106,52 +153,94 @@ class InstagramService {
         }.resume()
     }
     
-    // İsteğin yeniden denenmesi için
+    // Simplified retry logic: Max 1 retry (total 2 attempts)
+    // Retry ONLY for: Timeout, NetworkConnectionLost, or 5xx server errors
+    // Do NOT retry for 4xx errors
     private func fetchWithRetry<T: Codable>(
         urlString: String,
         method: String = "POST",
         body: Data?,
         responseType: T.Type,
         currentRetryCount: Int = 0,
-        maxRetryCount: Int = 3,
+        maxRetryCount: Int = 1, // Strictly 1 retry (total 2 attempts)
         completion: @escaping (Result<T, InstagramServiceError>) -> Void
     ) {
-        let retryDelay: TimeInterval = pow(2.0, Double(currentRetryCount)) // Exponential backoff: 1, 2, 4 saniye
-        
         performRequest(with: urlString, method: method, body: body, responseType: responseType) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success(let response):
-                // Başarılı sonuç, direkt döndür
+                // Success: return immediately
                 completion(.success(response))
                 
             case .failure(let error):
-                // 403 hatası alındı ve maksimum deneme sayısına ulaşılmadıysa yeniden dene
-                if case .serverError(let message) = error, message.contains("403") || message.contains("permission") {
-                    if currentRetryCount < maxRetryCount {
-                        print("🔄 403 hatası alındı, \(retryDelay) saniye sonra tekrar deneniyor (\(currentRetryCount + 1)/\(maxRetryCount))...")
-                        
-                        // Gecikme süresi ile tekrar dene
-                        DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) {
-                            self.fetchWithRetry(
-                                urlString: urlString,
-                                method: method,
-                                body: body,
-                                responseType: responseType,
-                                currentRetryCount: currentRetryCount + 1,
-                                maxRetryCount: maxRetryCount,
-                                completion: completion
-                            )
-                        }
-                        return
-                    }
-                }
+                // Check if we should retry
+                let shouldRetry = self.shouldRetry(error: error, retryCount: currentRetryCount, maxRetryCount: maxRetryCount)
                 
-                // Diğer tüm hatalar veya maksimum deneme sayısı aşıldıysa hatayı döndür
-                completion(.failure(error))
+                if shouldRetry {
+                    let retryDelay: TimeInterval = 2.0 // Fixed 2 second delay
+                    print("🔄 Retryable error detected, retrying in \(retryDelay) seconds (attempt \(currentRetryCount + 1)/\(maxRetryCount + 1))...")
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) {
+                        self.fetchWithRetry(
+                            urlString: urlString,
+                            method: method,
+                            body: body,
+                            responseType: responseType,
+                            currentRetryCount: currentRetryCount + 1,
+                            maxRetryCount: maxRetryCount,
+                            completion: completion
+                        )
+                    }
+                } else {
+                    // Don't retry: return error immediately
+                    completion(.failure(error))
+                }
             }
         }
+    }
+    
+    // Determine if error is retryable
+    private func shouldRetry(error: InstagramServiceError, retryCount: Int, maxRetryCount: Int) -> Bool {
+        // Don't retry if we've exceeded max retries
+        guard retryCount < maxRetryCount else {
+            return false
+        }
+        
+        switch error {
+        case .networkError(let networkError):
+            // Retry for timeout and connection lost errors
+            if let urlError = networkError as? URLError {
+                switch urlError.code {
+                case .timedOut, .networkConnectionLost:
+                    return true
+                default:
+                    return false
+                }
+            }
+            return false
+            
+        case .serverError(let message):
+            // Check if message indicates a 5xx error (we set this in performRequest)
+            if message.contains("Server error") && message.contains("Will retry") {
+                return true
+            }
+            // All other server errors (4xx, etc.) - don't retry
+            return false
+            
+        case .noData:
+            // No data might be a server issue, but we don't retry to avoid infinite loops
+            return false
+            
+        default:
+            // Invalid URL, decoding errors, etc. - don't retry
+            return false
+        }
+    }
+    
+    // Helper to check if HTTP response is 5xx
+    private func isServerError(statusCode: Int) -> Bool {
+        return (500...599).contains(statusCode)
     }
     
     func fetchReelInfo(

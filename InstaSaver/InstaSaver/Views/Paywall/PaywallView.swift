@@ -146,7 +146,7 @@ struct PaywallView: View {
                             
                             // MARK: - Features Section
                             VStack(spacing: 20) {
-                                if Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons {
+                                if configManager.shouldShowDownloadButtons {
                                     PremiumFeatureRow(
                                         icon: "arrow.down.circle.fill",
                                         title: NSLocalizedString("Premium Downloads", comment: ""),

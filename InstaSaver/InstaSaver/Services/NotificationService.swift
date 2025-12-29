@@ -11,7 +11,7 @@ import OneSignalExtension
 class NotificationService: UNNotificationServiceExtension {
     
     var contentHandler: ((UNNotificationContent) -> Void)?
-    var receivedRequest: UNNotificationRequest!
+    var receivedRequest: UNNotificationRequest? // Force unwrapping yerine optional
     var bestAttemptContent: UNMutableNotificationContent?
     
     override func didReceive(
@@ -22,9 +22,9 @@ class NotificationService: UNNotificationServiceExtension {
         self.contentHandler = contentHandler
         self.bestAttemptContent = (request.content.mutableCopy() as? UNMutableNotificationContent)
         
-        if let bestAttemptContent = bestAttemptContent {
+        if let bestAttemptContent = bestAttemptContent, let receivedRequest = self.receivedRequest {
             OneSignalExtension.didReceiveNotificationExtensionRequest(
-                self.receivedRequest,
+                receivedRequest,
                 with: bestAttemptContent,
                 withContentHandler: self.contentHandler
             )
@@ -32,10 +32,12 @@ class NotificationService: UNNotificationServiceExtension {
     }
     
     override func serviceExtensionTimeWillExpire() {
-        if let contentHandler = contentHandler, let bestAttemptContent = bestAttemptContent {
+        if let contentHandler = contentHandler, 
+           let bestAttemptContent = bestAttemptContent,
+           let receivedRequest = self.receivedRequest {
             OneSignalExtension.serviceExtensionTimeWillExpireRequest(
-                self.receivedRequest,
-                with: self.bestAttemptContent
+                receivedRequest,
+                with: bestAttemptContent
             )
             contentHandler(bestAttemptContent)
         }

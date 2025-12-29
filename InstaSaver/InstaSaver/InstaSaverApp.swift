@@ -42,17 +42,25 @@ struct InstaSaverApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environment(
-                    \.managedObjectContext,
-                    persistenceController.container.viewContext
-                )
-                .environmentObject(subscriptionManager)
-                .preferredColorScheme(.light)
-                .environment(
-                    \.screenSize,
-                    UIScreen.main.bounds.size
-                )
+            ZStack {
+                ContentView()
+                    .environment(
+                        \.managedObjectContext,
+                        persistenceController.container.viewContext
+                    )
+                    .environmentObject(subscriptionManager)
+                    .preferredColorScheme(.light)
+                    .environment(
+                        \.screenSize,
+                        UIScreen.main.bounds.size
+                    )
+                
+                // Ad Loading Overlay - Reklam yüklenirken tüm uygulamayı kaplar
+                if interstitialAd.isLoadingAd {
+                    AdLoadingOverlayView()
+                        .zIndex(999)
+                }
+            }
                 .onAppear {
                     // Config'i yükleme artık ConfigManager init içinde yapılıyor
                     // configManager.reloadConfig()
@@ -111,7 +119,7 @@ struct InstaSaverApp: App {
                         // Eğer 1 hafta geçmediyse gösterme
                         if !specialOfferViewModel.isPresented && 
                            specialOfferViewModel.shouldShowSpecialOffer() && 
-                           (Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons) &&
+                           configManager.shouldShowDownloadButtons &&
                            !subscriptionManager.isUserSubscribed { // PRO kullanıcı kontrolü ekledik
                             specialOfferViewModel.isPresented = true
                         } else {

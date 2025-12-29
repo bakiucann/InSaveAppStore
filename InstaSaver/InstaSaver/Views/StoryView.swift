@@ -81,7 +81,7 @@ struct StoryView: View {
                         
                         // Action Buttons
                         VStack(spacing: 12) {
-                            if Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons {
+                            if configManager.shouldShowDownloadButtons {
                                 if !isFromHistory {
                                     // Bulk Download Button
                                     if subscriptionManager.isUserSubscribed {
@@ -140,6 +140,12 @@ struct StoryView: View {
                 }
             }
             if showSuccessMessage { successMessage }
+            
+            // Ad Loading Overlay - Reklam yüklenirken tüm ekranı kaplar
+            if interstitialAd.isLoadingAd {
+                AdLoadingOverlayView()
+                    .zIndex(999)
+            }
         }
         .navigationBarHidden(true) // Navigation bar'ı gizle
         .fullScreenCover(isPresented: $showPaywallView) {
@@ -274,23 +280,16 @@ struct StoryView: View {
     }
     
     private func downloadStory(_ story: InstagramStoryModel) {
+        // İndirme limiti kontrolü
         if !subscriptionManager.isUserSubscribed {
             if !CoreDataManager.shared.canDownloadMore() {
                 showPaywallView = true
                 return
             }
-            
-            // Premium kullanıcı değilse, içerik ne olursa olsun reklam göster
-            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
-                interstitialAd.showAd(from: rootViewController) {
-                    // Reklam gösterildikten sonra indirme işlemine başla
-                    startDownloadProcess(story)
-                }
-            }
-        } else {
-            // Premium kullanıcı ise direkt indirme başlat
-            startDownloadProcess(story)
         }
+        
+        // İndirme işlemini HEMEN başlat (reklam öncesi değil)
+        startDownloadProcess(story)
     }
     
     private func startDownloadProcess(_ story: InstagramStoryModel) {
@@ -413,27 +412,27 @@ struct StoryView: View {
                             self.downloadCount += 1
                             
                             showSuccessMessage = true
-                            // Check if a review request has been shown today
-                            let calendar = Calendar.current
-                            if !calendar.isDateInToday(self.lastReviewRequestDate) {
-                                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
-                                    SKStoreReviewController.requestReview(in: windowScene)
-                                    self.lastReviewRequestDateDouble = Date().timeIntervalSince1970 // Update last request date
+                            
+                            // Success message göründükten 0.8 saniye sonra reklam göster (POST-action)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+                                    let topVC = self.findTopViewController(rootVC)
+                                    self.interstitialAd.showAd(from: topVC) {
+                                        print("✅ Ad shown after successful video download")
+                                    }
                                 }
                             }
-                            // Success message'ı 2 saniye göster, sonra reklamı göster
+                            
+                            // Success message'ı 2 saniye göster
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                 showSuccessMessage = false
-                                // Success message kapandıktan 0.5 saniye sonra reklamı göster
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    if !subscriptionManager.isUserSubscribed && self.downloadCount % 2 == 0 {
-                                        // Doğrudan güncel ve görünür view controller'ı bul
-                                        if let rootVC = UIApplication.shared.windows.first?.rootViewController {
-                                            let topVC = self.findTopViewController(rootVC)
-                                            self.interstitialAd.showAd(from: topVC) {
-                                                print("Ad shown successfully from video")
-                                            }
-                                        }
+                                
+                                // Check if a review request has been shown today
+                                let calendar = Calendar.current
+                                if !calendar.isDateInToday(self.lastReviewRequestDate) {
+                                    if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                                        SKStoreReviewController.requestReview(in: windowScene)
+                                        self.lastReviewRequestDateDouble = Date().timeIntervalSince1970 // Update last request date
                                     }
                                 }
                             }
@@ -464,22 +463,19 @@ struct StoryView: View {
                             
                             showSuccessMessage = true
                             
-                            // Success message'ı 2 saniye göster, sonra reklamı göster
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                showSuccessMessage = false
-                                
-                                // Success message kapandıktan 0.5 saniye sonra reklamı göster
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                    if !subscriptionManager.isUserSubscribed && self.downloadCount % 2 == 0 {
-                                        // Doğrudan güncel ve görünür view controller'ı bul
-                                        if let rootVC = UIApplication.shared.windows.first?.rootViewController {
-                                            let topVC = self.findTopViewController(rootVC)
-                                            self.interstitialAd.showAd(from: topVC) {
-                                                print("Ad shown successfully from image")
-                                            }
-                                        }
+                            // Success message göründükten 0.8 saniye sonra reklam göster (POST-action)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                                if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+                                    let topVC = self.findTopViewController(rootVC)
+                                    self.interstitialAd.showAd(from: topVC) {
+                                        print("✅ Ad shown after successful image download")
                                     }
                                 }
+                            }
+                            
+                            // Success message'ı 2 saniye göster
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                showSuccessMessage = false
                             }
                         }
                     } else {

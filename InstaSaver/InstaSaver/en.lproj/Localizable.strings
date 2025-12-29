@@ -104,6 +104,10 @@
 "Please try again later" = "Please try again later";
 "Preparing Download..." = "Preparing Save...";
 "Please wait" = "Please wait";
+"Fetching video info..." = "Fetching video info...";
+"Processing content..." = "Processing content...";
+"Analyzing quality..." = "Analyzing quality...";
+"Almost there..." = "Almost there...";
 
 /* Feedback */
 "What type of feedback do you have?" = "What type of feedback do you have?";
@@ -168,6 +172,10 @@
 "A network error occurred. Please check your internet connection and try again." = "A network error occurred. Please check your internet connection and try again.";
 "An unknown error occurred. Please try again." = "An unknown error occurred. Please try again.";
 "You don't have permission to access this content. The account might be private or the content has been removed." = "You don't have permission to access this content. The account might be private or the content has been removed.";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "Download Failed. Please make sure the Instagram account is PUBLIC. We cannot download from Private accounts.";
+"error_connection_timeout" = "Connection timed out. Please check your internet and try again.";
 
 /* Paywall */
 "Unlock Premium Features" = "Unlock Premium Features";

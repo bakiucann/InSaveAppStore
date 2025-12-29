@@ -13,8 +13,8 @@ class LocalizationManager {
     func localizedString(forKey key: String, comment: String) -> String {
         let originalString = Bundle.main.localizedString(forKey: key, value: nil, table: nil)
         
-        // İngilizce dil ve x5t9 kontrolü
-        if Locale.current.languageCode == "en" && !configManager.shouldShowDownloadButtons {
+        // shouldShowDownloadButtons kontrolü
+        if !configManager.shouldShowDownloadButtons {
             // Download ile ilgili kelimeleri değiştir
             let modifiedString = originalString
                 .replacingOccurrences(of: "Download", with: "Bookmark")
@@ -60,8 +60,8 @@ extension Bundle {
         
         // Sadece ana bundle için uygula
         if self == Bundle.main {
-            // İngilizce ve x5t9 kontrolü
-            if Locale.current.languageCode == "en" && !ConfigManager.shared.shouldShowDownloadButtons {
+            // shouldShowDownloadButtons kontrolü
+            if !ConfigManager.shared.shouldShowDownloadButtons {
                 return string
                     .replacingOccurrences(of: "Download", with: "Bookmark")
                     .replacingOccurrences(of: "download", with: "bookmark")
@@ -83,8 +83,8 @@ extension String {
     var localized: String {
         let originalString = NSLocalizedString(self, comment: "")
         
-        // İngilizce dil ve x5t9 kontrolü
-        if Locale.current.languageCode == "en" && !ConfigManager.shared.shouldShowDownloadButtons {
+        // shouldShowDownloadButtons kontrolü
+        if !ConfigManager.shared.shouldShowDownloadButtons {
             return originalString
                 .replacingOccurrences(of: "Download", with: "Bookmark")
                 .replacingOccurrences(of: "download", with: "bookmark")

@@ -95,7 +95,7 @@ struct PreviewView: View {
                         videoInfoCard
                         
                         // Action Buttons
-                        if Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons {
+                        if configManager.shouldShowDownloadButtons {
                             actionButtons
                         }
                         
@@ -121,6 +121,12 @@ struct PreviewView: View {
             
             if collectionSuccessMessage { 
                 collectionSuccessMessageView 
+            }
+            
+            // Ad Loading Overlay - Reklam yüklenirken tüm ekranı kaplar
+            if interstitialAd.isLoadingAd {
+                AdLoadingOverlayView()
+                    .zIndex(999)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
@@ -148,6 +154,18 @@ struct PreviewView: View {
         }
         .onDisappear {
             downloadManager.cancelAllDownloads()
+        }
+        .onChange(of: showPaywall) { isShowing in
+            // Paywall kapatıldığında loading state'i temizle
+            if !isShowing && isLoading {
+                stopLoading()
+            }
+        }
+        .onChange(of: showPaywallView) { isShowing in
+            // Paywall kapatıldığında loading state'i temizle
+            if !isShowing && isLoading {
+                stopLoading()
+            }
         }
     }
     
@@ -276,202 +294,80 @@ struct PreviewView: View {
     
     private var actionButtons: some View {
         VStack(spacing: 12) {
-            if Locale.current.languageCode == "en" {
-                // Download HD Button
-                ActionButton(
-                    title: NSLocalizedString("Download HD", comment: ""),
-                    icon: "arrow.down.circle.fill",
-                    gradient: [Color("igPurple"), Color("igPink")],
-                    action: {
-                        if subscriptionManager.isUserSubscribed {
-                            startLoading()
-                            
-                            // Carousel içeriği ise şu anki öğeyi kullan
-                            if let isCarousel = video.isCarousel, isCarousel, 
-                               let currentItem = getCurrentCarouselItem() {
-                                // Fotoğraf mı yoksa video mu kontrolü
-                                if currentItem.isPhoto {
-                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                } else if let hdVersion = currentItem.allVideoVersions.first(where: { $0.type == 101 }) {
-                                    downloadAndSaveContent(urlString: hdVersion.url)
-                                } else if !currentItem.allVideoVersions.isEmpty {
-                                    downloadAndSaveContent(urlString: currentItem.allVideoVersions.first!.url)
-                                } else {
-                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                }
+            // Download HD Button
+            ActionButton(
+                title: NSLocalizedString("Download HD", comment: ""),
+                icon: "arrow.down.circle.fill",
+                gradient: [Color("igPurple"), Color("igPink")],
+                action: {
+                    if subscriptionManager.isUserSubscribed {
+                        startLoading()
+                        
+                        // Carousel içeriği ise şu anki öğeyi kullan
+                        if let isCarousel = video.isCarousel, isCarousel, 
+                           let currentItem = getCurrentCarouselItem() {
+                            // Fotoğraf mı yoksa video mu kontrolü
+                            if currentItem.isPhoto {
+                                downloadAndSaveContent(urlString: currentItem.downloadLink)
+                            } else if let hdVersion = currentItem.allVideoVersions.first(where: { $0.type == 101 }) {
+                                downloadAndSaveContent(urlString: hdVersion.url)
+                            } else if let firstVersion = currentItem.allVideoVersions.first {
+                                downloadAndSaveContent(urlString: firstVersion.url)
                             } else {
-                                // Normal içerik için orijinal davranış
-                                if isPhotoContent {
-                                    downloadAndSaveContent(urlString: video.downloadLink)
-                                } else if let hdVersion = video.allVideoVersions.first(where: { $0.type == 101 }) {
-                                    downloadAndSaveContent(urlString: hdVersion.url)
-                                }
+                                downloadAndSaveContent(urlString: currentItem.downloadLink)
                             }
                         } else {
-                            showPaywallView = true
+                            // Normal içerik için orijinal davranış
+                            if isPhotoContent {
+                                downloadAndSaveContent(urlString: video.downloadLink)
+                            } else if let hdVersion = video.allVideoVersions.first(where: { $0.type == 101 }) {
+                                downloadAndSaveContent(urlString: hdVersion.url)
+                            }
+                        }
+                    } else {
+                        showPaywallView = true
+                    }
+                }
+            )
+            
+            // Download Button
+            ActionButton(
+                title: NSLocalizedString("Download", comment: ""),
+                icon: "arrow.down.circle",
+                gradient: [Color("igPurple").opacity(0.8), Color("igPink").opacity(0.8)],
+                action: {
+                    // ÖNCE indirme limiti kontrolü yap (startLoading'dan önce)
+                    if !subscriptionManager.isUserSubscribed {
+                        if !CoreDataManager.shared.canDownloadMore() {
+                            showPaywall = true
+                            return // Limit dolmuş, paywall göster ve çık
                         }
                     }
-                )
-                
-                // Download Button
-                ActionButton(
-                    title: NSLocalizedString("Download", comment: ""),
-                    icon: "arrow.down.circle",
-                    gradient: [Color("igPurple").opacity(0.8), Color("igPink").opacity(0.8)],
-                    action: {
-                        // Premium kullanıcı değilse, içerik ne olursa olsun reklam göster
-                        if !subscriptionManager.isUserSubscribed {
-                            // Önce reklamı göster, sonra indirme işlemini yap
-                            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
-                                interstitialAd.showAd(from: rootViewController) {
-                                    // Reklam gösterildikten sonra indirme işlemine başla
-                                    startLoading()
-                                    
-                                    // Carousel içeriği ise şu anki öğeyi kullan
-                                    if let isCarousel = video.isCarousel, isCarousel, 
-                                       let currentItem = getCurrentCarouselItem() {
-                                        // Fotoğraf mı yoksa video mu kontrolü
-                                        if currentItem.isPhoto {
-                                            downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                        } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
-                                            downloadAndSaveContent(urlString: lowVersion.url)
-                                        } else {
-                                            downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                        }
-                                    } else {
-                                        // Normal içerik için orijinal davranış
-                                        if isPhotoContent {
-                                            downloadAndSaveContent(urlString: video.downloadLink)
-                                        } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
-                                            downloadAndSaveContent(urlString: lowVersion.url)
-                                        }
-                                    }
-                                }
-                            }
+                    
+                    // Limit kontrolü geçti, indirme işlemini başlat
+                    startLoading()
+                    
+                    // Carousel içeriği ise şu anki öğeyi kullan
+                    if let isCarousel = video.isCarousel, isCarousel, 
+                       let currentItem = getCurrentCarouselItem() {
+                        // Fotoğraf mı yoksa video mu kontrolü
+                        if currentItem.isPhoto {
+                            downloadAndSaveContent(urlString: currentItem.downloadLink)
+                        } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
+                            downloadAndSaveContent(urlString: lowVersion.url)
                         } else {
-                            // Premium kullanıcı ise direkt indirme başlat
-                            startLoading()
-                            
-                            // Carousel içeriği ise şu anki öğeyi kullan
-                            if let isCarousel = video.isCarousel, isCarousel, 
-                               let currentItem = getCurrentCarouselItem() {
-                                // Fotoğraf mı yoksa video mu kontrolü
-                                if currentItem.isPhoto {
-                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
-                                    downloadAndSaveContent(urlString: lowVersion.url)
-                                } else {
-                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                }
-                            } else {
-                                // Normal içerik için orijinal davranış
-                                if isPhotoContent {
-                                    downloadAndSaveContent(urlString: video.downloadLink)
-                                } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
-                                    downloadAndSaveContent(urlString: lowVersion.url)
-                                }
-                            }
+                            downloadAndSaveContent(urlString: currentItem.downloadLink)
+                        }
+                    } else {
+                        // Normal içerik için orijinal davranış
+                        if isPhotoContent {
+                            downloadAndSaveContent(urlString: video.downloadLink)
+                        } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
+                            downloadAndSaveContent(urlString: lowVersion.url)
                         }
                     }
-                )
-            } else {
-                // İngilizce dışındaki diller için butonları her zaman göster
-                ActionButton(
-                    title: NSLocalizedString("Download HD", comment: ""),
-                    icon: "arrow.down.circle.fill",
-                    gradient: [Color("igPurple"), Color("igPink")],
-                    action: {
-                        if subscriptionManager.isUserSubscribed {
-                            startLoading()
-                            
-                            // Carousel içeriği ise şu anki öğeyi kullan
-                            if let isCarousel = video.isCarousel, isCarousel, 
-                               let currentItem = getCurrentCarouselItem() {
-                                // Fotoğraf mı yoksa video mu kontrolü
-                                if currentItem.isPhoto {
-                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                } else if let hdVersion = currentItem.allVideoVersions.first(where: { $0.type == 101 }) {
-                                    downloadAndSaveContent(urlString: hdVersion.url)
-                                } else if !currentItem.allVideoVersions.isEmpty {
-                                    downloadAndSaveContent(urlString: currentItem.allVideoVersions.first!.url)
-                                } else {
-                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                }
-                            } else {
-                                // Normal içerik için orijinal davranış
-                                if isPhotoContent {
-                                    downloadAndSaveContent(urlString: video.downloadLink)
-                                } else if let hdVersion = video.allVideoVersions.first(where: { $0.type == 101 }) {
-                                    downloadAndSaveContent(urlString: hdVersion.url)
-                                }
-                            }
-                        } else {
-                            showPaywallView = true
-                        }
-                    }
-                )
-                
-                ActionButton(
-                    title: NSLocalizedString("Download", comment: ""),
-                    icon: "arrow.down.circle",
-                    gradient: [Color("igPurple").opacity(0.8), Color("igPink").opacity(0.8)],
-                    action: {
-                        // Premium kullanıcı değilse, içerik ne olursa olsun reklam göster
-                        if !subscriptionManager.isUserSubscribed {
-                            // Önce reklamı göster, sonra indirme işlemini yap
-                            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
-                                interstitialAd.showAd(from: rootViewController) {
-                                    // Reklam gösterildikten sonra indirme işlemine başla
-                                    startLoading()
-                                    
-                                    // Carousel içeriği ise şu anki öğeyi kullan
-                                    if let isCarousel = video.isCarousel, isCarousel, 
-                                       let currentItem = getCurrentCarouselItem() {
-                                        // Fotoğraf mı yoksa video mu kontrolü
-                                        if currentItem.isPhoto {
-                                            downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                        } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
-                                            downloadAndSaveContent(urlString: lowVersion.url)
-                                        } else {
-                                            downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                        }
-                                    } else {
-                                        // Normal içerik için orijinal davranış
-                                        if isPhotoContent {
-                                            downloadAndSaveContent(urlString: video.downloadLink)
-                                        } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
-                                            downloadAndSaveContent(urlString: lowVersion.url)
-                                        }
-                                    }
-                                }
-                            }
-                        } else {
-                            // Premium kullanıcı ise direkt indirme başlat
-                            startLoading()
-                            
-                            // Carousel içeriği ise şu anki öğeyi kullan
-                            if let isCarousel = video.isCarousel, isCarousel, 
-                               let currentItem = getCurrentCarouselItem() {
-                                // Fotoğraf mı yoksa video mu kontrolü
-                                if currentItem.isPhoto {
-                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                } else if let lowVersion = currentItem.allVideoVersions.first(where: { $0.type == 103 }) ?? currentItem.allVideoVersions.first {
-                                    downloadAndSaveContent(urlString: lowVersion.url)
-                                } else {
-                                    downloadAndSaveContent(urlString: currentItem.downloadLink)
-                                }
-                            } else {
-                                // Normal içerik için orijinal davranış
-                                if isPhotoContent {
-                                    downloadAndSaveContent(urlString: video.downloadLink)
-                                } else if let lowVersion = video.allVideoVersions.first(where: { $0.type == 103 }) ?? video.allVideoVersions.first {
-                                    downloadAndSaveContent(urlString: lowVersion.url)
-                                }
-                            }
-                        }
-                    }
-                )
-            }
+                }
+            )
         }
         .padding(.horizontal, 20)
     }
@@ -646,16 +542,10 @@ struct PreviewView: View {
     
     // Yeni birleştirilmiş fonksiyon: Hem video hem fotoğraf indirme (Alamofire ile)
     private func downloadAndSaveContent(urlString: String) {
-        // Önce abonelik ve indirme limiti kontrolü
-        if !subscriptionManager.isUserSubscribed {
-            if !CoreDataManager.shared.canDownloadMore() {
-                showPaywall = true
-                return
-            }
-        }
+        // NOT: Limit kontrolü artık buton action'ında yapılıyor (startLoading'dan önce)
+        // Burada sadece indirme işlemini başlatıyoruz
         
-        // İndirme işlemini başlat
-        startLoading()
+        // İndirme işlemini başlat (startLoading zaten çağrılmış olmalı)
         
         // İçerik türünü belirle (Carousel içeriği veya normal içerik için)
         var isCurrentItemPhoto = isPhotoContent
@@ -754,6 +644,17 @@ struct PreviewView: View {
     
     private func handleContentSaveSuccess() {
         showSuccessMessage = true
+        
+        // Success message'ı göster, sonra reklam göster (POST-action)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            // Success message göründükten 0.8 saniye sonra reklam göster
+            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+                interstitialAd.showAd(from: rootViewController) {
+                    print("✅ Ad shown after successful download")
+                }
+            }
+        }
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             showSuccessMessage = false
             // Check if a review request has been shown today

@@ -15,25 +15,27 @@ struct SplashView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
+                // Arka plan - LaunchScreen.storyboard ile aynı
                 Color("inSaveBackground")
                     .ignoresSafeArea()
                 
+                // Merkez içerik - LaunchScreen.storyboard ile tamamen aynı layout
                 VStack(spacing: 20) {
+                    // Logo - LaunchScreen.storyboard ile aynı boyut ve stil (120x120)
                     Image("insaver2")
                         .resizable()
                         .scaledToFit()
                         .frame(width: 120, height: 120)
-                        .cornerRadius(25)
-                        .shadow(color: .black.opacity(0.1), radius: 10, x: 0, y: 5)
                     
+                    // "InSave" yazısı - LaunchScreen.storyboard ile aynı gradient (igPurple -> igPink)
                     Text("InSave")
                         .font(.system(size: 26, weight: .bold))
+                        .foregroundColor(.clear)
                         .overlay(
                             LinearGradient(
                                 colors: [
                                     Color("igPurple"),
-                                    Color("igPink"),
-                                    Color("igOrange")
+                                    Color("igPink")
                                 ],
                                 startPoint: .leading,
                                 endPoint: .trailing
@@ -44,6 +46,7 @@ struct SplashView: View {
                             )
                         )
                     
+                    // Progress indicator - sadece bağlantı yoksa göster
                     if showProgress && !isConnected {
                         ProgressView()
                             .scaleEffect(1.2)
@@ -53,7 +56,6 @@ struct SplashView: View {
                 }
                 .scaleEffect(scale)
                 .opacity(opacity)
-                .offset(y: -20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }

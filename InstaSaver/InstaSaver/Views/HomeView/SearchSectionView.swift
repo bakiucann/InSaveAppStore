@@ -65,7 +65,8 @@ struct SearchSectionView: View {
     }
     
     var body: some View {
-        VStack(spacing: 15) {
+        ZStack {
+            VStack(spacing: 15) {
             // Animated Header Section
             VStack(spacing: 12) {
                 ZStack {
@@ -125,7 +126,7 @@ struct SearchSectionView: View {
             // URL Input Section
             VStack(spacing: 15) {
                 // Custom Segmented control
-                if Locale.current.languageCode != "en" || configManager.shouldShowDownloadButtons {
+                if configManager.shouldShowDownloadButtons {
                     CustomSegmentedControl(
                         selectedOption: $searchMode,
                         options: SearchMode.allCases
@@ -275,33 +276,14 @@ struct SearchSectionView: View {
                         } else if let profileUsername = extractProfileUsername(from: inputText) {
                             // It's a profile URL, load stories
                             print("🔍 Detected profile URL for username: \(profileUsername)")
-                            // Check ads before loading stories
-                           if !subscriptionManager.isUserSubscribed {
-                               interstitial.showAd(
-                                   from: UIApplication.shared.windows.first?.rootViewController ?? UIViewController()
-                               ) {
-                                    // Load stories after ad
-                                   Task {
-                                       await loadStories(username: profileUsername)
-                                   }
-                               }
-                           } else {
-                               // Premium user, load stories directly
-                               Task {
-                                    await loadStories(username: profileUsername)
-                               }
-                           }
+                            // HEMEN story'leri yükle (reklam öncesi değil)
+                            Task {
+                                await loadStories(username: profileUsername)
+                            }
                         } else {
                             // It's likely a post/reel URL
-                            if !subscriptionManager.isUserSubscribed {
-                                interstitial.showAd(
-                                    from: UIApplication.shared.windows.first?.rootViewController ?? UIViewController()
-                                ) {
-                                    performSearch()
-                                }
-                            } else {
-                                performSearch()
-                            }
+                            // HEMEN aramayı başlat (reklam öncesi değil)
+                            performSearch()
                         }
                     }
                 }) {
@@ -395,11 +377,18 @@ struct SearchSectionView: View {
             // configManager.reloadConfig()
         }
         .onChange(of: configManager.shouldShowDownloadButtons) { newValue in
-            // Segmented control gizlenecekse ve dil İngilizce ise
-            if !newValue && Locale.current.languageCode == "en" {
+            // Segmented control gizlenecekse URL mode'unu ayarla
+            if !newValue {
                 // Default olarak URL mode'unu ayarla
                 searchMode = .url
             }
+        }
+        
+        // Ad Loading Overlay - Reklam yüklenirken tüm ekranı kaplar
+        if interstitial.isLoadingAd {
+            AdLoadingOverlayView()
+                .zIndex(999)
+        }
         }
     }
     
@@ -457,23 +446,9 @@ struct SearchSectionView: View {
     private func handleStoryURL() {
         if let username = extractUsername(from: inputText) {
             print("🔍 Extracted username: \(username)")
+            // HEMEN story'leri yükle (reklam öncesi değil)
             Task {
-                // Reklam kontrolü
-                if !subscriptionManager.isUserSubscribed {
-                    await MainActor.run {
-                        interstitial.showAd(
-                            from: UIApplication.shared.windows.first?.rootViewController ?? UIViewController()
-                        ) {
-                            // Reklam gösterildikten sonra story'leri yükle
-                            Task {
-                                await loadStories(username: username)
-                            }
-                        }
-                    }
-                } else {
-                    // Premium kullanıcı için direkt yükle
-                    await loadStories(username: username)
-                }
+                await loadStories(username: username)
             }
         } else {
             print("❌ Failed to extract username from: \(inputText)")
@@ -498,13 +473,39 @@ struct SearchSectionView: View {
                 print("⚠️ No stories found for username: \(username)")
             } else {
                 print("✅ Found \(stories.count) stories for username: \(username)")
+                
+                // Başarılı arama sonrası reklam göster (POST-action)
+                await MainActor.run {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                        if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+                            self.interstitial.showAd(from: rootViewController) {
+                                print("✅ Ad shown after successful story load")
+                            }
+                        }
+                    }
+                }
+                
                 withAnimation {
                     showStoryView = true
                 }
             }
         } catch {
             print("❌ Error fetching stories: \(error.localizedDescription)")
-            errorMessage = NSLocalizedString("Failed to fetch stories. Please try again.", comment: "")
+            
+            // Map errors to user-friendly messages
+            if let urlError = error as? URLError {
+                switch urlError.code {
+                case .timedOut, .networkConnectionLost:
+                    errorMessage = NSLocalizedString("error_connection_timeout", comment: "")
+                default:
+                    // All other errors (including 4xx/5xx) map to private account message
+                    errorMessage = NSLocalizedString("error_private_or_server", comment: "")
+                }
+            } else {
+                // Non-URLError errors (decoding, etc.) - map to private account message
+                errorMessage = NSLocalizedString("error_private_or_server", comment: "")
+            }
+            
             showError = true
         }
         
@@ -515,6 +516,10 @@ struct SearchSectionView: View {
     
     private func performSearch() {
         videoViewModel.fetchVideoInfo(url: inputText)
+        
+        // Başarılı arama sonrası reklam göster (POST-action)
+        // VideoViewModel'de video set edildiğinde reklam gösterilecek
+        // HomeView'da onChange ile yakalanacak
     }
 }
 
