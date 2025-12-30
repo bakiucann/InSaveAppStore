@@ -57,9 +57,9 @@ class InstagramService {
                     completion(.failure(.networkError(error)))
                     return
                 } else {
-                    print("Network error: \(error.localizedDescription)")
-                    completion(.failure(.networkError(error)))
-                    return
+                print("Network error: \(error.localizedDescription)")
+                completion(.failure(.networkError(error)))
+                return
                 }
             }
             
@@ -180,26 +180,26 @@ class InstagramService {
                 if shouldRetry {
                     let retryDelay: TimeInterval = 2.0 // Fixed 2 second delay
                     print("🔄 Retryable error detected, retrying in \(retryDelay) seconds (attempt \(currentRetryCount + 1)/\(maxRetryCount + 1))...")
-                    
-                    DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) {
-                        self.fetchWithRetry(
-                            urlString: urlString,
-                            method: method,
-                            body: body,
-                            responseType: responseType,
-                            currentRetryCount: currentRetryCount + 1,
-                            maxRetryCount: maxRetryCount,
-                            completion: completion
-                        )
-                    }
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + retryDelay) {
+                            self.fetchWithRetry(
+                                urlString: urlString,
+                                method: method,
+                                body: body,
+                                responseType: responseType,
+                                currentRetryCount: currentRetryCount + 1,
+                                maxRetryCount: maxRetryCount,
+                                completion: completion
+                            )
+                        }
                 } else {
                     // Don't retry: return error immediately
                     completion(.failure(error))
                 }
             }
-        }
-    }
-    
+                    }
+                }
+                
     // Determine if error is retryable
     private func shouldRetry(error: InstagramServiceError, retryCount: Int, maxRetryCount: Int) -> Bool {
         // Don't retry if we've exceeded max retries

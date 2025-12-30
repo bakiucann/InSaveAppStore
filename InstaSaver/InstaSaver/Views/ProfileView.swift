@@ -50,7 +50,7 @@ struct ProfileView: View {
         .navigationBarBackButtonHidden(true)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
-                BackButton {
+                GlassmorphicBackButton {
                     presentationMode.wrappedValue.dismiss()
                 }
             }
@@ -78,22 +78,102 @@ struct ProfileView: View {
     
     // MARK: - Header Section
     private var headerSection: some View {
-        VStack(spacing: 16) {
-            Circle()
-                .fill(instagramGradient)
-                .frame(width: 80, height: 80)
-                .overlay(
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 40))
-                        .foregroundColor(.white)
-                )
-                .shadow(color: Color("igPink").opacity(0.3), radius: 10, x: 0, y: 5)
+        HStack(spacing: 14) {
+            // Profile Icon - Compact with subtle glow
+            ZStack {
+                // Subtle glow effect
+                Circle()
+                    .fill(instagramGradient)
+                    .frame(width: 52, height: 52)
+                    .blur(radius: 12)
+                    .opacity(0.3)
+                
+                // Profile icon
+                Circle()
+                    .fill(instagramGradient)
+                    .frame(width: 48, height: 48)
+                    .overlay(
+                        Image(systemName: "person.circle.fill")
+                            .font(.system(size: 32))
+                            .foregroundColor(.white)
+                    )
+            }
             
+            // Title with gradient
             Text("My Account")
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.black)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.clear)
+                .overlay(
+                    LinearGradient(
+                        colors: [
+                            Color("igPurple"),
+                            Color("igPink"),
+                            Color("igOrange")
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                    .mask(
+                        Text("My Account")
+                            .font(.system(size: 20, weight: .bold))
+                    )
+                )
+            
+            Spacer()
         }
-        .padding(.top, 16)
+        .padding(.vertical, 14)
+        .padding(.horizontal, 18)
+        .background(
+            ZStack {
+                // Glass material background (iOS 14+ compatible)
+                if #available(iOS 15.0, *) {
+                    Capsule()
+                        .fill(.ultraThinMaterial)
+                } else {
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.85),
+                                    Color.white.opacity(0.75)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+                
+                // Tinted gradient overlay (subtle)
+                Capsule()
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color("igPurple").opacity(0.06),
+                                Color("igPink").opacity(0.04),
+                                Color("igOrange").opacity(0.03)
+                            ],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                
+                // Subtle border
+                Capsule()
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.25),
+                                Color.white.opacity(0.08)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.5
+                    )
+            }
+        )
+        .shadow(color: Color.black.opacity(0.06), radius: 15, x: 0, y: 6)
+        .shadow(color: Color("igPink").opacity(0.08), radius: 20, x: 0, y: 8)
     }
     
     // MARK: - Plan Card
@@ -497,33 +577,7 @@ struct MenuLink: View {
     }
 }
 
-struct BackButton: View {
-    let action: () -> Void
-    
-    private let instagramGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink")
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(instagramGradient)
-                    .frame(width: 36, height: 36)
-                    .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
-                
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-            }
-        }
-    }
-}
+// BackButton is now replaced by GlassmorphicBackButton in Utilities/GlassmorphicBackButton.swift
 
 struct LogoView: View {
     private let instagramGradient = LinearGradient(

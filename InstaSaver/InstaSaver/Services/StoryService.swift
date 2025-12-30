@@ -124,18 +124,18 @@ class StoryService {
         let maxRetries = 1
         
         while retryCount <= maxRetries {
-            do {
+        do {
                 print("📱 Fetching stories for username: \(username) (attempt \(retryCount + 1)/\(maxRetries + 1))")
-                print("🔗 Request URL: \(url.absoluteString)")
+            print("🔗 Request URL: \(url.absoluteString)")
                 let (data, response) = try await session.data(from: url)
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    let error = URLError(.badServerResponse)
-                    print("❌ Server Response Error: Invalid HTTP response")
-                    throw error
-                }
-                
-                print("📡 HTTP Status Code: \(httpResponse.statusCode)")
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                let error = URLError(.badServerResponse)
+                print("❌ Server Response Error: Invalid HTTP response")
+                throw error
+            }
+            
+            print("📡 HTTP Status Code: \(httpResponse.statusCode)")
                 
                 // 5xx errors: Retryable server errors
                 if isServerError(statusCode: httpResponse.statusCode) {
@@ -155,22 +155,22 @@ class StoryService {
                     print("❌ HTTP \(httpResponse.statusCode) Client Error - No retry for 4xx errors")
                     throw URLError(.badServerResponse)
                 }
-                
-                // Debug: Response data'yı yazdır
+            
+            // Debug: Response data'yı yazdır
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("📦 Raw Response: \(responseString)")
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                let error = URLError(.badServerResponse)
+                print("❌ Server Error: HTTP \(httpResponse.statusCode)")
                 if let responseString = String(data: data, encoding: .utf8) {
-                    print("📦 Raw Response: \(responseString)")
+                    print("Response Body: \(responseString)")
                 }
-                
-                guard httpResponse.statusCode == 200 else {
-                    let error = URLError(.badServerResponse)
-                    print("❌ Server Error: HTTP \(httpResponse.statusCode)")
-                    if let responseString = String(data: data, encoding: .utf8) {
-                        print("Response Body: \(responseString)")
-                    }
-                    throw error
-                }
-                
-                let decoder = JSONDecoder()
+                throw error
+            }
+            
+            let decoder = JSONDecoder()
                 let storyResponse = try decoder.decode(InstagramStoryResponse.self, from: data)
                 
                 guard storyResponse.success else {
@@ -252,17 +252,17 @@ class StoryService {
         let maxRetries = 1
         
         while retryCount <= maxRetries {
-            do {
+        do {
                 print("🔗 Highlight Request URL: \(url.absoluteString) (attempt \(retryCount + 1)/\(maxRetries + 1))")
                 let (data, response) = try await session.data(from: url)
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    let error = URLError(.badServerResponse)
-                    print("❌ Highlight Response Error: Invalid HTTP response")
-                    throw error
-                }
-                
-                print("📡 Highlight HTTP Status Code: \(httpResponse.statusCode)")
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                let error = URLError(.badServerResponse)
+                print("❌ Highlight Response Error: Invalid HTTP response")
+                throw error
+            }
+            
+            print("📡 Highlight HTTP Status Code: \(httpResponse.statusCode)")
                 
                 // 5xx errors: Retryable server errors
                 if isServerError(statusCode: httpResponse.statusCode) {
@@ -282,32 +282,32 @@ class StoryService {
                     print("❌ HTTP \(httpResponse.statusCode) Client Error - No retry for 4xx errors")
                     throw URLError(.badServerResponse)
                 }
-                
-                // Debug: Response data'yı yazdır
+            
+            // Debug: Response data'yı yazdır
+            if let responseString = String(data: data, encoding: .utf8) {
+                print("📦 Highlight Raw Response: \(responseString)")
+            }
+            
+            guard httpResponse.statusCode == 200 else {
+                let error = URLError(.badServerResponse)
+                print("❌ Highlight Server Error: HTTP \(httpResponse.statusCode)")
                 if let responseString = String(data: data, encoding: .utf8) {
-                    print("📦 Highlight Raw Response: \(responseString)")
+                    print("Highlight Response Body: \(responseString)")
                 }
-                
-                guard httpResponse.statusCode == 200 else {
-                    let error = URLError(.badServerResponse)
-                    print("❌ Highlight Server Error: HTTP \(httpResponse.statusCode)")
-                    if let responseString = String(data: data, encoding: .utf8) {
-                        print("Highlight Response Body: \(responseString)")
-                    }
-                    throw error
-                }
-                
-                // Story yanıtları ile aynı modeli kullanıyoruz
-                let decoder = JSONDecoder()
-                let storyResponse = try decoder.decode(InstagramStoryResponse.self, from: data)
-                
-                guard storyResponse.success else {
-                    throw NSError(domain: "StoryService", code: -1, 
-                                 userInfo: [NSLocalizedDescriptionKey: "Failed to fetch highlights"])
-                }
-                
-                print("✅ Successfully fetched \(storyResponse.stories.count) highlight stories")
-                return storyResponse.stories
+                throw error
+            }
+            
+            // Story yanıtları ile aynı modeli kullanıyoruz
+            let decoder = JSONDecoder()
+            let storyResponse = try decoder.decode(InstagramStoryResponse.self, from: data)
+            
+            guard storyResponse.success else {
+                throw NSError(domain: "StoryService", code: -1, 
+                             userInfo: [NSLocalizedDescriptionKey: "Failed to fetch highlights"])
+            }
+            
+            print("✅ Successfully fetched \(storyResponse.stories.count) highlight stories")
+            return storyResponse.stories
                 
             } catch {
                 // Check if error is retryable
@@ -317,15 +317,15 @@ class StoryService {
                     do {
                         try await Task.sleep(nanoseconds: 2_000_000_000) // 2 seconds
                         continue
-                    } catch {
+        } catch {
                         throw error
                     }
                 }
                 
                 // Not retryable or max retries exceeded
-                print("❌ Highlight Network Error: \(error.localizedDescription)")
-                throw error
-            }
+            print("❌ Highlight Network Error: \(error.localizedDescription)")
+            throw error
+        }
         }
         
         // Should never reach here, but just in case

@@ -71,15 +71,15 @@ struct LoadingOverlayView: View {
                     // Ana mesaj - animasyonlu geçiş
                     Text(currentMessage)
                         .font(.system(size: 17, weight: .semibold))
-                        .foregroundColor(.white)
+                    .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
                         .id(currentMessageIndex) // ID değiştiğinde animasyon tetiklenir
-                    
+                
                     // Alt mesaj
                     Text(NSLocalizedString("Please wait", comment: ""))
                         .font(.system(size: 14, weight: .regular))
-                        .foregroundColor(.white.opacity(0.7))
+                    .foregroundColor(.white.opacity(0.7))
                 }
                 .animation(.easeInOut(duration: 0.3), value: currentMessageIndex)
             }

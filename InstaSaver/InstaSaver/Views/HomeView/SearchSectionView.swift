@@ -66,7 +66,7 @@ struct SearchSectionView: View {
     
     var body: some View {
         ZStack {
-            VStack(spacing: 15) {
+        VStack(spacing: 15) {
             // Animated Header Section
             VStack(spacing: 12) {
                 ZStack {
@@ -277,13 +277,13 @@ struct SearchSectionView: View {
                             // It's a profile URL, load stories
                             print("🔍 Detected profile URL for username: \(profileUsername)")
                             // HEMEN story'leri yükle (reklam öncesi değil)
-                            Task {
-                                await loadStories(username: profileUsername)
-                            }
+                               Task {
+                                    await loadStories(username: profileUsername)
+                           }
                         } else {
                             // It's likely a post/reel URL
                             // HEMEN aramayı başlat (reklam öncesi değil)
-                            performSearch()
+                                performSearch()
                         }
                     }
                 }) {
@@ -388,7 +388,7 @@ struct SearchSectionView: View {
         if interstitial.isLoadingAd {
             AdLoadingOverlayView()
                 .zIndex(999)
-        }
+            }
         }
     }
     
@@ -448,7 +448,7 @@ struct SearchSectionView: View {
             print("🔍 Extracted username: \(username)")
             // HEMEN story'leri yükle (reklam öncesi değil)
             Task {
-                await loadStories(username: username)
+                    await loadStories(username: username)
             }
         } else {
             print("❌ Failed to extract username from: \(inputText)")

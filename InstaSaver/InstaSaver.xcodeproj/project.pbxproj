@@ -8,11 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		0046423A2F016B9C00481A3F /* AdLoadingOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004642392F016B9C00481A3F /* AdLoadingOverlayView.swift */; };
+		0046423C2F032AD700481A3F /* GlassmorphicHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0046423B2F032AD700481A3F /* GlassmorphicHeaderView.swift */; };
 		004D79AE2D690B010002C994 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D79AB2D690B010002C994 /* Color+Hex.swift */; };
 		004D79AF2D690B010002C994 /* UserDefaults+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D79AC2D690B010002C994 /* UserDefaults+Extension.swift */; };
 		004D79B12D690B130002C994 /* SpecialOfferViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D79B02D690B130002C994 /* SpecialOfferViewModel.swift */; };
 		004D79B32D690B1A0002C994 /* SpecialOfferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D79B22D690B1A0002C994 /* SpecialOfferView.swift */; };
 		004D79B72D6A19E40002C994 /* TimerPulseAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D79B62D6A19E40002C994 /* TimerPulseAnimation.swift */; };
+		0062C1B62F0498D500305377 /* GlassmorphicBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0062C1B52F0498D500305377 /* GlassmorphicBackButton.swift */; };
 		00690D162D7F110600E55550 /* ConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00690D152D7F110600E55550 /* ConfigService.swift */; };
 		00690D492D86F2D600E55550 /* LocalizationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00690D472D86F2D600E55550 /* LocalizationHelper.swift */; };
 		00922AA72DC43B6000464A60 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 00922AA62DC43B6000464A60 /* Kingfisher */; };
@@ -106,11 +108,13 @@
 
 /* Begin PBXFileReference section */
 		004642392F016B9C00481A3F /* AdLoadingOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdLoadingOverlayView.swift; sourceTree = "<group>"; };
+		0046423B2F032AD700481A3F /* GlassmorphicHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassmorphicHeaderView.swift; sourceTree = "<group>"; };
 		004D79AB2D690B010002C994 /* Color+Hex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		004D79AC2D690B010002C994 /* UserDefaults+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserDefaults+Extension.swift"; sourceTree = "<group>"; };
 		004D79B02D690B130002C994 /* SpecialOfferViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecialOfferViewModel.swift; sourceTree = "<group>"; };
 		004D79B22D690B1A0002C994 /* SpecialOfferView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpecialOfferView.swift; sourceTree = "<group>"; };
 		004D79B62D6A19E40002C994 /* TimerPulseAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerPulseAnimation.swift; sourceTree = "<group>"; };
+		0062C1B52F0498D500305377 /* GlassmorphicBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassmorphicBackButton.swift; sourceTree = "<group>"; };
 		00690D152D7F110600E55550 /* ConfigService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigService.swift; sourceTree = "<group>"; };
 		00690D472D86F2D600E55550 /* LocalizationHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalizationHelper.swift; sourceTree = "<group>"; };
 		00A81D442D2B27A500ABA492 /* InstaSaver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstaSaver.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -361,6 +365,7 @@
 		00A81D832D2B282E00ABA492 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				0062C1B52F0498D500305377 /* GlassmorphicBackButton.swift */,
 				00D06FB42DAEE3F600FB5A58 /* DownloadManager.swift */,
 				00A81D7B2D2B282E00ABA492 /* AlertModifier.swift */,
 				00A81D7C2D2B282E00ABA492 /* ModernCustomAlert.swift */,
@@ -389,6 +394,7 @@
 		00A81DB72D2BF59500ABA492 /* HomeView */ = {
 			isa = PBXGroup;
 			children = (
+				0046423B2F032AD700481A3F /* GlassmorphicHeaderView.swift */,
 				00A81D612D2B282D00ABA492 /* HomeView.swift */,
 				00A81DBA2D2BF5AE00ABA492 /* LoadingOverlayView.swift */,
 				00A81DBC2D2BF5B400ABA492 /* HomeLeadingToolbarView.swift */,
@@ -587,6 +593,7 @@
 				00A81D8E2D2B282E00ABA492 /* PreviewView.swift in Sources */,
 				00A81D9E2D2B282E00ABA492 /* CollectionModel.swift in Sources */,
 				00A81D9F2D2B282E00ABA492 /* HistoryModel.swift in Sources */,
+				0062C1B62F0498D500305377 /* GlassmorphicBackButton.swift in Sources */,
 				00FE76182D49216800384281 /* StoryView.swift in Sources */,
 				00A81DAB2D2B282E00ABA492 /* SubscriptionManager.swift in Sources */,
 				00A81DA32D2B282E00ABA492 /* ModernCustomAlert.swift in Sources */,
@@ -598,6 +605,7 @@
 				00A81D972D2B282E00ABA492 /* PrivacyPolicyView.swift in Sources */,
 				00CA5C892D3041CC0059B896 /* Tab.swift in Sources */,
 				00A81D482D2B27A500ABA492 /* InstaSaverApp.swift in Sources */,
+				0046423C2F032AD700481A3F /* GlassmorphicHeaderView.swift in Sources */,
 				00A81DA82D2B282E00ABA492 /* DetailImageLoader.swift in Sources */,
 				00A81D982D2B282E00ABA492 /* TermsOfUseView.swift in Sources */,
 				00690D492D86F2D600E55550 /* LocalizationHelper.swift in Sources */,

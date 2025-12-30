@@ -47,7 +47,7 @@ struct PersistenceController {
                 print("❌ CRITICAL: Core Data persistent store yüklenemedi")
                 print("❌ Error: \(error), \(error.userInfo)")
                 print("❌ Store Description: \(storeDescription)")
-                
+
                 /*
                  Typical reasons for an error here include:
                  * The parent directory does not exist, cannot be created, or disallows writing.

@@ -64,8 +64,8 @@ struct CollectionDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(true)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    BackButtons {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        GlassmorphicBackButton {
                         presentationMode.wrappedValue.dismiss()
                     }
                 }
@@ -252,33 +252,7 @@ struct VideoThumbnailView: View {
     }
 }
 
-struct BackButtons: View {
-    let action: () -> Void
-    
-    private let instagramGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink")
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                Circle()
-                    .fill(instagramGradient)
-                    .frame(width: 36, height: 36)
-                    .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
-                
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-            }
-        }
-    }
-}
+// BackButtons is now replaced by GlassmorphicBackButton in Utilities/GlassmorphicBackButton.swift
 
 struct MenuButton: View {
     let action: () -> Void

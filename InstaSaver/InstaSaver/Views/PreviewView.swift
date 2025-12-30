@@ -374,17 +374,8 @@ struct PreviewView: View {
     
 
     private var backButton: some View {
-        Button(action: { presentationMode.wrappedValue.dismiss() }) {
-            ZStack {
-                Circle()
-                    .fill(Color.white)
-                    .frame(width: 36, height: 36)
-                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-                
-                Image(systemName: "chevron.left")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Color("igPurple"))
-            }
+        GlassmorphicBackButton {
+            presentationMode.wrappedValue.dismiss()
         }
     }
     

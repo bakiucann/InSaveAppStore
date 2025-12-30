@@ -48,6 +48,7 @@ struct HomeView: View {
                                 Spacer()
                             }
                             .padding()
+                            .padding(.top, 80) // Header için üst padding
                             .frame(minHeight: geometry.size.height)
                         }
                         
@@ -69,18 +70,8 @@ struct HomeView: View {
                 .onAppear {
                     videoViewModel.isLoading = false
                 }
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        HomeLeadingToolbarView()
-                    }
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        HomeTrailingToolbarView(
-                            showProfileView: $showProfileView,
-                            showFeedbackView: $showFeedbackView,
-                            showPaywallView: $showPaywallView
-                        )
-                    }
-                }
+                // Native navigation bar'ı tamamen gizle (iOS 14+ uyumlu)
+                .navigationBarHidden(true)
                 .navigationBarTitleDisplayMode(.inline)
                 .fullScreenCover(isPresented: $showPreview) {
                     NavigationView {
@@ -97,16 +88,26 @@ struct HomeView: View {
                 .sheet(isPresented: $showFeedbackView) {
                     FeedbackView()
                 }
-                .background(
-                    NavigationLink(
-                        destination: ProfileView(),
-                        isActive: $showProfileView
-                    ) {
-                        EmptyView()
+                .fullScreenCover(isPresented: $showProfileView) {
+                    NavigationView {
+                        ProfileView()
                     }
-                )
+                    .navigationViewStyle(StackNavigationViewStyle())
+                }
             }
             .navigationViewStyle(StackNavigationViewStyle())
+            
+            // Glassmorphic Header - NavigationView dışında, üst seviye ZStack'te
+            VStack {
+                GlassmorphicHeaderView(
+                    showProfileView: $showProfileView,
+                    showFeedbackView: $showFeedbackView,
+                    showPaywallView: $showPaywallView
+                )
+                
+                Spacer()
+            }
+            .zIndex(100) // Header'ın NavigationView'ın üstünde olması için
             
             // Alert'ler - NavigationView dışında, üst seviye ZStack'te
             let displayedError = errorAlertMessage.components(separatedBy: "#").first ?? errorAlertMessage
