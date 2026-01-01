@@ -113,7 +113,7 @@
 "Copy Feedback" = "フィードバックをコピー";
 "General" = "一般";
 "Bug" = "バグ";
-"Feature Request" = "機能リクエスト";
+"Feature" = "機能";
 "Other" = "その他";
 "Feedback sent successfully!" = "フィードバックを送信しました！";
 "Failed to send feedback" = "フィードバックの送信に失敗しました";
@@ -232,3 +232,7 @@
 "Purchase Failed" = "購入に失敗しました";
 "Failed to complete the purchase. Please try again later." = "購入を完了できませんでした。後でもう一度お試しください。";
 "Thank you for your purchase!" = "ご購入ありがとうございました！";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "ダウンロードに失敗しました。Instagramアカウントが公開されていることを確認してください。非公開アカウントからはダウンロードできません。";
+"error_connection_timeout" = "接続がタイムアウトしました。インターネット接続を確認して、もう一度お試しください。";

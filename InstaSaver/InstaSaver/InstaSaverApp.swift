@@ -196,60 +196,97 @@ struct InstaSaverApp: App {
 }
 
 class AppDelegate: NSObject, UIApplicationDelegate {
+    private var umpTimeoutWorkItem: DispatchWorkItem?
+    private let umpTimeout: TimeInterval = 3.0 // 3 seconds max
+    
     // Helper function to initialize Mobile Ads SDK
     func initializeMobileAdsSDK() {
         // Initialize the Google Mobile Ads SDK.
         DispatchQueue.main.async {
              GADMobileAds.sharedInstance().start(completionHandler: nil)
-             print("Google Mobile Ads SDK initialized after UMP.")
+             print("✅ Google Mobile Ads SDK initialized after UMP.")
         }
+    }
+    
+    /// Request UMP consent with timeout - fails silently after 3 seconds
+    private func requestUMPConsentWithTimeout(application: UIApplication) {
+        let parameters = UMPRequestParameters()
+        // Optional: Set debug settings for testing
+        // #if DEBUG
+        // let debugSettings = UMPDebugSettings()
+        // debugSettings.testDeviceIdentifiers = ["360CB643-85EC-48A4-80F1-051C8B71517D"]
+        // debugSettings.geography = .EEA
+        // parameters.debugSettings = debugSettings
+        // #endif
+        
+        // Set up timeout - if UMP takes longer than 3 seconds, fail silently
+        let timeoutItem = DispatchWorkItem { [weak self] in
+            print("⏱️ UMP consent request timeout (3 seconds) - initializing ads SDK anyway")
+            self?.completeUMPFlow()
+        }
+        umpTimeoutWorkItem = timeoutItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + umpTimeout, execute: timeoutItem)
+        
+        // Request consent information update
+        UMPConsentInformation.sharedInstance.requestConsentInfoUpdate(with: parameters) { [weak self] requestError in
+            guard let self = self else { return }
+            
+            // Cancel timeout since we got a response
+            self.umpTimeoutWorkItem?.cancel()
+            self.umpTimeoutWorkItem = nil
+            
+            if let error = requestError {
+                print("⚠️ UMP Error requesting consent info update: \(error)")
+                // Fail silently - initialize SDK anyway for non-personalized ads
+                self.completeUMPFlow()
+                return
+            }
+            
+            // Load and present consent form if required
+            // Set up another timeout for form loading
+            let formTimeoutItem = DispatchWorkItem { [weak self] in
+                print("⏱️ UMP form loading timeout (3 seconds) - initializing ads SDK anyway")
+                self?.completeUMPFlow()
+            }
+            self.umpTimeoutWorkItem = formTimeoutItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + self.umpTimeout, execute: formTimeoutItem)
+            
+            UMPConsentForm.loadAndPresentIfRequired(from: application.windows.first?.rootViewController) { [weak self] loadAndPresentError in
+                guard let self = self else { return }
+                
+                // Cancel timeout since form loading completed
+                self.umpTimeoutWorkItem?.cancel()
+                self.umpTimeoutWorkItem = nil
+                
+                if let error = loadAndPresentError {
+                    print("⚠️ UMP Error loading or presenting form: \(error)")
+                    // Fail silently - initialize SDK anyway
+                }
+                
+                // Consent process is complete (or form not required/error occurred)
+                self.completeUMPFlow()
+            }
+        }
+    }
+    
+    /// Complete UMP flow - initialize ads SDK and post notification
+    private func completeUMPFlow() {
+        // Initialize Google Mobile Ads SDK
+        self.initializeMobileAdsSDK()
+        
+        // Post notification that UMP flow is complete
+        NotificationCenter.default.post(name: .umpFlowDidComplete, object: nil)
+        print("✅ Posted umpFlowDidComplete notification.")
     }
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        // UMP Consent Request
-        let parameters = UMPRequestParameters()
-        // Optional: Set debug settings for testing
-        // #if DEBUG
-        // let debugSettings = UMPDebugSettings()
-        // // Add your test device identifier found in the console output
-        // debugSettings.testDeviceIdentifiers = ["360CB643-85EC-48A4-80F1-051C8B71517D"] // <--- UPDATED with console ID
-        // // Force geography for testing (e.g., .EEA or .notEEA)
-        // debugSettings.geography = .EEA
-        // parameters.debugSettings = debugSettings
-        // #endif
-
-        // Request consent information update
-        UMPConsentInformation.sharedInstance.requestConsentInfoUpdate(with: parameters) { [weak self] requestError in
-            guard let self = self else { return }
-
-            if let error = requestError {
-                print("UMP Error requesting consent info update: \(error)")
-                // Handle error, possibly initialize SDK anyway for non-personalized ads
-                self.initializeMobileAdsSDK() // Initialize even on error
-                return
-            }
-
-            // Load and present consent form if required
-            UMPConsentForm.loadAndPresentIfRequired(from: application.windows.first?.rootViewController) { [weak self] loadAndPresentError in
-                 guard let self = self else { return }
-
-                 if let error = loadAndPresentError {
-                     print("UMP Error loading or presenting form: \(error)")
-                     // Handle error, possibly initialize SDK anyway
-                 }
-
-                 // Consent process is complete (or form not required/error occurred).
-                 // Initialize Google Mobile Ads SDK HERE.
-                 self.initializeMobileAdsSDK()
-
-                 // Post notification that UMP flow is complete
-                 NotificationCenter.default.post(name: .umpFlowDidComplete, object: nil)
-                 print("Posted umpFlowDidComplete notification.")
-            }
-        }
+        // UMP Consent Request with timeout and fail-silent behavior
+        // This MUST NOT block app launch - fail silently after 3 seconds
+        requestUMPConsentWithTimeout(application: application)
+        
         // --- End of UMP Consent Request ---
 
         OneSignal.Debug.setLogLevel(.LL_VERBOSE)

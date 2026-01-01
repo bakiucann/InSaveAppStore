@@ -43,6 +43,9 @@ struct TabBarView: View {
                     bottomSheetManager.showBottomSheet = false
                 }
             )
+            
+            // Collections Alert Overlay - TabBarView seviyesinde tüm ekranı kaplar
+            CollectionsAlertOverlay(viewModel: collectionsViewModel)
         }
         .ignoresSafeArea(.keyboard)
         .onAppear {

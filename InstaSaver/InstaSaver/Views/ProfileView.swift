@@ -60,8 +60,11 @@ struct ProfileView: View {
         .sheet(isPresented: $showShareSheet) {
             CustomShareView(isPresented: $showShareSheet)
         }
-        .sheet(isPresented: $showHelp) {
-            FeedbackView()
+        .fullScreenCover(isPresented: $showHelp) {
+            NavigationView {
+                FeedbackView()
+            }
+            .navigationViewStyle(StackNavigationViewStyle())
         }
         .sheet(isPresented: $showPrivacyPolicySheet) {
             PrivacyPolicyView()

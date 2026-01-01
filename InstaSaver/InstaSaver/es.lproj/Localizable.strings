@@ -113,7 +113,7 @@
 "Copy Feedback" = "Copiar comentario";
 "General" = "General";
 "Bug" = "Error";
-"Feature Request" = "Solicitud de función";
+"Feature" = "Función";
 "Other" = "Otro";
 "Feedback sent successfully!" = "¡Comentario enviado exitosamente!";
 "Failed to send feedback" = "Error al enviar el comentario";
@@ -232,3 +232,7 @@
 "Purchase Failed" = "Compra fallida";
 "Failed to complete the purchase. Please try again later." = "No se pudo completar la compra. Por favor, inténtalo de nuevo más tarde.";
 "Thank you for your purchase!" = "¡Gracias por tu compra!";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "Descarga fallida. Asegúrate de que la cuenta de Instagram sea PÚBLICA. No podemos descargar de cuentas privadas.";
+"error_connection_timeout" = "Tiempo de conexión agotado. Por favor, verifica tu conexión a internet e inténtalo de nuevo.";

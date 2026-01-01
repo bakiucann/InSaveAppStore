@@ -113,7 +113,7 @@
 "Copy Feedback" = "피드백 복사";
 "General" = "일반";
 "Bug" = "버그";
-"Feature Request" = "기능 요청";
+"Feature" = "기능";
 "Other" = "기타";
 "Feedback sent successfully!" = "피드백 전송 성공!";
 "Failed to send feedback" = "피드백 전송 실패";
@@ -232,3 +232,7 @@
 "Purchase Failed" = "구매 실패";
 "Failed to complete the purchase. Please try again later." = "구매를 완료하지 못했습니다. 나중에 다시 시도해 주세요.";
 "Thank you for your purchase!" = "구매해 주셔서 감사합니다!";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "다운로드 실패. Instagram 계정이 공개되어 있는지 확인하세요. 비공개 계정에서는 다운로드할 수 없습니다.";
+"error_connection_timeout" = "연결 시간 초과. 인터넷 연결을 확인하고 다시 시도하세요.";

@@ -26,67 +26,70 @@ struct HomeView: View {
     var body: some View {
         ZStack {
             // Ana içerik: NavigationView
-            NavigationView {
-                GeometryReader { geometry in
-                    ZStack {
-                        Color.white
-                            .edgesIgnoringSafeArea(.all)
-                        
-                        ScrollView {
-                            VStack(spacing: 15) {
-                                SearchSectionView(
-                                    inputText: $inputText,
-                                    showPasteButton: $showPasteButton,
-                                    isUrlSearch: $isUrlSearch,
-                                    isLoading: $isLoading,
-                                    showPreview: $showPreview,
-                                    showCustomAlert: $showCustomAlert,
-                                    interstitial: interstitial,
-                                    videoViewModel: videoViewModel
-                                )
-                                
-                                Spacer()
-                            }
-                            .padding()
-                            .padding(.top, 80) // Header için üst padding
-                            .frame(minHeight: geometry.size.height)
+        NavigationView {
+            GeometryReader { geometry in
+                ZStack {
+                    Color.white
+                        .edgesIgnoringSafeArea(.all)
+                    
+                    ScrollView {
+                        VStack(spacing: 15) {
+                            SearchSectionView(
+                                inputText: $inputText,
+                                showPasteButton: $showPasteButton,
+                                isUrlSearch: $isUrlSearch,
+                                isLoading: $isLoading,
+                                showPreview: $showPreview,
+                                showCustomAlert: $showCustomAlert,
+                                interstitial: interstitial,
+                                videoViewModel: videoViewModel
+                            )
+                            
+                            Spacer()
                         }
-                        
+                        .padding()
+                            .padding(.top, 80) // Header için üst padding
+                        .frame(minHeight: geometry.size.height)
+                    }
+                    
                         if videoViewModel.isLoading {
                             LoadingOverlayView()
-                        }
-                        
+                    }
+                    
                         // Ad Loading Overlay - Reklam yüklenirken tüm ekranı kaplar
                         if interstitial.isLoadingAd {
                             AdLoadingOverlayView()
                                 .zIndex(999)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        hideKeyboard()
                     }
                 }
-                .onAppear {
-                    videoViewModel.isLoading = false
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    hideKeyboard()
                 }
+            }
+            .onAppear {
+                videoViewModel.isLoading = false
+            }
                 // Native navigation bar'ı tamamen gizle (iOS 14+ uyumlu)
                 .navigationBarHidden(true)
-                .navigationBarTitleDisplayMode(.inline)
-                .fullScreenCover(isPresented: $showPreview) {
-                    NavigationView {
-                        if let video = videoViewModel.video {
-                            PreviewView(video: video)
-                        }
+            .navigationBarTitleDisplayMode(.inline)
+            .fullScreenCover(isPresented: $showPreview) {
+                NavigationView {
+                    if let video = videoViewModel.video {
+                        PreviewView(video: video)
                     }
                 }
-                .fullScreenCover(isPresented: $showPaywallView) {
-                    NavigationView {
-                        PaywallView()
-                    }
+            }
+            .fullScreenCover(isPresented: $showPaywallView) {
+                NavigationView {
+                    PaywallView()
                 }
-                .sheet(isPresented: $showFeedbackView) {
-                    FeedbackView()
+            }
+                .fullScreenCover(isPresented: $showFeedbackView) {
+                    NavigationView {
+                FeedbackView()
+            }
+                    .navigationViewStyle(StackNavigationViewStyle())
                 }
                 .fullScreenCover(isPresented: $showProfileView) {
                     NavigationView {
@@ -106,7 +109,7 @@ struct HomeView: View {
                 )
                 
                 Spacer()
-            }
+        }
             .zIndex(100) // Header'ın NavigationView'ın üstünde olması için
             
             // Alert'ler - NavigationView dışında, üst seviye ZStack'te

@@ -61,11 +61,12 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
     
     // Timeout management
     private var timeoutWorkItem: DispatchWorkItem?
-    private let adTimeout: TimeInterval = 5.0 // 5 seconds timeout
+    private let adTimeout: TimeInterval = 2.0 // 2 seconds timeout (reduced from 5)
     
     override init() {
         super.init()
-        loadInterstitial()
+        // ❌ REMOVED: loadInterstitial() from init
+        // Ad will be loaded lazily when needed (optimistic loading)
     }
     
     func loadInterstitial() {
@@ -139,34 +140,40 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
         
         // All checks passed, proceed with ad display
         print("✅ All safety checks passed. Proceeding with ad display.")
-        isLoadingAd = true
         
-        // Cancel any existing timeout
-        timeoutWorkItem?.cancel()
-        
-        // Set up timeout (5 seconds)
-        let timeoutItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
-            if self.isLoadingAd {
-                print("⏱️ Ad timeout reached (5 seconds). Unblocking user.")
-                self.isLoadingAd = false
-                self.completion?()
-                self.completion = nil
-            }
-        }
-        timeoutWorkItem = timeoutItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + adTimeout, execute: timeoutItem)
-        
-        // Try to present ad
+        // Optimistic approach: Don't block UI immediately
+        // Only show loading overlay if ad is not ready and we're actively loading
         if interstitial == nil {
-            // Ad not ready, try to load
+            // Ad not ready - load in background, but don't block user
             loadInterstitial()
-            // Wait a bit and try to present
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+            
+            // Set up timeout (2 seconds) - user can proceed if ad doesn't load
+            timeoutWorkItem?.cancel()
+            let timeoutItem = DispatchWorkItem { [weak self] in
+                guard let self = self else { return }
+                if self.isLoadingAd {
+                    print("⏱️ Ad timeout reached (2 seconds). Unblocking user.")
+                    self.isLoadingAd = false
+                    self.completion?()
+                    self.completion = nil
+                }
+            }
+            timeoutWorkItem = timeoutItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + adTimeout, execute: timeoutItem)
+            
+            // Try to present after short delay (optimistic)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
                 self?.tryPresentAd()
             }
+            
+            // Only show loading overlay if ad is still not ready after brief wait
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+                if self?.interstitial == nil && self?.isLoading == true {
+                    self?.isLoadingAd = true
+                }
+            }
         } else {
-            // Ad is ready, present immediately
+            // Ad is ready, present immediately (no loading overlay needed)
             tryPresentAd()
         }
     }
@@ -177,9 +184,10 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             print("⚠️ No ad available to show or no root view controller, completing immediately")
             isLoadingAd = false
             timeoutWorkItem?.cancel()
-            completion?()
+            let savedCompletion = completion
             completion = nil
-            loadInterstitial() // Try to load for next time
+            savedCompletion?() // Complete immediately - don't block user
+            loadInterstitial() // Try to load for next time (background)
             return
         }
         

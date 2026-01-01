@@ -117,7 +117,7 @@
 "Copy Feedback" = "Geri Bildirimi Kopyala";
 "General" = "Genel";
 "Bug" = "Hata";
-"Feature Request" = "Özellik İsteği";
+"Feature" = "Özellik";
 "Other" = "Diğer";
 "Feedback sent successfully!" = "Geri bildirim başarıyla gönderildi!";
 "Failed to send feedback" = "Geri bildirim gönderilemedi";
@@ -236,3 +236,7 @@
 "Failed to restore purchases. Please try again later." = "Satın alımlar geri yüklenemedi. Lütfen daha sonra tekrar deneyin.";
 "No Purchases Found" = "Satın Alım Bulunamadı";
 "No previous purchases were found to restore." = "Geri yüklenecek önceki satın alım bulunamadı.";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "İndirme Başarısız. Lütfen Instagram hesabının HERKESE AÇIK olduğundan emin olun. Gizli hesaplardan indirme yapamıyoruz.";
+"error_connection_timeout" = "Bağlantı zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.";

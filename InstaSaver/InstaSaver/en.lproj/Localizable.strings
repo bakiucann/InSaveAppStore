@@ -117,7 +117,7 @@
 "Copy Feedback" = "Copy Feedback";
 "General" = "General";
 "Bug" = "Bug";
-"Feature Request" = "Feature Request";
+"Feature" = "Feature";
 "Other" = "Other";
 "Feedback sent successfully!" = "Feedback sent successfully!";
 "Failed to send feedback" = "Failed to send feedback";
@@ -174,7 +174,7 @@
 "You don't have permission to access this content. The account might be private or the content has been removed." = "You don't have permission to access this content. The account might be private or the content has been removed.";
 
 /* New Error Messages - Private Account & Timeout */
-"error_private_or_server" = "Download Failed. Please make sure the Instagram account is PUBLIC. We cannot download from Private accounts.";
+"error_private_or_server" = "Download Failed. Please make sure the Instagram account is PUBLIC. We cannot save from Private accounts.";
 "error_connection_timeout" = "Connection timed out. Please check your internet and try again.";
 
 /* Paywall */

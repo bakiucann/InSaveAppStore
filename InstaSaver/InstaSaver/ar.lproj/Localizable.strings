@@ -113,7 +113,7 @@
 "Copy Feedback" = "نسخ التعليق";
 "General" = "عام";
 "Bug" = "خلل";
-"Feature Request" = "طلب ميزة";
+"Feature" = "ميزة";
 "Other" = "أخرى";
 "Feedback sent successfully!" = "تم إرسال التعليق بنجاح!";
 "Failed to send feedback" = "فشل إرسال التعليق";
@@ -232,3 +232,7 @@
 "Purchase Failed" = "فشل الشراء";
 "Failed to complete the purchase. Please try again later." = "فشل إتمام عملية الشراء. يرجى المحاولة مرة أخرى لاحقًا.";
 "Thank you for your purchase!" = "شكرًا لك على الشراء!";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "فشل التنزيل. يرجى التأكد من أن حساب Instagram عام. لا يمكننا التنزيل من الحسابات الخاصة.";
+"error_connection_timeout" = "انتهت مهلة الاتصال. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.";

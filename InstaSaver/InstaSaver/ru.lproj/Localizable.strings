@@ -113,7 +113,7 @@
 "Copy Feedback" = "Копировать отзыв";
 "General" = "Общее";
 "Bug" = "Ошибка";
-"Feature Request" = "Запрос функции";
+"Feature" = "Функция";
 "Other" = "Другое";
 "Feedback sent successfully!" = "Отзыв успешно отправлен!";
 "Failed to send feedback" = "Не удалось отправить отзыв";
@@ -232,3 +232,7 @@
 "Purchase Failed" = "Ошибка покупки";
 "Failed to complete the purchase. Please try again later." = "Не удалось завершить покупку. Пожалуйста, повторите попытку позже.";
 "Thank you for your purchase!" = "Спасибо за вашу покупку!";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "Ошибка загрузки. Убедитесь, что аккаунт Instagram является ПУБЛИЧНЫМ. Мы не можем загружать из приватных аккаунтов.";
+"error_connection_timeout" = "Превышено время ожидания соединения. Проверьте подключение к интернету и попробуйте снова.";

@@ -10,6 +10,8 @@ class SpecialOfferViewModel: ObservableObject {
                 defaults.initializeSpecialOfferTime()
                 startTimer()
                 updateTimer()
+                // Fetch packages when view is about to be shown
+                fetchPackagesIfNeeded()
             }
         }
     }
@@ -30,6 +32,13 @@ class SpecialOfferViewModel: ObservableObject {
     @ObservedObject var subscriptionManager = SubscriptionManager.shared
     
     init() {
+        // ❌ REMOVED: fetchSpecialOfferPackages() from init
+        // Packages will be fetched on-demand when needed
+    }
+    
+    /// Fetch packages when actually needed (e.g., when showing special offer)
+    func fetchPackagesIfNeeded() {
+        guard packages.isEmpty else { return } // Already fetched
         fetchSpecialOfferPackages()
     }
     
@@ -192,23 +201,40 @@ class SpecialOfferViewModel: ObservableObject {
     }
     
     func fetchSpecialOfferPackages() {
-        Task {
-            do {
-                let offerings = try await Purchases.shared.offerings()
-                if let discountOffering = offerings.offering(identifier: "discount") {
-                    DispatchQueue.main.async {
-                        self.packages = discountOffering.availablePackages
-                        if let annualPackage = self.packages.first(where: { 
-                            $0.storeProduct.subscriptionPeriod?.unit == .year 
-                        }) {
-                            self.selectedPackage = annualPackage
-                        } else {
-                            self.selectedPackage = self.packages.first
+        // Use background task with timeout
+        Task.detached(priority: .utility) { [weak self] in
+            await withTaskGroup(of: Void.self) { group in
+                // Start the actual operation
+                group.addTask {
+                    do {
+                        let offerings = try await Purchases.shared.offerings()
+                        if let discountOffering = offerings.offering(identifier: "discount") {
+                            await MainActor.run {
+                                self?.packages = discountOffering.availablePackages
+                                if let annualPackage = self?.packages.first(where: { 
+                                    $0.storeProduct.subscriptionPeriod?.unit == .year 
+                                }) {
+                                    self?.selectedPackage = annualPackage
+                                } else {
+                                    self?.selectedPackage = self?.packages.first
+                                }
+                            }
                         }
+                    } catch {
+                        print("⚠️ Error fetching special offer packages: \(error.localizedDescription)")
+                        // Fail silently - packages remain empty
                     }
                 }
-            } catch {
-                print("Error fetching special offer packages: \(error.localizedDescription)")
+                
+                // Add timeout task (3 seconds)
+                group.addTask {
+                    try? await Task.sleep(nanoseconds: 3_000_000_000) // 3 seconds
+                    print("⏱️ Special offer packages fetch timeout - using empty packages")
+                }
+                
+                // Wait for first completion
+                _ = await group.next()
+                group.cancelAll()
             }
         }
     }

@@ -113,7 +113,7 @@
 "Copy Feedback" = "复制反馈";
 "General" = "常规";
 "Bug" = "问题";
-"Feature Request" = "功能建议";
+"Feature" = "功能";
 "Other" = "其他";
 "Feedback sent successfully!" = "反馈发送成功！";
 "Failed to send feedback" = "发送反馈失败";
@@ -232,3 +232,7 @@
 "Purchase Failed" = "购买失败";
 "Failed to complete the purchase. Please try again later." = "无法完成购买。请稍后再试。";
 "Thank you for your purchase!" = "感谢您的购买！";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "下载失败。请确保 Instagram 账户是公开的。我们无法从私人账户下载。";
+"error_connection_timeout" = "连接超时。请检查您的网络并重试。";

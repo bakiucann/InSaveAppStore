@@ -4,8 +4,6 @@ import SwiftUI
 
 struct CollectionsView: View {
     @ObservedObject var viewModel: CollectionsViewModel
-    @State private var showCustomAlert = false
-    @State private var newCollectionName = ""
     @State private var selectedCollection: CollectionModel? = nil
     
     var onCollectionSelected: (CollectionModel) -> Void
@@ -23,14 +21,14 @@ struct CollectionsView: View {
     
     var body: some View {
         ZStack {
-            Color.white.edgesIgnoringSafeArea(.all)
+            Color.white
+                .ignoresSafeArea()
             
             mainContent
             if viewModel.collections.isEmpty { EmptyCollectionsView() }
-            if showCustomAlert { customAlertOverlay }
         }
         .navigationBarTitle("Collections", displayMode: .inline)
-        .navigationBarItems(trailing: addButton)
+        .navigationBarItems(trailing: glassmorphicAddButton)
         .onAppear {
             if viewModel.collections.isEmpty {
                 viewModel.fetchCollections()
@@ -40,31 +38,33 @@ struct CollectionsView: View {
     }
     
     private var mainContent: some View {
-        VStack {
+        VStack(spacing: 0) {
             ScrollView {
                 if !viewModel.collections.isEmpty {
                     CollectionsListView(collections: viewModel.collections) {
                         handleCollectionSelection($0)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
                 }
             }
-            .padding(.horizontal)
         }
     }
     
-    private var addButton: some View {
-        Button { showCustomAlert.toggle() } label: {
-            ZStack {
-                Circle()
-                    .fill(instagramGradient)
-                    .frame(width: 36, height: 36)
-                    .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
-                
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-            }
+    private var glassmorphicAddButton: some View {
+        Button(action: { viewModel.showCreateCollectionAlert = true }) {
+            Image(systemName: "plus")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundColor(.clear)
+                .overlay(
+                    instagramGradient
+                        .mask(
+                            Image(systemName: "plus")
+                                .font(.system(size: 18, weight: .semibold))
+                        )
+                )
         }
+        .buttonStyle(PlainButtonStyle())
     }
     
     private var navigationLink: some View {
@@ -81,73 +81,115 @@ struct CollectionsView: View {
         }
     }
     
-    private var customAlertOverlay: some View {
-        CustomAlertView(
-            isPresented: $showCustomAlert,
-            text: $newCollectionName,
-            title: NSLocalizedString("Create a Collection", comment: ""),
-            message: NSLocalizedString("Enter collection name",comment: "collection name"),
-            placeholder: NSLocalizedString("Collection Name", comment: ""),
-            onCancel: { print("Creation cancelled") },
-            onCreate: { addCollection() }
-        )
-        .transition(.scale)
-        .animation(.easeInOut, value: showCustomAlert)
-    }
-    
     private func handleCollectionSelection(_ collection: CollectionModel) {
         isPresentedModally ? onCollectionSelected(collection) : (selectedCollection = collection)
-    }
-    
-    private func addCollection() {
-        guard !newCollectionName.isEmpty else {
-            showAlert(title: NSLocalizedString("Error", comment: ""), message: NSLocalizedString("Collection Name cannot be empty.", comment: ""))
-            return
-        }
-        viewModel.addCollection(name: newCollectionName)
-        newCollectionName = ""
-        showCustomAlert = false
     }
     
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(.init(title: NSLocalizedString("OK", comment: ""), style: .default))
-        UIApplication.shared.windows.first?.rootViewController?.present(alert, animated: true)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let rootViewController = windowScene.windows.first?.rootViewController {
+            rootViewController.present(alert, animated: true)
+        }
     }
 }
 
 struct EmptyCollectionsView: View {
+    private let instagramGradient = LinearGradient(
+        colors: [
+            Color("igPurple"),
+            Color("igPink"),
+            Color("igOrange")
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
     var body: some View {
-        VStack(spacing: 20) {
-            Circle()
-                .fill(
-                    LinearGradient(
-                        colors: [
-                            Color("igPurple"),
-                            Color("igPink")
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-                .frame(width: 80, height: 80)
-                .overlay(
-                    Image(systemName: "square.grid.2x2.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.white)
-                )
-                .shadow(color: Color("igPink").opacity(0.3), radius: 10, x: 0, y: 5)
-            
-            VStack(spacing: 8) {
-                Text("No Collections Yet")
-                    .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(.black)
+        VStack(spacing: 28) {
+            // Glassmorphic Icon Container
+            ZStack {
+                // Glow Effect
+                Circle()
+                    .fill(instagramGradient)
+                    .frame(width: 100, height: 100)
+                    .blur(radius: 20)
+                    .opacity(0.3)
                 
-                Text("Create your first collection to organize your downloads")
-                    .font(.system(size: 15))
+                // Glassmorphic Circle Background
+                ZStack {
+                    if #available(iOS 15.0, *) {
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                    } else {
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.9),
+                                        Color.white.opacity(0.85)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                    
+                    Circle()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color("igPurple").opacity(0.08),
+                                    Color("igPink").opacity(0.06),
+                                    Color("igOrange").opacity(0.05)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                    
+                    Circle()
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color("igPurple").opacity(0.3),
+                                    Color("igPink").opacity(0.3)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
+                }
+                .frame(width: 90, height: 90)
+                .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                .shadow(color: Color("igPink").opacity(0.2), radius: 25, x: 0, y: 12)
+                
+                // Icon
+                Image(systemName: "square.grid.2x2.fill")
+                    .font(.system(size: 36, weight: .medium))
+                    .foregroundColor(.clear)
+                    .overlay(
+                        instagramGradient
+                            .mask(
+                                Image(systemName: "square.grid.2x2.fill")
+                                    .font(.system(size: 36, weight: .medium))
+                            )
+                    )
+            }
+            
+            VStack(spacing: 12) {
+                Text(NSLocalizedString("No Collections Yet", comment: ""))
+                    .font(.system(size: 24, weight: .bold))
+                    .foregroundColor(.black.opacity(0.9))
+                
+                Text(NSLocalizedString("Create your first collection to organize your downloads", comment: ""))
+                    .font(.system(size: 16))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 40)
+                    .lineSpacing(4)
             }
         }
     }
@@ -158,7 +200,7 @@ struct CollectionsListView: View {
     let onCollectionSelected: (CollectionModel) -> Void
     
     var body: some View {
-        LazyVStack(spacing: 15) {
+        LazyVStack(spacing: 12) {
             ForEach(collections, id: \.id) { collection in
                 CollectionRowView(
                     collection: collection,
@@ -167,7 +209,6 @@ struct CollectionsListView: View {
                 .onTapGesture { onCollectionSelected(collection) }
             }
         }
-        .padding(.vertical)
     }
     
     private func getMostRecentCover(for collection: CollectionModel) -> Data? {
@@ -181,19 +222,38 @@ struct CollectionRowView: View {
     var collection: CollectionModel
     var coverImageData: Data?
     
+    private let instagramGradient = LinearGradient(
+        colors: [
+            Color("igPurple"),
+            Color("igPink"),
+            Color("igOrange")
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+    
     var body: some View {
-        HStack(spacing: 15) {
+        HStack(spacing: 12) {
+            // Cover Image with Glassmorphic Border
             coverImage
             
-            VStack(alignment: .leading, spacing: 6) {
-                Text(collection.name ?? "Unknown Collection")
+            // Collection Info
+            VStack(alignment: .leading, spacing: 5) {
+                Text(collection.name ?? NSLocalizedString("Unknown Collection", comment: ""))
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.black)
+                    .foregroundColor(.black.opacity(0.9))
                 
-                HStack(spacing: 4) {
+                HStack(spacing: 5) {
                     Image(systemName: "video.fill")
                         .font(.system(size: 12))
-                        .foregroundColor(Color("igPink"))
+                        .foregroundColor(.clear)
+                        .overlay(
+                            instagramGradient
+                                .mask(
+                                    Image(systemName: "video.fill")
+                                        .font(.system(size: 12))
+                                )
+                        )
                     
                     Text("\(collection.videos?.count ?? 0) \(NSLocalizedString("videos", comment: ""))")
                         .font(.system(size: 13))
@@ -203,28 +263,71 @@ struct CollectionRowView: View {
             
             Spacer()
             
+            // Chevron Icon with Gradient
             Image(systemName: "chevron.right")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(Color("igPink"))
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(15)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-        .overlay(
-            RoundedRectangle(cornerRadius: 15)
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            Color("igPurple").opacity(0.2),
-                            Color("igPink").opacity(0.2)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(.clear)
+                .overlay(
+                    instagramGradient
+                        .mask(
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13, weight: .semibold))
+                        )
                 )
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            ZStack {
+                // Glassmorphic Background
+                if #available(iOS 15.0, *) {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(.ultraThinMaterial)
+                } else {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.95),
+                                    Color.white.opacity(0.9)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+                
+                // Tinted Gradient Overlay
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color("igPurple").opacity(0.06),
+                                Color("igPink").opacity(0.04),
+                                Color("igOrange").opacity(0.03)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                
+                // Subtle Border
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                Color.white.opacity(0.4),
+                                Color.white.opacity(0.15)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1.5
+                    )
+            }
         )
+        .shadow(color: Color.black.opacity(0.06), radius: 15, x: 0, y: 6)
+        .shadow(color: Color("igPink").opacity(0.08), radius: 20, x: 0, y: 8)
     }
     
     private var coverImage: some View {
@@ -233,20 +336,64 @@ struct CollectionRowView: View {
                 Image(uiImage: uiImage)
                     .resizable()
             } else {
-                Image("empty.insta")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 45, height: 45)
+                ZStack {
+                    // Glassmorphic placeholder background
+                    if #available(iOS 15.0, *) {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(.ultraThinMaterial)
+                    } else {
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.9),
+                                        Color.white.opacity(0.85)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                    }
+                    
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color("igPurple").opacity(0.08),
+                                    Color("igPink").opacity(0.06)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                    
+                    Image("empty.insta")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 28, height: 28)
+                        .opacity(0.5)
+                }
             }
         }
         .aspectRatio(contentMode: .fill)
-        .frame(width: 60, height: 60)
-        .cornerRadius(12)
+        .frame(width: 56, height: 56)
+        .clipShape(RoundedRectangle(cornerRadius: 12))
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color("igPink").opacity(0.2), lineWidth: 1)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color("igPurple").opacity(0.3),
+                            Color("igPink").opacity(0.3)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.5
+                )
         )
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
+        .shadow(color: Color.black.opacity(0.08), radius: 6, x: 0, y: 3)
+        .shadow(color: Color("igPink").opacity(0.12), radius: 10, x: 0, y: 4)
     }
 }
 

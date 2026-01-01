@@ -113,7 +113,7 @@
 "Copy Feedback" = "Feedback kopieren";
 "General" = "Allgemein";
 "Bug" = "Fehler";
-"Feature Request" = "Funktionswunsch";
+"Feature" = "Funktion";
 "Other" = "Sonstiges";
 "Feedback sent successfully!" = "Feedback erfolgreich gesendet!";
 "Failed to send feedback" = "Feedback konnte nicht gesendet werden";
@@ -228,3 +228,7 @@
 "Purchase Failed" = "Kauf fehlgeschlagen";
 "Failed to complete the purchase. Please try again later." = "Der Kauf konnte nicht abgeschlossen werden. Bitte versuchen Sie es später erneut.";
 "Thank you for your purchase!" = "Vielen Dank für Ihren Einkauf!";
+
+/* New Error Messages - Private Account & Timeout */
+"error_private_or_server" = "Download fehlgeschlagen. Bitte stellen Sie sicher, dass das Instagram-Konto ÖFFENTLICH ist. Wir können nicht von privaten Konten herunterladen.";
+"error_connection_timeout" = "Verbindungszeitüberschreitung. Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.";

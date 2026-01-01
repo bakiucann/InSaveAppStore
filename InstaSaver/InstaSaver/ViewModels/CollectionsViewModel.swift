@@ -11,40 +11,59 @@ class CollectionsViewModel: ObservableObject {
     @Published var collections: [CollectionModel] = []
     @Published var showError = false
     @Published var errorMessage = ""
+    @Published var showCreateCollectionAlert = false
+    @Published var newCollectionName = ""
+    @Published var isLoading = false
     
     private var context: NSManagedObjectContext
     private var cancellables = Set<AnyCancellable>()
+    private var hasFetched = false // Track if we've already fetched
     
     init(context: NSManagedObjectContext = CoreDataManager.shared.context) {
         self.context = context
         setupObservers()
-        fetchCollections()
+        // ❌ REMOVED: fetchCollections() from init
+        // Fetch will be called on-demand in .onAppear
     }
     
     func deleteVideoFromCollection(collection: CollectionModel, video: BookmarkedVideo) {
-        if let context = collection.managedObjectContext {
+        guard let context = collection.managedObjectContext else { return }
+        
+        context.perform {
             collection.removeFromVideos(video)
             context.delete(video)
+            
             do {
                 try context.save()
-                fetchCollections()
+                DispatchQueue.main.async { [weak self] in
+                    self?.refreshCollections()
+                }
             } catch {
-                showError = true
-                errorMessage = "Failed to save context: \(error.localizedDescription)"
+                DispatchQueue.main.async { [weak self] in
+                    self?.showError = true
+                    self?.errorMessage = "Failed to save context: \(error.localizedDescription)"
+                }
             }
         }
     }
     
     func deleteCollection(_ collection: CollectionModel) {
         guard let context = collection.managedObjectContext else { return }
-        context.delete(collection)
         
-        do {
-            try context.save()
-            fetchCollections() // Listeyi yenile
-        } catch {
-            showError = true
-            errorMessage = "Failed to delete collection: \(error.localizedDescription)"
+        context.perform {
+            context.delete(collection)
+            
+            do {
+                try context.save()
+                DispatchQueue.main.async { [weak self] in
+                    self?.refreshCollections()
+                }
+            } catch {
+                DispatchQueue.main.async { [weak self] in
+                    self?.showError = true
+                    self?.errorMessage = "Failed to delete collection: \(error.localizedDescription)"
+                }
+            }
         }
     }
     
@@ -63,43 +82,81 @@ class CollectionsViewModel: ObservableObject {
     }
     
     private func handleContextObjectsDidChange(_ notification: Notification) {
+        // Only refresh if we've already fetched (avoid fetching on init)
+        guard hasFetched else { return }
+        
         DispatchQueue.main.async {
-            self.fetchCollections()
+            self.refreshCollections()
         }
     }
     
     func fetchCollections() {
-        DispatchQueue.global(qos: .background).async {
+        // Prevent duplicate fetches
+        guard !isLoading && !hasFetched else { return }
+        
+        isLoading = true
+        hasFetched = true
+        
+        // Use background context for thread-safe fetching
+        let backgroundContext = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        backgroundContext.automaticallyMergesChangesFromParent = true
+        
+        backgroundContext.perform { [weak self] in
+            guard let self = self else { return }
+            
             let fetchRequest: NSFetchRequest<CollectionModel> = CollectionModel.fetchRequest()
             let sortDescriptor = NSSortDescriptor(key: "createdAt", ascending: false)
             fetchRequest.sortDescriptors = [sortDescriptor]
             
             do {
-                let fetchedCollections = try self.context.fetch(fetchRequest)
+                let fetchedCollections = try backgroundContext.fetch(fetchRequest)
+                
+                // Get object IDs to fetch on main context
+                let objectIDs = fetchedCollections.map { $0.objectID }
+                
+                // Switch to main context to get objects for UI
                 DispatchQueue.main.async {
-                    self.collections = fetchedCollections
+                    let mainContext = CoreDataManager.shared.context
+                    let mainContextCollections = objectIDs.compactMap { try? mainContext.existingObject(with: $0) as? CollectionModel }
+                    
+                    self.collections = mainContextCollections
+                    self.isLoading = false
                 }
             } catch {
                 DispatchQueue.main.async {
                     self.showError = true
                     self.errorMessage = "Failed to fetch collections: \(error.localizedDescription)"
+                    self.isLoading = false
+                    print("❌ Error fetching collections: \(error.localizedDescription)")
                 }
             }
         }
     }
     
+    /// Force refresh collections (e.g., after adding/deleting)
+    func refreshCollections() {
+        hasFetched = false
+        fetchCollections()
+    }
+    
     func addCollection(name: String) {
-        let newCollection = CollectionModel(context: context)
-        newCollection.id = UUID()
-        newCollection.name = name
-        newCollection.createdAt = Date()
-        
-        do {
-            try context.save()
-            fetchCollections()
-        } catch {
-            showError = true
-            errorMessage = "Failed to create collection: \(error.localizedDescription)"
+        context.perform {
+            let newCollection = CollectionModel(context: self.context)
+            newCollection.id = UUID()
+            newCollection.name = name
+            newCollection.createdAt = Date()
+            
+            do {
+                try self.context.save()
+                DispatchQueue.main.async { [weak self] in
+                    self?.refreshCollections()
+                }
+            } catch {
+                DispatchQueue.main.async { [weak self] in
+                    self?.showError = true
+                    self?.errorMessage = "Failed to create collection: \(error.localizedDescription)"
+                }
+            }
         }
     }
 }
