@@ -40,6 +40,9 @@ struct InstaSaverApp: App {
     
     @StateObject private var specialOfferViewModel = SpecialOfferViewModel()
     
+    // Store NotificationCenter observers for proper cleanup
+    @State private var notificationObservers: [NSObjectProtocol] = []
+    
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -74,8 +77,16 @@ struct InstaSaverApp: App {
                     checkAndRequestReview()
                     
                     // Listen for UMP completion notification
-                    NotificationCenter.default.addObserver(forName: .umpFlowDidComplete, object: nil, queue: .main) { _ in
+                    let umpObserver = NotificationCenter.default.addObserver(forName: .umpFlowDidComplete, object: nil, queue: .main) { _ in
                         print("UMP flow completed notification received.")
+                        
+                        // Google Mobile Ads SDK başlatıldı, şimdi reklamı önceden yükle
+                        // Bu, ilk aramada reklamın hazır olmasını sağlar
+                        if !subscriptionManager.isUserSubscribed {
+                            print("🔄 Preloading interstitial ad after UMP completion...")
+                            interstitialAd.loadInterstitial()
+                        }
+                        
                         // PRO kullanıcı kontrolü - Paywall ve Special Offer gösterme mantığını UMP tamamlandıktan sonra çalıştır
                     if !subscriptionManager.isUserSubscribed {
                         // Sadece ücretsiz kullanıcılar için paywall göster
@@ -95,12 +106,19 @@ struct InstaSaverApp: App {
                         specialOfferViewModel.isPresented = false
                         }
                     }
+                    notificationObservers.append(umpObserver)
                     
                     // Uygulama açıldığında bildirimleri dinle
-                    NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
+                    let backgroundObserver = NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
                         isAppInBackground = true // Uygulama arka plana alındı
+                        // Preload ad for next time (when app returns to foreground)
+                        if !subscriptionManager.isUserSubscribed {
+                            interstitialAd.loadInterstitial()
+                        }
                     }
-                    NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
+                    notificationObservers.append(backgroundObserver)
+                    
+                    let foregroundObserver = NotificationCenter.default.addObserver(forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main) { _ in
                         isAppInBackground = false // Uygulama ön plana alındı
                         // Uygulama geri döndüğünde config'i güncelle
                         configManager.fetchConfig()
@@ -115,7 +133,9 @@ struct InstaSaverApp: App {
                             }
                         }
                     }
-                    NotificationCenter.default.addObserver(forName: Notification.Name("ShowSpecialOffer"), object: nil, queue: .main) { _ in
+                    notificationObservers.append(foregroundObserver)
+                    
+                    let specialOfferObserver = NotificationCenter.default.addObserver(forName: Notification.Name("ShowSpecialOffer"), object: nil, queue: .main) { _ in
                         // Eğer 1 hafta geçmediyse gösterme
                         if !specialOfferViewModel.isPresented && 
                            specialOfferViewModel.shouldShowSpecialOffer() && 
@@ -126,6 +146,16 @@ struct InstaSaverApp: App {
                             print("Special offer cannot be shown yet - 1 week cooling period is active or user is PRO")
                         }
                     }
+                    notificationObservers.append(specialOfferObserver)
+                }
+                .onDisappear {
+                    // Remove all NotificationCenter observers to prevent memory leaks
+                    // Note: For the root WindowGroup content, this should only be called on app termination.
+                    // Observers will persist for the app's lifetime, which is the desired behavior.
+                    for observer in notificationObservers {
+                        NotificationCenter.default.removeObserver(observer)
+                    }
+                    notificationObservers.removeAll()
                 }
                 // .fullScreenCover(isPresented: $specialOfferViewModel.isPresented) {
                 //     SpecialOfferView(viewModel: specialOfferViewModel)

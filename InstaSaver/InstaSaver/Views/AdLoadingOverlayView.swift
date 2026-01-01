@@ -23,7 +23,7 @@ struct AdLoadingOverlayView: View {
                     .scaleEffect(1.5)
                 
                 // Loading text below spinner
-                Text(NSLocalizedString("Reklam Yükleniyor...", comment: "Loading ad text"))
+                Text(NSLocalizedString("Ad Loading...", comment: "Loading ad text"))
                     .font(.system(size: 16, weight: .bold))
                     .foregroundColor(.white)
             }

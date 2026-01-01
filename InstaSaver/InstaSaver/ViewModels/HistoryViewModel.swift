@@ -30,9 +30,18 @@ class HistoryViewModel: ObservableObject {
         NotificationCenter.default.addObserver(self, selector: #selector(newVideoSaved(_:)), name: NSNotification.Name("NewVideoSaved"), object: nil)
     }
     
+    deinit {
+        // Remove NotificationCenter observer to prevent memory leaks
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     // Bildirimi dinleyen metod
     @objc private func newVideoSaved(_ notification: Notification) {
-        fetchHistory() // Yeni kaydedilen videoyu yükle ve güncelle
+        // Ensure UI updates happen on main thread
+        // NotificationCenter observer doesn't guarantee main thread execution
+        DispatchQueue.main.async { [weak self] in
+            self?.fetchHistory() // Yeni kaydedilen videoyu yükle ve güncelle
+        }
     }
     
     func saveCoverImage(from url: URL, for videoID: String) {

@@ -136,21 +136,7 @@ class DownloadManager: ObservableObject {
         configuration.sessionSendsLaunchEvents = true
         configuration.isDiscretionary = false
         
-        // ÇÖZÜM 1: Özel ServerTrustManager konfigürasyonu
-        // Belli olan sunucu adreslerini whitelist olarak belirle
-        let knownHosts = Set([
-            "cdninstagram.com",
-            "scontent-vie1-1.cdninstagram.com",
-            "scontent-fra3-1.cdninstagram.com",
-            "scontent-hou1-1.cdninstagram.com"
-            // Bilinen diğer CDN adresleri burada listelenebilir
-        ])
-        
-        // Evaluators sözlüğünü oluştur
-        var evaluators: [String: ServerTrustEvaluating] = [:]
-        
-        // ÇÖZÜM 2: Dinamik evaluator oluşturma
-        // Tüm CDN sunucular için güvenlik değerlendirmesini devre dışı bırak
+        // SSL sertifika doğrulaması tamamen devre dışı - CustomServerTrustManager kullan
         return Session(
             configuration: configuration,
             serverTrustManager: CustomServerTrustManager()
@@ -376,34 +362,41 @@ class DownloadManager: ObservableObject {
         return errorMessage
     }
     
-    // MARK: - Instagram CDN güven değerlendirmesi için özel sınıf
+    // MARK: - SSL Certificate Validation Disabled for Downloads
     
-    // CustomServerTrustManager, Instagram CDN'nin herhangi bir sunucusunu dinamik olarak kabul eden özel sınıf
+    // CustomServerTrustManager, tüm SSL sertifika doğrulamalarını devre dışı bırakan özel sınıf
     class CustomServerTrustManager: ServerTrustManager {
         init() {
-            // Instagram'ın tüm CDN alanlarını kabul eden evaluator sözlüğü
+            // Instagram ve Facebook CDN alanlarını içeren evaluator sözlüğü
+            // SSL sertifika doğrulaması tamamen devre dışı
             let evaluators: [String: ServerTrustEvaluating] = [
+                "instagram.com": DisabledTrustEvaluator(),
                 "cdninstagram.com": DisabledTrustEvaluator(),
-                "*.cdninstagram.com": DisabledTrustEvaluator()
+                "fbcdn.net": DisabledTrustEvaluator()
             ]
             
-            super.init(evaluators: evaluators)
+            // allHostsMustBeEvaluated: false - Tüm hostlar için evaluator gerekli değil
+            super.init(allHostsMustBeEvaluated: false, evaluators: evaluators)
         }
         
-        // Bu metodu override ederek, bilinmeyen Instagram CDN sunucuları için de güven değerlendirmesini yönet
+        // Bu metodu override ederek, tüm Instagram/Facebook CDN sunucuları için SSL doğrulamasını devre dışı bırak
         override func serverTrustEvaluator(forHost host: String) -> ServerTrustEvaluating? {
-            // Eğer host cdninstagram.com içeriyorsa, DisabledTrustEvaluator kullan
-            if host.contains("cdninstagram.com") {
+            // Instagram ve Facebook CDN domainleri için SSL doğrulamasını devre dışı bırak
+            if host.contains("instagram.com") || 
+               host.contains("cdninstagram.com") || 
+               host.contains("fbcdn.net") {
+                print("🔓 SSL sertifika doğrulaması devre dışı bırakıldı: \(host)")
                 return DisabledTrustEvaluator()
             }
             
-            // Normal davranışa dön (diğer sunucular için)
-            // Hata kontrolü ekle
+            // Diğer sunucular için de SSL doğrulamasını devre dışı bırak (fallback)
+            // Bu, bilinmeyen domainler için de SSL hatalarını önler
             do {
-                return try super.serverTrustEvaluator(forHost: host)
+                let evaluator = try super.serverTrustEvaluator(forHost: host)
+                return evaluator ?? DisabledTrustEvaluator()
             } catch {
-                print("ServerTrust hatası: \(error.localizedDescription), host: \(host)")
-                return DisabledTrustEvaluator() // Fallback olarak tüm sunucular için güvenli değerlendirmeyi devre dışı bırak
+                print("🔓 ServerTrust hatası, SSL doğrulaması devre dışı: \(error.localizedDescription), host: \(host)")
+                return DisabledTrustEvaluator() // Fallback olarak tüm sunucular için SSL doğrulamasını devre dışı bırak
             }
         }
     }

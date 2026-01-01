@@ -7,22 +7,15 @@ import SwiftUI
 class CoreDataManager {
     static let shared = CoreDataManager()
     
-    let persistentContainer: NSPersistentContainer
+    // Use the shared PersistenceController container to avoid duplicate model instances
+    var persistentContainer: NSPersistentContainer {
+        return PersistenceController.shared.container
+    }
     
     private init() {
-        persistentContainer = NSPersistentContainer(name: "InstaSaver")
-        
-        persistentContainer.loadPersistentStores { (description, error) in
-            if let error = error {
-                // fatalError yerine error logging ve graceful handling
-                print("❌ CRITICAL: Persistent stores yüklenemedi: \(error.localizedDescription)")
-                print("❌ Error details: \(error)")
-                // Production'da crash yerine error handling yapılmalı
-                // Bu durumda Core Data kullanılamaz, ama uygulama çalışmaya devam edebilir
-            } else {
-                print("Persistent store yüklendi: \(description)")
-            }
-        }
+        // No longer creating a separate container - using PersistenceController.shared.container
+        // This prevents the "Multiple NSEntityDescriptions claim the NSManagedObject subclass" error
+        // when using "Codegen: Class Definition"
     }
     
     var context: NSManagedObjectContext {

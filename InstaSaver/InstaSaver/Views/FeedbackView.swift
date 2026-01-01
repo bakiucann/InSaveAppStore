@@ -356,6 +356,10 @@ struct FeedbackView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 8)
                 }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    hideKeyboard()
+                }
             }
         }
         .navigationBarHidden(true)
@@ -480,6 +484,15 @@ struct FeedbackView: View {
             showError = true
             UIPasteboard.general.string = createEmailBody()
         }
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+        )
     }
 }
 

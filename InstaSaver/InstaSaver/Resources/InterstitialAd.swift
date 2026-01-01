@@ -59,6 +59,10 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
     private let maxAttempts = 5
     private let retryInterval: TimeInterval = 0.5
     
+    // Pending show request flag - when ad is requested but not yet loaded
+    // rootViewController and completion are already stored as class properties
+    private var hasPendingShowRequest = false
+    
     // Timeout management
     private var timeoutWorkItem: DispatchWorkItem?
     private let adTimeout: TimeInterval = 2.0 // 2 seconds timeout (reduced from 5)
@@ -95,6 +99,16 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
                 } else {
                     // Reset attempts after reaching max
                     self.loadAttempts = 0
+                    // If there was a pending request and we failed to load, complete it
+                    if self.hasPendingShowRequest {
+                        print("❌ Failed to load ad after max attempts, completing pending request")
+                        self.hasPendingShowRequest = false
+                        let savedCompletion = self.completion
+                        self.completion = nil
+                        DispatchQueue.main.async {
+                            savedCompletion?()
+                        }
+                    }
                 }
                 return
             }
@@ -104,7 +118,54 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             self.interstitial?.fullScreenContentDelegate = self
             self.loadAttempts = 0
             print("Ad is now available.")
+            
+            // If there's a pending show request, automatically show the ad
+            if self.hasPendingShowRequest {
+                print("🔄 Pending show request found, automatically showing ad after load")
+                self.hasPendingShowRequest = false
+                // rootViewController and completion are already set from showAd call
+                // Run safety checks again before showing
+                self.tryShowAdAfterLoad()
+            }
         }
+    }
+    
+    private func tryShowAdAfterLoad() {
+        // Re-run safety checks
+        if SubscriptionManager.shared.isUserSubscribed {
+            print("⚠️ User is subscribed, skipping ad display (pending request)")
+            hasPendingShowRequest = false
+            let savedCompletion = self.completion
+            self.completion = nil
+            savedCompletion?()
+            return
+        }
+        
+        if let lastShowTime = lastAdShowTime {
+            let timeSinceLastAd = Date().timeIntervalSince(lastShowTime)
+            if timeSinceLastAd < 60 {
+                let remainingTime = Int(60 - timeSinceLastAd)
+                print("⚠️ Ad cooldown active. Please wait \(remainingTime) more seconds. Skipping ad (pending request).")
+                hasPendingShowRequest = false
+                let savedCompletion = self.completion
+                self.completion = nil
+                savedCompletion?()
+                return
+            }
+        }
+        
+        if dailyAdCount >= 15 {
+            print("⚠️ Daily ad limit reached (15). Skipping ad (pending request).")
+            hasPendingShowRequest = false
+            let savedCompletion = self.completion
+            self.completion = nil
+            savedCompletion?()
+            return
+        }
+        
+        // All checks passed, show the ad
+        print("✅ All safety checks passed for pending request. Showing ad.")
+        tryPresentAd() // This will clear hasPendingShowRequest flag
     }
     
     func showAd(from rootViewController: UIViewController, completion: @escaping () -> Void) {
@@ -120,11 +181,11 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             return
         }
         
-        // Check 2: Cooldown (2 minutes = 120 seconds)
+        // Check 2: Cooldown (1 minute = 60 seconds)
         if let lastShowTime = lastAdShowTime {
             let timeSinceLastAd = Date().timeIntervalSince(lastShowTime)
-            if timeSinceLastAd < 120 {
-                let remainingTime = Int(120 - timeSinceLastAd)
+            if timeSinceLastAd < 60 {
+                let remainingTime = Int(60 - timeSinceLastAd)
                 print("⚠️ Ad cooldown active. Please wait \(remainingTime) more seconds. Skipping ad.")
                 completion()
                 return
@@ -141,40 +202,24 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
         // All checks passed, proceed with ad display
         print("✅ All safety checks passed. Proceeding with ad display.")
         
-        // Optimistic approach: Don't block UI immediately
-        // Only show loading overlay if ad is not ready and we're actively loading
-        if interstitial == nil {
-            // Ad not ready - load in background, but don't block user
-            loadInterstitial()
-            
-            // Set up timeout (2 seconds) - user can proceed if ad doesn't load
-            timeoutWorkItem?.cancel()
-            let timeoutItem = DispatchWorkItem { [weak self] in
-                guard let self = self else { return }
-                if self.isLoadingAd {
-                    print("⏱️ Ad timeout reached (2 seconds). Unblocking user.")
-                    self.isLoadingAd = false
-                    self.completion?()
-                    self.completion = nil
-                }
-            }
-            timeoutWorkItem = timeoutItem
-            DispatchQueue.main.asyncAfter(deadline: .now() + adTimeout, execute: timeoutItem)
-            
-            // Try to present after short delay (optimistic)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                self?.tryPresentAd()
-            }
-            
-            // Only show loading overlay if ad is still not ready after brief wait
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
-                if self?.interstitial == nil && self?.isLoading == true {
-                    self?.isLoadingAd = true
-                }
-            }
-        } else {
+        // Check if ad is ready BEFORE showing any loading indicator
+        if let interstitial = interstitial {
             // Ad is ready, present immediately (no loading overlay needed)
             tryPresentAd()
+        } else {
+            // Ad not ready - save the request and load the ad
+            // When ad loads, it will automatically show
+            print("⚠️ Ad not ready. Saving show request and loading ad...")
+            hasPendingShowRequest = true
+            // rootViewController and completion are already stored as class properties
+            
+            // Start loading if not already loading
+            if !isLoading {
+                loadInterstitial()
+            }
+            
+            // Don't call completion yet - wait for ad to load and show
+            // Completion will be called when ad is shown or if it fails
         }
     }
     
@@ -184,12 +229,16 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             print("⚠️ No ad available to show or no root view controller, completing immediately")
             isLoadingAd = false
             timeoutWorkItem?.cancel()
+            hasPendingShowRequest = false // Clear pending request flag
             let savedCompletion = completion
             completion = nil
             savedCompletion?() // Complete immediately - don't block user
             loadInterstitial() // Try to load for next time (background)
             return
         }
+        
+        // Clear pending request flag since we're showing the ad now
+        hasPendingShowRequest = false
         
         // Cancel timeout since we're presenting
         timeoutWorkItem?.cancel()
