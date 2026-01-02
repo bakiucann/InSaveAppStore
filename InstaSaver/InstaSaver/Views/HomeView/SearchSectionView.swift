@@ -2,7 +2,7 @@
 //  SearchSectionView.swift
 //  InstaSaver
 //
-//  Created by Baki Uçan on 6.01.2025.
+//  Glassmorphic UI Design - Compact Version - iOS 14+ Compatible
 //
 
 import SwiftUI
@@ -16,8 +16,7 @@ struct SearchSectionView: View {
     @Binding var showCustomAlert: Bool
     
     @State private var searchCount = 0
-    @State private var isHovering = false
-    @State private var showTutorial = false
+    @State private var isInputFocused = false
     @State private var animateGradient = false
     @State private var currentPage = 0
     @State private var showStoryView = false
@@ -25,18 +24,17 @@ struct SearchSectionView: View {
     @State private var showError = false
     @State private var errorMessage = ""
     @State private var searchMode: SearchMode = .url
+    @State private var pulseAnimation = false
+    @State private var floatingIconOffset: CGFloat = 0
     @StateObject private var configManager = ConfigManager.shared
     
     @ObservedObject var subscriptionManager = SubscriptionManager.shared
     let interstitial: InterstitialAd
     @ObservedObject var videoViewModel: VideoViewModel
     
-    private let instagramGradient: LinearGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink"),
-            Color("igOrange")
-        ],
+    // Instagram Gradient
+    private let instagramGradient = LinearGradient(
+        colors: [Color("igPurple"), Color("igPink"), Color("igOrange")],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
@@ -47,347 +45,442 @@ struct SearchSectionView: View {
         
         var displayName: String {
             switch self {
-            case .url:
-                return "URL"
-            case .username:
-                return NSLocalizedString("Username", comment: "")
+            case .url: return "URL"
+            case .username: return NSLocalizedString("Username", comment: "")
             }
         }
         
         var emptyInputError: String {
             switch self {
-            case .url:
-                return NSLocalizedString("Please enter a valid Instagram URL", comment: "")
-            case .username:
-                return NSLocalizedString("Please enter an Instagram username", comment: "")
+            case .url: return NSLocalizedString("Please enter a valid Instagram URL", comment: "")
+            case .username: return NSLocalizedString("Please enter an Instagram username", comment: "")
+            }
+        }
+        
+        var icon: String {
+            switch self {
+            case .url: return "link"
+            case .username: return "at"
+            }
+        }
+        
+        var placeholder: String {
+            switch self {
+            case .url: return NSLocalizedString("Paste Instagram URL here...", comment: "")
+            case .username: return NSLocalizedString("Enter Instagram username...", comment: "")
             }
         }
     }
     
     var body: some View {
         ZStack {
-        VStack(spacing: 15) {
-            // Animated Header Section
-            VStack(spacing: 12) {
+            VStack(spacing: 16) {
+                // MARK: - Compact Hero Section
+                heroSection
+                
+                // MARK: - Glassmorphic Search Card
+                glassmorphicSearchCard
+                
+                // MARK: - Compact Tutorial Cards
+                tutorialCarousel
+            }
+            .fullScreenCover(isPresented: $showStoryView) {
+                NavigationView {
+                    StoryView(stories: stories, isFromHistory: false)
+                }
+            }
+            .alert(isPresented: $showError) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(errorMessage),
+                    dismissButton: .default(Text("OK"))
+                )
+            }
+            .onAppear {
+                withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+                    floatingIconOffset = 6
+                }
+                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                    pulseAnimation = true
+                }
+            }
+            .onChange(of: configManager.shouldShowDownloadButtons) { newValue in
+                if !newValue {
+                    searchMode = .url
+                }
+            }
+            
+            // Ad Loading Overlay
+            if interstitial.isLoadingAd {
+                AdLoadingOverlayView()
+                    .zIndex(999)
+            }
+        }
+    }
+    
+    // MARK: - Compact Hero Section
+    private var heroSection: some View {
+        VStack(spacing: 10) {
+            // Compact floating download icon
+            ZStack {
+                // Glow effect
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                Color("igPink").opacity(0.35),
+                                Color("igPurple").opacity(0.15),
+                                Color.clear
+                            ],
+                            center: .center,
+                            startRadius: 18,
+                            endRadius: 52
+                        )
+                    )
+                    .frame(width: 105, height: 105)
+                    .scaleEffect(pulseAnimation ? 1.08 : 0.92)
+                
+                // Main icon container
                 ZStack {
-                    // Background circle with gradient
                     Circle()
                         .fill(
                             LinearGradient(
-                                colors: [
-                                    Color("igPurple"),
-                                    Color("igPink"),
-                                    Color("igOrange")
-                                ],
+                                colors: [Color.white.opacity(0.95), Color.white.opacity(0.8)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             )
                         )
-                        .frame(width: 70, height: 70)
-                    
-                    // Download icon
-                    Image(systemName: "arrow.down")
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                        .rotationEffect(.degrees(animateGradient ? 360 : 0))
-                        .animation(
-                            Animation
-                                .spring(response: 1, dampingFraction: 1)
-                                .repeatForever(autoreverses: false),
-                            value: animateGradient
+                        .frame(width: 64, height: 64)
+                        .overlay(
+                            Circle()
+                                .stroke(
+                                    LinearGradient(
+                                        colors: [Color.white.opacity(0.8), Color("igPink").opacity(0.3)],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    ),
+                                    lineWidth: 1.5
+                                )
                         )
+                        .shadow(color: Color("igPink").opacity(0.25), radius: 12, x: 0, y: 6)
+                    
+                    Image(systemName: "arrow.down.to.line.compact")
+                        .font(.system(size: 28, weight: .bold))
+                        .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
                 }
-                .onAppear { animateGradient = true }
-                
+                .offset(y: floatingIconOffset)
+            }
+            
+            // Compact title
+            VStack(spacing: 4) {
                 Text(NSLocalizedString("InSave for Instagram", comment: ""))
-                    .font(.system(size: 26, weight: .bold))
-                    .overlay(
+                    .font(.system(size: 22, weight: .bold, design: .rounded))
+                    .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
+                
+                Text(NSLocalizedString("Download Reels, Stories & Video Posts", comment: ""))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(.gray.opacity(0.8))
+            }
+        }
+        .padding(.top, 4)
+    }
+    
+    // MARK: - Compact Glassmorphic Search Card
+    private var glassmorphicSearchCard: some View {
+        VStack(spacing: 14) {
+            // Search Mode Selector
+            if configManager.shouldShowDownloadButtons {
+                GlassmorphicSegmentedControl(
+                    selectedMode: $searchMode,
+                    modes: SearchMode.allCases
+                )
+                .onChange(of: searchMode) { _ in
+                    inputText = ""
+                    showPasteButton = true
+                    isInputFocused = false
+                }
+            }
+            
+            // Compact Input Field
+            glassmorphicInputField
+            
+            // Compact Download Button
+            downloadButton
+        }
+        .padding(16)
+        .background(glassmorphicCardBackground)
+    }
+    
+    // MARK: - Glassmorphic Card Background
+    private var glassmorphicCardBackground: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 22)
+                .fill(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.88), Color.white.opacity(0.78)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            
+            RoundedRectangle(cornerRadius: 22)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color("igPurple").opacity(0.03),
+                            Color("igPink").opacity(0.02),
+                            Color("igOrange").opacity(0.02)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.6), Color("igPink").opacity(0.15), Color.white.opacity(0.4)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        }
+        .shadow(color: Color("igPurple").opacity(0.06), radius: 20, x: 0, y: 10)
+        .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 4)
+    }
+    
+    // MARK: - Compact Glassmorphic Input Field
+    private var glassmorphicInputField: some View {
+        HStack(spacing: 10) {
+            // Icon
+            ZStack {
+                Circle()
+                    .fill(
                         LinearGradient(
-                            colors: [
-                                Color("igPurple"),
-                                Color("igPink"),
-                                Color("igOrange")
-                            ],
+                            colors: [Color("igPurple").opacity(0.1), Color("igPink").opacity(0.1)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .mask(
-                        Text(NSLocalizedString("InSave for Instagram", comment: ""))
-                            .font(.system(size: 26, weight: .bold))
-                    )
+                    .frame(width: 36, height: 36)
                 
-                Text(NSLocalizedString("Download Reels, Stories & Video Posts", comment: ""))
-                    .font(.system(size: 15))
-                    .foregroundColor(.gray)
-                    .padding(.bottom, 5)
+                Image(systemName: searchMode.icon)
+                    .font(.system(size: 15, weight: .semibold))
+                    .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
             }
             
-            // URL Input Section
-            VStack(spacing: 15) {
-                // Custom Segmented control
-                if configManager.shouldShowDownloadButtons {
-                    CustomSegmentedControl(
-                        selectedOption: $searchMode,
-                        options: SearchMode.allCases
-                    )
-                    .padding(.horizontal)
-                    .padding(.vertical, 5)
-                    .onChange(of: searchMode) { _ in
-                        // Segmentler arası geçişte textfield'ı temizle
-                        inputText = ""
-                        showPasteButton = true
-                        isHovering = false
+            // Text Field
+            TextField(searchMode.placeholder, text: $inputText)
+                .font(.system(size: 15, weight: .medium))
+                .autocapitalization(.none)
+                .disableAutocorrection(true)
+                .onChange(of: inputText) { newValue in
+                    showPasteButton = newValue.isEmpty
+                    withAnimation(.spring(response: 0.3)) {
+                        isInputFocused = !newValue.isEmpty
                     }
                 }
-                
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .fill(Color(.systemGray6))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 20)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [
-                                            Color("igPurple"),
-                                            Color("igPink"),
-                                            Color("igOrange")
-                                        ],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    ),
-                                    lineWidth: isHovering ? 2 : 1
-                                )
-                        )
-                        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
-                    
-                    HStack {
-                        Image(systemName: searchMode == .url ? "link" : "person")
-                            .foregroundColor(Color("igPink"))
-                            .font(.system(size: 18))
-                            .padding(.leading, 20)
-                        
-                        TextField(
-                            searchMode == .url 
-                                ? NSLocalizedString("Paste Instagram URL here...", comment: "")
-                                : NSLocalizedString("Enter Instagram username...", comment: ""), 
-                            text: $inputText
-                        )
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 15)
-                            .font(.system(size: 16))
-                            .autocapitalization(.none)
-                            .disableAutocorrection(true)
-                            .onChange(of: inputText) { newValue in
-                                showPasteButton = newValue.isEmpty
-                                withAnimation {
-                                    isHovering = !newValue.isEmpty
-                                }
-                            }
-                        
-                        // Clear button (X)
-                        if !inputText.isEmpty {
-                            Button(action: {
-                                inputText = "" // Clear the text field
-                            }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(Color("igPink"))
-                                    .font(.system(size: 18))
-                                    .padding(.trailing, 20)
-                            }
-                        }
-                        
-                        if showPasteButton {
-                            Button(action: {
-                                if let clipboardText = UIPasteboard.general.string {
-                                    withAnimation {
-                                        inputText = clipboardText
-                                    }
-                                }
-                            }) {
-                                Text(NSLocalizedString("Paste", comment: ""))
-                                    .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(.white)
-                                    .padding(.horizontal, 15)
-                                    .padding(.vertical, 8)
-                                    .background(
-                                        LinearGradient(
-                                            colors: [
-                                                Color("igPurple"),
-                                                Color("igPink")
-                                            ],
-                                            startPoint: .leading,
-                                            endPoint: .trailing
-                                        )
-                                    )
-                                    .clipShape(Capsule())
-                            }
-                            .padding(.trailing, 15)
-                        }
-                    }
-                }
-                .frame(height: 55)
-                
-                // Download Button
-                Button(action: {
-                    guard !inputText.isEmpty else {
-                        errorMessage = searchMode.emptyInputError
-                        showError = true
-                        return
-                    }
-                    
-                    withAnimation {
-                        searchCount += 1
-                        videoViewModel.clearVideoData()
-                        isUrlSearch = true
-                        isLoading = true
-                    }
-
-                    // Kullanıcı adı veya URL kontrolü
-                    switch searchMode {
-                    case .username:
-                        // Username modunda URL kontrolü
-                        if inputText.contains("instagram.com") || inputText.contains("http") || inputText.contains("/") {
-                            errorMessage = NSLocalizedString("Please enter only the username without URL", comment: "")
-                            showError = true
-                            isLoading = false
-                            isUrlSearch = false
-                            return
-                        }
-                        handleStoryURL()
-                        
-                    case .url:
-                        // URL kontrolü
-                        if !inputText.contains("instagram.com") {
-                            errorMessage = NSLocalizedString("Please enter a valid Instagram URL", comment: "")
-                            showError = true
-                            isLoading = false
-                            isUrlSearch = false
-                            return
-                        }
-                        
-                        // URL formatını düzenle
-                        if !inputText.hasPrefix("http://") && !inputText.hasPrefix("https://") {
-                            inputText = "https://www." + inputText
-                        }
-                        
-                        if isStoryURL(inputText) {
-                            handleStoryURL()
-                        } else if let profileUsername = extractProfileUsername(from: inputText) {
-                            // It's a profile URL, load stories
-                            print("🔍 Detected profile URL for username: \(profileUsername)")
-                            // HEMEN story'leri yükle (reklam öncesi değil)
-                               Task {
-                                    await loadStories(username: profileUsername)
-                           }
-                        } else {
-                            // It's likely a post/reel URL
-                            // HEMEN aramayı başlat (reklam öncesi değil)
-                                performSearch()
-                        }
-                    }
-                }) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "arrow.down.circle")
-                            .font(.system(size: 20))
-                        Text(NSLocalizedString("Download Now", comment: ""))
-                            .font(.system(size: 18, weight: .semibold))
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 55)
-                    .background(
-                        LinearGradient(
-                            colors: [
-                                Color("igPurple"),
-                                Color("igPink"),
-                                Color("igOrange")
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: Color("igPink").opacity(0.3), radius: 10, x: 0, y: 5)
-                    .scaleEffect(isHovering ? 1.02 : 1.0)
-                    .animation(.spring(response: 0.3), value: isHovering)
-                }
-            }
-            .padding(.horizontal)
             
-            // Tutorial Section
-            VStack(spacing: 0) {
-                // Tutorial Pages with Step Numbers
-                TabView(selection: $currentPage) {
-                    // Step 1: Copy Link
-                    CompactStepView(
-                        number: "1",
-                        icon: "square.and.arrow.up",
-                        title: NSLocalizedString("Copy Link", comment: ""),
-                        description: NSLocalizedString("Open Instagram and copy video/story link", comment: "")
-                    )
-                    .tag(0)
-                    
-                    // Step 2: Paste
-                    CompactStepView(
-                        number: "2",
-                        icon: "doc.on.clipboard",
-                        title: NSLocalizedString("Paste URL/Username", comment: ""),
-                        description: NSLocalizedString("Paste the link or enter username in the box", comment: "")
-                    )
-                    .tag(1)
-                    
-                    // Step 3: Download
-                    CompactStepView(
-                        number: "3",
-                        icon: "arrow.down.circle",
-                        title: NSLocalizedString("Download", comment: ""),
-                        description: NSLocalizedString("Click download and save to your gallery", comment: "")
-                    )
-                    .tag(2)
+            // Clear / Paste Button
+            if !inputText.isEmpty {
+                Button(action: { inputText = "" }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(.gray.opacity(0.5))
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                .frame(height: 120)
+                .transition(.scale.combined(with: .opacity))
+            } else {
+                pasteButton
+            }
+        }
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color.white.opacity(0.6))
                 .overlay(
-                    // Custom Page Control
-                    CompactPageControl(numberOfPages: 3, currentPage: $currentPage)
-                        .padding(.bottom, -5),
-                    alignment: .bottom
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            isInputFocused
+                                ? LinearGradient(
+                                    colors: [Color("igPurple"), Color("igPink"), Color("igOrange")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                                : LinearGradient(
+                                    colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.1)],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ),
+                            lineWidth: isInputFocused ? 1.5 : 1
+                        )
                 )
+        )
+        .animation(.spring(response: 0.3), value: isInputFocused)
+    }
+    
+    // MARK: - Compact Paste Button
+    private var pasteButton: some View {
+        Button(action: {
+            if let clipboardText = UIPasteboard.general.string {
+                withAnimation(.spring()) {
+                    inputText = clipboardText
+                }
             }
-            .background(Color.white)
-            .padding(.bottom, 15)
-        }
-        .padding(.vertical)
-        .background(Color.white)
-        .fullScreenCover(isPresented: $showStoryView) {
-            NavigationView {
-                StoryView(stories: stories, isFromHistory: false)
+        }) {
+            HStack(spacing: 4) {
+                Image(systemName: "doc.on.clipboard")
+                    .font(.system(size: 11, weight: .semibold))
+                Text(NSLocalizedString("Paste", comment: ""))
+                    .font(.system(size: 12, weight: .semibold))
             }
-        }
-        .alert(isPresented: $showError) {
-            Alert(
-                title: Text("Error"),
-                message: Text(errorMessage),
-                dismissButton: .default(Text("OK"))
+            .foregroundColor(.white)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                Capsule().fill(instagramGradient)
             )
+            .shadow(color: Color("igPink").opacity(0.25), radius: 6, x: 0, y: 3)
         }
-        .onAppear {
-            // ConfigManager zaten init sırasında yükleniyor, burada çağrılmasına gerek yok
-            // configManager.reloadConfig()
-        }
-        .onChange(of: configManager.shouldShowDownloadButtons) { newValue in
-            // Segmented control gizlenecekse URL mode'unu ayarla
-            if !newValue {
-                // Default olarak URL mode'unu ayarla
-                searchMode = .url
+        .transition(.scale.combined(with: .opacity))
+    }
+    
+    // MARK: - Compact Download Button
+    private var downloadButton: some View {
+        Button(action: handleDownloadAction) {
+            HStack(spacing: 10) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.2))
+                        .frame(width: 30, height: 30)
+                    
+                    Image(systemName: "arrow.down.circle.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                
+                Text(NSLocalizedString("Download Now", comment: ""))
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
             }
+            .frame(maxWidth: .infinity)
+            .frame(height: 50)
+            .background(
+                ZStack {
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(instagramGradient)
+                    
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.2), Color.white.opacity(0.08), Color.clear],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                }
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .stroke(Color.white.opacity(0.25), lineWidth: 1)
+            )
+            .shadow(color: Color("igPurple").opacity(0.25), radius: 10, x: 0, y: 5)
+            .shadow(color: Color("igPink").opacity(0.15), radius: 6, x: 0, y: 3)
+            .scaleEffect(isInputFocused ? 1.01 : 1.0)
+            .animation(.spring(response: 0.3), value: isInputFocused)
+        }
+    }
+    
+    // MARK: - Compact Tutorial Carousel
+    private var tutorialCarousel: some View {
+        VStack(spacing: 10) {
+            TabView(selection: $currentPage) {
+                ForEach(0..<3) { index in
+                    CompactTutorialCard(
+                        step: index + 1,
+                        icon: tutorialIcons[index],
+                        title: tutorialTitles[index],
+                        description: tutorialDescriptions[index]
+                    )
+                    .tag(index)
+                }
+            }
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .frame(height: 100)
+            
+            // Compact page indicator
+            HStack(spacing: 6) {
+                ForEach(0..<3) { index in
+                    Capsule()
+                        .fill(currentPage == index ? Color("igPink") : Color.gray.opacity(0.3))
+                        .frame(width: currentPage == index ? 18 : 6, height: 6)
+                        .animation(.spring(response: 0.3), value: currentPage)
+                }
+            }
+        }
+    }
+    
+    // Tutorial Data
+    private let tutorialIcons = ["square.and.arrow.up.fill", "doc.on.clipboard.fill", "arrow.down.circle.fill"]
+    private let tutorialTitles = [
+        NSLocalizedString("Copy Link", comment: ""),
+        NSLocalizedString("Paste URL/Username", comment: ""),
+        NSLocalizedString("Download", comment: "")
+    ]
+    private let tutorialDescriptions = [
+        NSLocalizedString("Open Instagram and copy video/story link", comment: ""),
+        NSLocalizedString("Paste the link or enter username in the box", comment: ""),
+        NSLocalizedString("Click download and save to your gallery", comment: "")
+    ]
+    
+    // MARK: - Actions
+    private func handleDownloadAction() {
+        guard !inputText.isEmpty else {
+            errorMessage = searchMode.emptyInputError
+            showError = true
+            return
         }
         
-        // Ad Loading Overlay - Reklam yüklenirken tüm ekranı kaplar
-        if interstitial.isLoadingAd {
-            AdLoadingOverlayView()
-                .zIndex(999)
+        withAnimation {
+            searchCount += 1
+            videoViewModel.clearVideoData()
+            isUrlSearch = true
+            isLoading = true
+        }
+        
+        switch searchMode {
+        case .username:
+            if inputText.contains("instagram.com") || inputText.contains("http") || inputText.contains("/") {
+                errorMessage = NSLocalizedString("Please enter only the username without URL", comment: "")
+                showError = true
+                isLoading = false
+                isUrlSearch = false
+                return
+            }
+            handleStoryURL()
+            
+        case .url:
+            if !inputText.contains("instagram.com") {
+                errorMessage = NSLocalizedString("Please enter a valid Instagram URL", comment: "")
+                showError = true
+                isLoading = false
+                isUrlSearch = false
+                return
+            }
+            
+            if !inputText.hasPrefix("http://") && !inputText.hasPrefix("https://") {
+                inputText = "https://www." + inputText
+            }
+            
+            if isStoryURL(inputText) {
+                handleStoryURL()
+            } else if let profileUsername = extractProfileUsername(from: inputText) {
+                print("🔍 Detected profile URL for username: \(profileUsername)")
+                Task {
+                    await loadStories(username: profileUsername)
+                }
+            } else {
+                performSearch()
             }
         }
     }
@@ -397,40 +490,33 @@ struct SearchSectionView: View {
     }
     
     private func extractProfileUsername(from url: String) -> String? {
-        // Ensure it's an instagram URL but not a story/highlight/post/reel
         guard url.contains("instagram.com") else { return nil }
         guard !url.contains("/p/") && !url.contains("/reel/") && !url.contains("/reels/") && !url.contains("/tv/") && !url.contains("/stories/") && !url.contains("/s/") else {
-            return nil // It's likely a post, reel, story, or highlight share URL
+            return nil
         }
-
-        // Pattern: instagram.com/username or instagram.com/username?params
+        
         let components = url.components(separatedBy: "instagram.com/")
         guard components.count > 1 else { return nil }
-
+        
         let pathPart = components[1]
-        // Take the part before the first '/' or '?'
         let usernamePart = pathPart.components(separatedBy: CharacterSet(charactersIn: "/?")).first ?? pathPart
-
+        
         return usernamePart.isEmpty ? nil : usernamePart.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     private func extractUsername(from url: String) -> String? {
-        // Highlight URL kontrolü - bu durumda direkt URL'i döndür
         if StoryService.shared.isHighlightURL(url) {
             return url
         }
         
-        // SearchMode.username seçildiğinde, direkt kullanıcı adını döndür
         if searchMode == .username {
             return url.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         
-        // Direkt kullanıcı adı girişi
         if !url.contains("/") && !url.contains(".") {
             return url.trimmingCharacters(in: .whitespacesAndNewlines)
         }
         
-        // Instagram story URL pattern: https://www.instagram.com/stories/USERNAME/
         if url.contains("instagram.com/stories/") && !url.contains("/highlights/") {
             let components = url.components(separatedBy: "/")
             if let storiesIndex = components.firstIndex(of: "stories"),
@@ -446,9 +532,8 @@ struct SearchSectionView: View {
     private func handleStoryURL() {
         if let username = extractUsername(from: inputText) {
             print("🔍 Extracted username: \(username)")
-            // HEMEN story'leri yükle (reklam öncesi değil)
             Task {
-                    await loadStories(username: username)
+                await loadStories(username: username)
             }
         } else {
             print("❌ Failed to extract username from: \(inputText)")
@@ -460,7 +545,6 @@ struct SearchSectionView: View {
         }
     }
     
-    // Story'leri yükleyip gösteren yardımcı fonksiyon
     private func loadStories(username: String) async {
         videoViewModel.isLoading = true
         
@@ -474,7 +558,6 @@ struct SearchSectionView: View {
             } else {
                 print("✅ Found \(stories.count) stories for username: \(username)")
                 
-                // Başarılı arama sonrası reklam göster (POST-action)
                 await MainActor.run {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                         if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
@@ -492,17 +575,14 @@ struct SearchSectionView: View {
         } catch {
             print("❌ Error fetching stories: \(error.localizedDescription)")
             
-            // Map errors to user-friendly messages
             if let urlError = error as? URLError {
                 switch urlError.code {
                 case .timedOut, .networkConnectionLost:
                     errorMessage = NSLocalizedString("error_connection_timeout", comment: "")
                 default:
-                    // All other errors (including 4xx/5xx) map to private account message
                     errorMessage = NSLocalizedString("error_private_or_server", comment: "")
                 }
             } else {
-                // Non-URLError errors (decoding, etc.) - map to private account message
                 errorMessage = NSLocalizedString("error_private_or_server", comment: "")
             }
             
@@ -516,173 +596,167 @@ struct SearchSectionView: View {
     
     private func performSearch() {
         videoViewModel.fetchVideoInfo(url: inputText)
-        
-        // Başarılı arama sonrası reklam göster (POST-action)
-        // VideoViewModel'de video set edildiğinde reklam gösterilecek
-        // HomeView'da onChange ile yakalanacak
     }
 }
 
-// Kompakt Adım Görünümü
-struct CompactStepView: View {
-    let number: String
+// MARK: - Gradient Foreground Extension (iOS 14 Compatible)
+extension View {
+    func gradientForeground(colors: [Color]) -> some View {
+        self.overlay(
+            LinearGradient(
+                colors: colors,
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .mask(self)
+    }
+}
+
+// MARK: - Compact Glassmorphic Segmented Control
+struct GlassmorphicSegmentedControl: View {
+    @Binding var selectedMode: SearchSectionView.SearchMode
+    let modes: [SearchSectionView.SearchMode]
+    
+    var body: some View {
+        GeometryReader { geometry in
+            let width = (geometry.size.width - 6) / CGFloat(modes.count)
+            
+            ZStack(alignment: .leading) {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.white.opacity(0.5))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+                    )
+                
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color("igPurple"), Color("igPink"), Color("igOrange")],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(width: width - 4)
+                    .padding(3)
+                    .offset(x: CGFloat(modes.firstIndex(of: selectedMode) ?? 0) * width)
+                    .shadow(color: Color("igPink").opacity(0.25), radius: 6, x: 0, y: 3)
+                    .animation(.spring(response: 0.35, dampingFraction: 0.7), value: selectedMode)
+                
+                HStack(spacing: 0) {
+                    ForEach(modes, id: \.self) { mode in
+                        Button(action: { selectedMode = mode }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: mode == .url ? "link.circle.fill" : "at.circle.fill")
+                                    .font(.system(size: 14, weight: .semibold))
+                                Text(mode.displayName)
+                                    .font(.system(size: 14, weight: .semibold))
+                            }
+                            .foregroundColor(selectedMode == mode ? .white : .gray)
+                            .frame(width: width, height: 40)
+                        }
+                    }
+                }
+            }
+        }
+        .frame(height: 44)
+    }
+}
+
+// MARK: - Compact Tutorial Card
+struct CompactTutorialCard: View {
+    let step: Int
     let icon: String
     let title: String
     let description: String
     
     var body: some View {
-        VStack(spacing: 5) {
-            // Step numarası
+        HStack(spacing: 14) {
+            // Compact step icon
             ZStack {
                 Circle()
                     .fill(
+                        RadialGradient(
+                            colors: [Color("igPink").opacity(0.25), Color.clear],
+                            center: .center,
+                            startRadius: 8,
+                            endRadius: 30
+                        )
+                    )
+                    .frame(width: 60, height: 60)
+                
+                Circle()
+                    .fill(
                         LinearGradient(
-                            colors: [
-                                Color("igPurple"),
-                                Color("igPink")
-                            ],
+                            colors: [Color.white.opacity(0.95), Color.white.opacity(0.8)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         )
                     )
-                    .frame(width: 20, height: 20)
-                
-                Text(number)
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(.white)
-            }
-            
-            // Icon
-            Image(systemName: icon)
-                .font(.system(size: 24))
-                .foregroundColor(Color("igPink"))
-                .padding(.vertical, 2)
-            
-            // Başlık
-            Text(title)
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(.black)
-                .multilineTextAlignment(.center)
-                .lineLimit(1)
-            
-            // Açıklama
-            Text(description)
-                .font(.system(size: 11))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .frame(height: 26)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 5)
-    }
-}
-
-// Custom Segmented Control
-struct CustomSegmentedControl: View {
-    @Binding var selectedOption: SearchSectionView.SearchMode
-    let options: [SearchSectionView.SearchMode]
-    @State private var xOffset: CGFloat = 0
-    @State private var buttonWidth: CGFloat = 0
-    
-    var body: some View {
-        ZStack(alignment: .leading) {
-            // Arka plan
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemGray6))
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 2)
-            
-            // Seçili buton için arkaplan (kayar dikdörtgen)
-            if buttonWidth > 0 {
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color("igPurple"),
-                                Color("igPink"),
-                                Color("igOrange")
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                    .frame(width: buttonWidth)
-                    .offset(x: xOffset)
-                    .padding(2)
-                    .shadow(color: Color("igPink").opacity(0.3), radius: 5, x: 0, y: 2)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.7), value: xOffset)
-            }
-            
-            // Butonlar
-            HStack(spacing: 0) {
-                ForEach(Array(options.enumerated()), id: \.element) { index, option in
-                    Button(action: {
-                        selectedOption = option
-                        withAnimation {
-                            xOffset = CGFloat(index) * buttonWidth
-                        }
-                    }) {
-                        HStack(spacing: 6) {
-                            Image(systemName: option == .url ? "link.circle.fill" : "person.crop.circle.fill")
-                                .font(.system(size: 14, weight: .medium))
-                            
-                            Text(option.displayName)
-                                .font(.system(size: 15, weight: .medium))
-                        }
-                        .foregroundColor(selectedOption == option ? .white : Color.gray.opacity(0.8))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 40)
-                        .contentShape(Rectangle())
-                        .background(
-                            GeometryReader { geo in
-                                Color.clear.onAppear {
-                                    // Her butonun genişliğini hesapla
-                                    let width = geo.size.width
-                                    if buttonWidth == 0 {
-                                        buttonWidth = width
-                                        
-                                        // İlk yükleme için seçili butonun konumunu ayarla
-                                        if let selectedIndex = options.firstIndex(of: selectedOption) {
-                                            xOffset = CGFloat(selectedIndex) * width
-                                        }
-                                    }
-                                }
-                            }
-                        )
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                }
-            }
-        }
-        .frame(height: 44)
-        .padding(.horizontal, 0)
-    }
-}
-
-// Kompakt Page Control
-struct CompactPageControl: View {
-    let numberOfPages: Int
-    @Binding var currentPage: Int
-    
-    var body: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<numberOfPages, id: \.self) { page in
-                if page == currentPage {
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color("igPurple"), Color("igPink")],
-                                startPoint: .leading,
-                                endPoint: .trailing
+                    .frame(width: 46, height: 46)
+                    .overlay(
+                        Circle()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [Color.white, Color("igPink").opacity(0.25)],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
                             )
-                        )
-                        .frame(width: 12, height: 4)
-                } else {
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .frame(width: 4, height: 4)
+                    )
+                    .shadow(color: Color("igPink").opacity(0.15), radius: 8, x: 0, y: 4)
+                
+                VStack(spacing: 1) {
+                    Image(systemName: icon)
+                        .font(.system(size: 18, weight: .semibold))
+                        .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+                    
+                    Text("\(step)")
+                        .font(.system(size: 9, weight: .bold))
+                        .foregroundColor(Color("igPink"))
                 }
             }
+            
+            // Content
+            VStack(alignment: .leading, spacing: 4) {
+                Text(title)
+                    .font(.system(size: 15, weight: .bold))
+                    .foregroundColor(.black.opacity(0.85))
+                
+                Text(description)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(.gray)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            
+            Spacer()
         }
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 18)
+                .fill(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.85), Color.white.opacity(0.65)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.white.opacity(0.8), Color("igPink").opacity(0.15)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1
+                        )
+                )
+                .shadow(color: Color.black.opacity(0.04), radius: 10, x: 0, y: 5)
+        )
+        .padding(.horizontal, 4)
     }
 }

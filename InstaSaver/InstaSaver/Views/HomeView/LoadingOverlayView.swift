@@ -2,7 +2,7 @@
 //  LoadingOverlayView.swift
 //  InstaSaver
 //
-//  Created by Baki Uçan on 6.01.2025.
+//  Simple loading overlay
 //
 
 import SwiftUI
@@ -12,7 +12,6 @@ struct LoadingOverlayView: View {
     @State private var currentMessageIndex = 0
     @State private var timer: Timer?
     
-    // Bilgilendirici mesajlar - belirli sürelerde değişecek
     private let loadingMessages: [String] = [
         NSLocalizedString("Fetching video info...", comment: ""),
         NSLocalizedString("Processing content...", comment: ""),
@@ -31,7 +30,7 @@ struct LoadingOverlayView: View {
                 .edgesIgnoringSafeArea(.all)
             
             VStack(spacing: 24) {
-                // Custom Loading Animation
+                // Simple Loading Animation
                 ZStack {
                     Circle()
                         .stroke(lineWidth: 4)
@@ -42,10 +41,7 @@ struct LoadingOverlayView: View {
                         .trim(from: 0, to: 0.7)
                         .stroke(
                             LinearGradient(
-                                colors: [
-                                    Color("igPurple"),
-                                    Color("igOrange")
-                                ],
+                                colors: [Color("igPurple"), Color("igOrange")],
                                 startPoint: .leading,
                                 endPoint: .trailing
                             ),
@@ -68,18 +64,16 @@ struct LoadingOverlayView: View {
                 }
                 
                 VStack(spacing: 8) {
-                    // Ana mesaj - animasyonlu geçiş
                     Text(currentMessage)
                         .font(.system(size: 17, weight: .semibold))
-                    .foregroundColor(.white)
+                        .foregroundColor(.white)
                         .multilineTextAlignment(.center)
                         .transition(.opacity.combined(with: .scale(scale: 0.95)))
-                        .id(currentMessageIndex) // ID değiştiğinde animasyon tetiklenir
-                
-                    // Alt mesaj
+                        .id(currentMessageIndex)
+                    
                     Text(NSLocalizedString("Please wait", comment: ""))
                         .font(.system(size: 14, weight: .regular))
-                    .foregroundColor(.white.opacity(0.7))
+                        .foregroundColor(.white.opacity(0.7))
                 }
                 .animation(.easeInOut(duration: 0.3), value: currentMessageIndex)
             }
@@ -107,7 +101,6 @@ struct LoadingOverlayView: View {
     }
     
     private func startMessageRotation() {
-        // İlk mesajı göster, sonra her 3 saniyede bir değiştir
         timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
             withAnimation(.easeInOut(duration: 0.3)) {
                 currentMessageIndex = (currentMessageIndex + 1) % loadingMessages.count

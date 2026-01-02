@@ -1,100 +1,145 @@
 // CustomTabBar.swift
+// Glassmorphic Tab Bar - HomeView uyumlu tasarım
 
 import SwiftUI
 
 struct CustomTabBar: View {
     @Binding var currentTab: Tab
-    @State private var hoveredTab: Tab?
     
     private let instagramGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink"),
-            Color("igOrange")
-        ],
+        colors: [Color("igPurple"), Color("igPink"), Color("igOrange")],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
     var body: some View {
-        HStack(spacing: 35) {
+        HStack(spacing: 0) {
             ForEach(Tab.allCases, id: \.self) { tab in
-                TabButton(
+                GlassTabButton(
                     tab: tab,
-                    currentTab: $currentTab,
-                    hoveredTab: $hoveredTab,
-                    gradient: instagramGradient
+                    isSelected: currentTab == tab,
+                    gradient: instagramGradient,
+                    onTap: {
+                        currentTab = tab
+                    }
                 )
             }
         }
-        .padding(.horizontal, 30)
-        .padding(.vertical, 15)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(glassmorphicBackground)
+        .padding(.horizontal, 16)
+        .padding(.bottom, 4)
+    }
+    
+    // MARK: - Glassmorphic Background
+    private var glassmorphicBackground: some View {
+        ZStack {
+            // Frosted glass base
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.92), Color.white.opacity(0.85)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            
+            // Subtle gradient tint
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color("igPurple").opacity(0.04),
+                            Color("igPink").opacity(0.03),
+                            Color("igOrange").opacity(0.02)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
+            
+            // Border
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        colors: [Color.white.opacity(0.5), Color.white.opacity(0.2), Color("igPink").opacity(0.1)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+        }
+        .shadow(color: Color.black.opacity(0.08), radius: 15, x: 0, y: -4)
+        .shadow(color: Color("igPink").opacity(0.08), radius: 20, x: 0, y: -6)
     }
 }
 
-struct TabButton: View {
+// MARK: - Glass Tab Button
+struct GlassTabButton: View {
     let tab: Tab
-    @Binding var currentTab: Tab
-    @Binding var hoveredTab: Tab?
+    let isSelected: Bool
     let gradient: LinearGradient
+    let onTap: () -> Void
     
     var body: some View {
-        Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                currentTab = tab
-            }
-        } label: {
-            VStack(spacing: 6) {
+        Button(action: onTap) {
+            VStack(spacing: 4) {
                 ZStack {
-                    // Floating effect shadow for inactive state
-                    if currentTab != tab {
-                        Circle()
-                            .fill(.white)
-                            .frame(width: 50, height: 50)
-                            .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-                            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 2)
-                            .overlay(
-                                Circle()
-                                    .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                            )
-                    }
-                    
-                    // Active state with gradient and enhanced shadow
-                    if currentTab == tab {
+                    // Icon container
+                    if isSelected {
+                        // Selected state - gradient circle
                         Circle()
                             .fill(gradient)
-                            .frame(width: 50, height: 50)
-                            .shadow(color: Color("igPink").opacity(0.3), radius: 10, x: 0, y: 5)
-                            .shadow(color: Color("igPurple").opacity(0.2), radius: 4, x: 0, y: 2)
+                            .frame(width: 44, height: 44)
                             .overlay(
                                 Circle()
-                                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                                    .fill(
+                                        LinearGradient(
+                                            colors: [Color.white.opacity(0.3), Color.white.opacity(0.1), Color.clear],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        )
+                                    )
                             )
-                            .matchedGeometryEffect(id: "TAB", in: namespace)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                            )
+                            .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
+                    } else {
+                        // Unselected state - subtle glass
+                        Circle()
+                            .fill(Color.white.opacity(0.4))
+                            .frame(width: 44, height: 44)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+                            )
                     }
                     
+                    // Icon
                     Image(systemName: tab.icon)
-                        .font(.system(size: 22, weight: currentTab == tab ? .semibold : .medium))
-                        .foregroundColor(currentTab == tab ? .white : Color(.systemGray))
+                        .font(.system(size: 20, weight: isSelected ? .semibold : .medium))
+                        .foregroundColor(isSelected ? .white : Color.gray.opacity(0.7))
                 }
-                .offset(y: hoveredTab == tab ? -5 : 0)
                 
+                // Label
                 Text(tab.title)
-                    .font(.system(size: 12, weight: currentTab == tab ? .medium : .regular))
-                    .foregroundColor(currentTab == tab ? Color("igPink") : Color(.systemGray))
-                    .opacity(hoveredTab == tab ? 0.5 : 1.0)
+                    .font(.system(size: 11, weight: isSelected ? .semibold : .medium))
+                    .foregroundColor(isSelected ? Color("igPink") : Color.gray.opacity(0.7))
             }
+            .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
-            .scaleEffect(hoveredTab == tab ? 1.1 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.7), value: hoveredTab)
         }
         .buttonStyle(PlainButtonStyle())
-        .onHover { isHovered in
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                hoveredTab = isHovered ? tab : nil
-            }
-        }
     }
-    
-    @Namespace private var namespace
+}
+
+#Preview {
+    VStack {
+        Spacer()
+        CustomTabBar(currentTab: .constant(.home))
+    }
+    .background(Color.gray.opacity(0.1))
 }

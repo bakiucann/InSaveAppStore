@@ -33,4 +33,4 @@ enum Tab: String, CaseIterable {
             return "clock.fill"
         }
     }
-} 
+}
