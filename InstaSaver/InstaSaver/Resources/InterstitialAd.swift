@@ -5,6 +5,7 @@ import GoogleMobileAds
 class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
     @Published var interstitial: GADInterstitialAd?
     @Published var isLoadingAd: Bool = false // Loading state for UI
+    @Published var isLoadingAdForFirstSearch: Bool = false // İlk aramada reklam yükleniyor mu?
     
     let adUnitID: String = "ca-app-pub-9288291055014999/6789517081"
     var rootViewController: UIViewController?
@@ -57,15 +58,18 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
     private var isLoading = false
     private var loadAttempts = 0
     private let maxAttempts = 5
-    private let retryInterval: TimeInterval = 0.5
+    private let retryInterval: TimeInterval = 0.3 // Daha hızlı retry için 0.3 saniye
     
     // Pending show request flag - when ad is requested but not yet loaded
     // rootViewController and completion are already stored as class properties
     private var hasPendingShowRequest = false
+    private var skipCooldownForPending = false // İlk aramada cooldown'u atla
+    private var isFirstSearchRequest = false // İlk aramada reklam zorunlu
     
     // Timeout management
     private var timeoutWorkItem: DispatchWorkItem?
     private let adTimeout: TimeInterval = 2.0 // 2 seconds timeout (reduced from 5)
+    private let firstSearchAdTimeout: TimeInterval = 8.0 // İlk aramada reklam için 8 saniye timeout
     
     override init() {
         super.init()
@@ -99,14 +103,22 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
                 } else {
                     // Reset attempts after reaching max
                     self.loadAttempts = 0
-                    // If there was a pending request and we failed to load, complete it
+                    // If there was a pending request and we failed to load
                     if self.hasPendingShowRequest {
-                        print("❌ Failed to load ad after max attempts, completing pending request")
-                        self.hasPendingShowRequest = false
-                        let savedCompletion = self.completion
-                        self.completion = nil
-                        DispatchQueue.main.async {
-                            savedCompletion?()
+                        // İlk aramada reklam zorunlu ise, timeout beklesin
+                        // Değilse hemen completion çağır
+                        if !self.isFirstSearchRequest {
+                            print("❌ Failed to load ad after max attempts, completing pending request")
+                            self.hasPendingShowRequest = false
+                            self.skipCooldownForPending = false
+                            let savedCompletion = self.completion
+                            self.completion = nil
+                            DispatchQueue.main.async {
+                                savedCompletion?()
+                            }
+                        } else {
+                            print("⏱️ First search ad failed to load, waiting for timeout...")
+                            // Timeout zaten ayarlanmış, o bekleyecek
                         }
                     }
                 }
@@ -122,6 +134,11 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             // If there's a pending show request, automatically show the ad
             if self.hasPendingShowRequest {
                 print("🔄 Pending show request found, automatically showing ad after load")
+                // Timeout'u iptal et çünkü reklam yüklendi
+                self.timeoutWorkItem?.cancel()
+                DispatchQueue.main.async {
+                    self.isLoadingAdForFirstSearch = false // Loading overlay'i gizle
+                }
                 self.hasPendingShowRequest = false
                 // rootViewController and completion are already set from showAd call
                 // Run safety checks again before showing
@@ -134,29 +151,43 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
         // Re-run safety checks
         if SubscriptionManager.shared.isUserSubscribed {
             print("⚠️ User is subscribed, skipping ad display (pending request)")
+            timeoutWorkItem?.cancel()
             hasPendingShowRequest = false
+            skipCooldownForPending = false
+            isFirstSearchRequest = false
             let savedCompletion = self.completion
             self.completion = nil
             savedCompletion?()
             return
         }
         
-        if let lastShowTime = lastAdShowTime {
-            let timeSinceLastAd = Date().timeIntervalSince(lastShowTime)
-            if timeSinceLastAd < 60 {
-                let remainingTime = Int(60 - timeSinceLastAd)
-                print("⚠️ Ad cooldown active. Please wait \(remainingTime) more seconds. Skipping ad (pending request).")
-                hasPendingShowRequest = false
-                let savedCompletion = self.completion
-                self.completion = nil
-                savedCompletion?()
-                return
+        // Cooldown kontrolü - eğer skipCooldownForPending true ise atla
+        if !skipCooldownForPending {
+            if let lastShowTime = lastAdShowTime {
+                let timeSinceLastAd = Date().timeIntervalSince(lastShowTime)
+                if timeSinceLastAd < 60 {
+                    let remainingTime = Int(60 - timeSinceLastAd)
+                    print("⚠️ Ad cooldown active. Please wait \(remainingTime) more seconds. Skipping ad (pending request).")
+                    timeoutWorkItem?.cancel()
+                    hasPendingShowRequest = false
+                    skipCooldownForPending = false
+                    isFirstSearchRequest = false
+                    let savedCompletion = self.completion
+                    self.completion = nil
+                    savedCompletion?()
+                    return
+                }
             }
+        } else {
+            print("🔄 Skipping cooldown check for pending request (first search)")
         }
         
         if dailyAdCount >= 15 {
             print("⚠️ Daily ad limit reached (15). Skipping ad (pending request).")
+            timeoutWorkItem?.cancel()
             hasPendingShowRequest = false
+            skipCooldownForPending = false
+            isFirstSearchRequest = false
             let savedCompletion = self.completion
             self.completion = nil
             savedCompletion?()
@@ -165,10 +196,13 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
         
         // All checks passed, show the ad
         print("✅ All safety checks passed for pending request. Showing ad.")
+        timeoutWorkItem?.cancel() // Timeout'u iptal et çünkü reklam gösterilecek
+        skipCooldownForPending = false // Reset flag
+        isFirstSearchRequest = false
         tryPresentAd() // This will clear hasPendingShowRequest flag
     }
     
-    func showAd(from rootViewController: UIViewController, completion: @escaping () -> Void) {
+    func showAd(from rootViewController: UIViewController, completion: @escaping () -> Void, skipCooldown: Bool = false) {
         self.completion = completion
         self.rootViewController = rootViewController
         
@@ -182,14 +216,19 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
         }
         
         // Check 2: Cooldown (1 minute = 60 seconds)
-        if let lastShowTime = lastAdShowTime {
-            let timeSinceLastAd = Date().timeIntervalSince(lastShowTime)
-            if timeSinceLastAd < 60 {
-                let remainingTime = Int(60 - timeSinceLastAd)
-                print("⚠️ Ad cooldown active. Please wait \(remainingTime) more seconds. Skipping ad.")
-                completion()
-                return
+        // skipCooldown = true ise cooldown kontrolünü atla (ilk arama için)
+        if !skipCooldown {
+            if let lastShowTime = lastAdShowTime {
+                let timeSinceLastAd = Date().timeIntervalSince(lastShowTime)
+                if timeSinceLastAd < 60 {
+                    let remainingTime = Int(60 - timeSinceLastAd)
+                    print("⚠️ Ad cooldown active. Please wait \(remainingTime) more seconds. Skipping ad.")
+                    completion()
+                    return
+                }
             }
+        } else {
+            print("🔄 Skipping cooldown check for first search - ad will be shown")
         }
         
         // Check 3: Daily Limit (15 ads per day)
@@ -203,7 +242,7 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
         print("✅ All safety checks passed. Proceeding with ad display.")
         
         // Check if ad is ready BEFORE showing any loading indicator
-        if let interstitial = interstitial {
+        if interstitial != nil {
             // Ad is ready, present immediately (no loading overlay needed)
             tryPresentAd()
         } else {
@@ -211,11 +250,38 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             // When ad loads, it will automatically show
             print("⚠️ Ad not ready. Saving show request and loading ad...")
             hasPendingShowRequest = true
+            skipCooldownForPending = skipCooldown // İlk aramada cooldown'u atla
+            isFirstSearchRequest = skipCooldown // İlk aramada reklam zorunlu
             // rootViewController and completion are already stored as class properties
             
             // Start loading if not already loading
             if !isLoading {
                 loadInterstitial()
+            }
+            
+            // İlk aramada reklam yüklenemezse timeout ekle
+            // Bu sayede kullanıcı sonsuz beklemeye düşmez
+            if isFirstSearchRequest {
+                print("⏱️ Setting timeout for first search ad loading (\(firstSearchAdTimeout) seconds)")
+                DispatchQueue.main.async {
+                    self.isLoadingAdForFirstSearch = true // Loading overlay'i göster
+                }
+                timeoutWorkItem = DispatchWorkItem { [weak self] in
+                    guard let self = self else { return }
+                    if self.hasPendingShowRequest {
+                        print("⏱️ First search ad loading timeout - opening PreviewView anyway")
+                        DispatchQueue.main.async {
+                            self.isLoadingAdForFirstSearch = false // Loading overlay'i gizle
+                        }
+                        self.hasPendingShowRequest = false
+                        self.skipCooldownForPending = false
+                        self.isFirstSearchRequest = false
+                        let savedCompletion = self.completion
+                        self.completion = nil
+                        savedCompletion?()
+                    }
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + firstSearchAdTimeout, execute: timeoutWorkItem!)
             }
             
             // Don't call completion yet - wait for ad to load and show
@@ -229,7 +295,12 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             print("⚠️ No ad available to show or no root view controller, completing immediately")
             isLoadingAd = false
             timeoutWorkItem?.cancel()
+            DispatchQueue.main.async {
+                self.isLoadingAdForFirstSearch = false // Loading overlay'i gizle
+            }
             hasPendingShowRequest = false // Clear pending request flag
+            skipCooldownForPending = false
+            isFirstSearchRequest = false
             let savedCompletion = completion
             completion = nil
             savedCompletion?() // Complete immediately - don't block user
@@ -237,11 +308,14 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
             return
         }
         
-        // Clear pending request flag since we're showing the ad now
+        // Clear pending request flags since we're showing the ad now
+        timeoutWorkItem?.cancel() // Timeout'u iptal et
+        DispatchQueue.main.async {
+            self.isLoadingAdForFirstSearch = false // Loading overlay'i gizle
+        }
         hasPendingShowRequest = false
-        
-        // Cancel timeout since we're presenting
-        timeoutWorkItem?.cancel()
+        skipCooldownForPending = false
+        isFirstSearchRequest = false
         
         // İyileştirilmiş sunum kontrolü
         if rootViewController.presentedViewController != nil {
@@ -299,6 +373,11 @@ class InterstitialAd: NSObject, GADFullScreenContentDelegate, ObservableObject {
         
         // Cancel any pending timeout
         timeoutWorkItem?.cancel()
+        
+        // Clean up flags
+        hasPendingShowRequest = false
+        skipCooldownForPending = false
+        isFirstSearchRequest = false
         
         // Reset loading state
         isLoadingAd = false

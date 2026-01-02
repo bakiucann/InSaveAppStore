@@ -19,7 +19,7 @@ struct HomeView: View {
     @State private var showErrorAlert = false
     @State private var errorAlertMessage: String = ""
     
-    let interstitial = InterstitialAd()
+    @ObservedObject var interstitial = InterstitialAd()
     
     @Environment(\.screenSize) var screenSize
     
@@ -56,10 +56,10 @@ struct HomeView: View {
                             LoadingOverlayView()
                     }
                     
-                        // Ad Loading Overlay - Reklam yüklenirken tüm ekranı kaplar
-                        if interstitial.isLoadingAd {
+                        // Ad Loading Overlay - İlk aramada reklam yüklenirken tüm ekranı kaplar
+                        if interstitial.isLoadingAdForFirstSearch {
                             AdLoadingOverlayView()
-                                .zIndex(999)
+                                .zIndex(999) // Overlay zaten allowsHitTesting(true) kullanıyor, tıklamaları engeller
                     }
                 }
                 .contentShape(Rectangle())
@@ -143,16 +143,22 @@ struct HomeView: View {
         }
         .onChange(of: videoViewModel.video) { newValue in
             guard let _ = newValue else { return }
-            showPreview = true
             
-            // Başarılı arama sonrası reklam göster (POST-action)
-            // Video başarıyla yüklendi, 0.8 saniye sonra reklam göster
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            // ÖNEMLİ: Reklamı PreviewView açılmadan ÖNCE göster
+            // Bu, kullanıcı "İndir" butonuna tıklarken reklam çıkmasını önler
+            // Reklam kapandıktan sonra PreviewView'ı aç
+            // İlk aramada cooldown kontrolünü atla (skipCooldown: true)
                 if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
-                    interstitial.showAd(from: rootViewController) {
-                        print("✅ Ad shown after successful video search")
+                interstitial.showAd(from: rootViewController, completion: {
+                    print("✅ Ad shown after successful video search, now opening PreviewView")
+                    // Reklam kapandıktan sonra PreviewView'ı aç
+                    DispatchQueue.main.async {
+                        showPreview = true
                     }
-                }
+                }, skipCooldown: true)
+            } else {
+                // RootViewController bulunamazsa direkt PreviewView'ı aç
+                showPreview = true
             }
         }
         .onChange(of: videoViewModel.errorMessage) { newValue in

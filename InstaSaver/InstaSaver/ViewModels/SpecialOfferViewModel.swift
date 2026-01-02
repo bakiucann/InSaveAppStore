@@ -203,20 +203,22 @@ class SpecialOfferViewModel: ObservableObject {
     func fetchSpecialOfferPackages() {
         // Use background task with timeout
         Task.detached(priority: .utility) { [weak self] in
+            guard let self = self else { return }
             await withTaskGroup(of: Void.self) { group in
                 // Start the actual operation
                 group.addTask {
                     do {
                         let offerings = try await Purchases.shared.offerings()
                         if let discountOffering = offerings.offering(identifier: "discount") {
+                            let fetchedPackages = discountOffering.availablePackages
                             await MainActor.run {
-                                self?.packages = discountOffering.availablePackages
-                                if let annualPackage = self?.packages.first(where: { 
+                                self.packages = fetchedPackages
+                                if let annualPackage = fetchedPackages.first(where: { 
                                     $0.storeProduct.subscriptionPeriod?.unit == .year 
                                 }) {
-                                    self?.selectedPackage = annualPackage
+                                    self.selectedPackage = annualPackage
                                 } else {
-                                    self?.selectedPackage = self?.packages.first
+                                    self.selectedPackage = fetchedPackages.first
                                 }
                             }
                         }

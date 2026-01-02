@@ -95,6 +95,9 @@ class DownloadManager: ObservableObject {
     
     @Published var activeDownloads: [String: DownloadStatus] = [:]
     
+    // Retry mekanizması için maksimum deneme sayısı
+    private let maxRetryCount = 3
+    
     struct DownloadStatus {
         var progress: Double
         var isCompleted: Bool
@@ -110,9 +113,9 @@ class DownloadManager: ObservableObject {
     private let sessionManager: Session = {
         let configuration = URLSessionConfiguration.default
         
-        // Timeout sürelerini optimize et
-        configuration.timeoutIntervalForRequest = 60 // Daha kısa süre, yanıt alınamayan istekler için
-        configuration.timeoutIntervalForResource = 300 // Toplam indirme süresi
+        // Timeout sürelerini optimize et - yavaş internet için daha uzun süreler
+        configuration.timeoutIntervalForRequest = 120 // Yavaş internet için 2 dakika
+        configuration.timeoutIntervalForResource = 600 // Toplam indirme süresi 10 dakika (yavaş internet için)
         
         // Performans iyileştirmeleri
         configuration.waitsForConnectivity = true
@@ -142,9 +145,6 @@ class DownloadManager: ObservableObject {
             serverTrustManager: CustomServerTrustManager()
         )
     }()
-    
-    // Yeniden deneme sayısı
-    private let maxRetryCount = 3
     
     private init() {
         // Singleton init
@@ -282,23 +282,35 @@ class DownloadManager: ObservableObject {
                 }
                 
             case .failure(let error):
-                // Hata durumunda
-                print("❌ İndirme hatası: \(error.localizedDescription)")
+                // Hata durumunda - yavaş internet için özel kontrol
+                let nsError = error as NSError
+                print("❌ İndirme hatası: \(error.localizedDescription), domain: \(nsError.domain), code: \(nsError.code)")
+                
+                // Yavaş internet durumunda timeout hatalarını tekrar dene
+                // NSURLErrorTimedOut = -1001
+                let isTimeoutError = nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorTimedOut
                 
                 // Özel retry mekanizması
                 let currentRetryCount = self.activeDownloads[urlString]?.retryCount ?? 0
                 
-                if currentRetryCount < self.maxRetryCount {
-                    print("🔄 Yeniden deneniyor (\(currentRetryCount + 1)/\(self.maxRetryCount))...")
+                // Timeout hatalarında daha fazla retry yap
+                let maxRetries = isTimeoutError ? (self.maxRetryCount + 2) : self.maxRetryCount
+                
+                if currentRetryCount < maxRetries {
+                    // Retry count'u artır
+                    self.activeDownloads[urlString]?.retryCount = currentRetryCount + 1
                     
-                    // Mevcut indirmeyi kaldır ve yeniden deneyin
-                    self.activeDownloads.removeValue(forKey: urlString)
+                    print("🔄 Yeniden deneniyor (\(currentRetryCount + 1)/\(maxRetries))... \(isTimeoutError ? "(Timeout hatası)" : "")")
                     
-                    // Kısa bir gecikme ile yeniden deneyin
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    // Timeout hatalarında daha uzun gecikme (yavaş internet için)
+                    let delay = isTimeoutError ? 2.0 : 1.0
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        // Mevcut indirmeyi kaldırmadan devam et (aynı download'u kullan)
                         self.downloadContent(urlString: urlString, isPhoto: isPhoto, progressHandler: progressHandler, completion: completion)
                     }
                 } else {
+                    // Gerçekten başarısız oldu
+                    print("❌ Maksimum retry sayısına ulaşıldı, indirme başarısız")
                     DispatchQueue.main.async {
                         self.activeDownloads[urlString]?.error = error
                         completion(.failure(error))
@@ -365,7 +377,7 @@ class DownloadManager: ObservableObject {
     // MARK: - SSL Certificate Validation Disabled for Downloads
     
     // CustomServerTrustManager, tüm SSL sertifika doğrulamalarını devre dışı bırakan özel sınıf
-    class CustomServerTrustManager: ServerTrustManager {
+    class CustomServerTrustManager: ServerTrustManager, @unchecked Sendable {
         init() {
             // Instagram ve Facebook CDN alanlarını içeren evaluator sözlüğü
             // SSL sertifika doğrulaması tamamen devre dışı

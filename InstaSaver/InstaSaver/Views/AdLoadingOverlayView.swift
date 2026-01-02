@@ -13,7 +13,8 @@ struct AdLoadingOverlayView: View {
         ZStack {
             // Semi-transparent black background covering entire screen
             Color.black.opacity(0.6)
-                .edgesIgnoringSafeArea(.all)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .ignoresSafeArea(.all)
             
             // Content centered on screen
             VStack(spacing: 20) {
@@ -28,6 +29,8 @@ struct AdLoadingOverlayView: View {
                     .foregroundColor(.white)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea(.all)
         // Ensure it blocks all touch interactions
         .allowsHitTesting(true)
     }

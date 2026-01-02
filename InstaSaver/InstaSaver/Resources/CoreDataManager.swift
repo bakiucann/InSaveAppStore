@@ -63,12 +63,20 @@ class CoreDataManager {
         savedVideo.date = date
         savedVideo.type = type
         
+        // Save the objectID to fetch it later in async context (Sendable-safe)
+        let objectID = savedVideo.objectID
+        
         // URL'den kapak görselini asenkron bir şekilde indir
         if let coverUrl = URL(string: originCover) {
             URLSession.shared.dataTask(with: coverUrl) { data, response, error in
                 if let data = data {
                     DispatchQueue.main.async {
-                        savedVideo.coverImageData = data
+                        // Fetch the object again using objectID to avoid Sendable issues
+                        guard let video = context.object(with: objectID) as? SavedVideo else {
+                            print("Video object not found in context")
+                            return
+                        }
+                        video.coverImageData = data
                         do {
                             try context.save()
                             print("Video/Story başarıyla kaydedildi.")

@@ -230,11 +230,14 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     private let umpTimeout: TimeInterval = 3.0 // 3 seconds max
     
     // Helper function to initialize Mobile Ads SDK
-    func initializeMobileAdsSDK() {
+    func initializeMobileAdsSDK(completion: (() -> Void)? = nil) {
         // Initialize the Google Mobile Ads SDK.
         DispatchQueue.main.async {
-             GADMobileAds.sharedInstance().start(completionHandler: nil)
+             GADMobileAds.sharedInstance().start { initializationStatus in
              print("✅ Google Mobile Ads SDK initialized after UMP.")
+                 // SDK hazır olduğunda completion'ı çağır
+                 completion?()
+             }
         }
     }
     
@@ -302,11 +305,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     /// Complete UMP flow - initialize ads SDK and post notification
     private func completeUMPFlow() {
         // Initialize Google Mobile Ads SDK
-        self.initializeMobileAdsSDK()
-        
-        // Post notification that UMP flow is complete
+        // SDK hazır olduğunda notification gönder (reklam yükleme için kritik)
+        self.initializeMobileAdsSDK {
+            // SDK tamamen hazır olduğunda notification gönder
+            // Bu sayede reklam yükleme işlemi SDK hazır olduktan sonra başlar
         NotificationCenter.default.post(name: .umpFlowDidComplete, object: nil)
-        print("✅ Posted umpFlowDidComplete notification.")
+            print("✅ Posted umpFlowDidComplete notification after SDK initialization.")
+        }
     }
 
     func application(
