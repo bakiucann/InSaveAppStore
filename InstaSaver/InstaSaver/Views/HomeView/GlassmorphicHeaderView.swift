@@ -43,7 +43,7 @@ struct GlassmorphicHeaderView: View {
     
     // MARK: - Compact Header Background
     private var headerBackground: some View {
-        ZStack {
+                ZStack {
             Capsule()
                 .fill(
                     LinearGradient(
@@ -53,19 +53,19 @@ struct GlassmorphicHeaderView: View {
                     )
                 )
             
-            Capsule()
-                .fill(
-                    LinearGradient(
-                        colors: [
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [
                             Color("igPurple").opacity(0.04),
                             Color("igPink").opacity(0.03),
                             Color("igOrange").opacity(0.02)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-            
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            )
+                        )
+                    
             Capsule()
                 .fill(
                     LinearGradient(
@@ -77,16 +77,16 @@ struct GlassmorphicHeaderView: View {
                 .offset(x: shimmerOffset)
                 .mask(Capsule())
             
-            Capsule()
-                .stroke(
-                    LinearGradient(
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
                         colors: [Color.white.opacity(0.5), Color.white.opacity(0.2), Color("igPink").opacity(0.08)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
                     lineWidth: 1
-                )
-        }
+                        )
+                }
         .shadow(color: Color.black.opacity(0.06), radius: 15, x: 0, y: 6)
         .shadow(color: Color("igPink").opacity(0.08), radius: 20, x: 0, y: 8)
         .onAppear {
@@ -264,7 +264,7 @@ struct GlassmorphicHeaderView: View {
             startPoint: .top,
             endPoint: .bottom
         )
-        .ignoresSafeArea()
+            .ignoresSafeArea()
         
         VStack {
             GlassmorphicHeaderView(

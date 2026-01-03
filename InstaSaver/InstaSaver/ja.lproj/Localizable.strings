@@ -134,14 +134,19 @@
 "Daily Download Limit" = "1日のダウンロード制限";
 "Downloads Today" = "今日のダウンロード";
 "Remaining Today" = "今日の残り";
+"Today" = "今日";
+"Left" = "残り";
 "Get unlimited downloads" = "無制限ダウンロードを取得";
 "Quick Actions" = "クイックアクション";
 "Restore" = "復元";
+"Share" = "シェア";
 "Share App" = "アプリをシェア";
 "Help" = "ヘルプ";
 "Support" = "サポート";
 "Privacy Policy" = "プライバシーポリシー";
 "Terms of Use" = "利用規約";
+"Privacy Options" = "プライバシー設定";
+"Restoring..." = "復元中...";
 
 /* Input */
 "Input Required" = "入力が必要です";
@@ -236,3 +241,14 @@
 /* New Error Messages - Private Account & Timeout */
 "error_private_or_server" = "ダウンロードに失敗しました。Instagramアカウントが公開されていることを確認してください。非公開アカウントからはダウンロードできません。";
 "error_connection_timeout" = "接続がタイムアウトしました。インターネット接続を確認して、もう一度お試しください。";
+
+/* ShareView */
+"Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨" = "ねえ！InSaveをチェックしてね - 最高のInstagram動画ダウンローダーアプリ。お気に入りの動画を簡単に保存！📱✨";
+"Instagram Video Downloader" = "Instagram動画ダウンローダー";
+"Fast" = "高速";
+"Easy" = "簡単";
+"Safe" = "安全";
+"Share via" = "共有";
+"Messages" = "メッセージ";
+"More" = "その他";
+"App Link" = "アプリリンク";

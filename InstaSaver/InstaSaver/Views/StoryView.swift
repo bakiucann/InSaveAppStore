@@ -31,73 +31,49 @@ struct StoryView: View {
     
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(
-                colors: [
-                    Color.white,
-                    Color("igPurple").opacity(0.05)
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            // MARK: - Animated Background
+            animatedBackground
             
             // Ana içerik
             VStack(spacing: 0) {
-                // Custom NavBar
-                HStack {
-                    // Back button
-                    backButton
-                    
-                    Spacer()
-                    
-                    // Title
-                    toolbarTitle
-                    
-                    Spacer()
-                    
-                    // Sağ tarafa boşluk bırakmak için
-                    Circle()
-                        .fill(Color.clear)
-                        .frame(width: 36, height: 36)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .zIndex(1)
+                // Custom Glassmorphic NavBar
+                glassmorphicNavBar
                 
                 // Scroll View ve içindeki elemanlar
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 24) {
+                    VStack(spacing: 20) {
                         // Story Preview Card
                         TabView(selection: $currentPage) {
                             ForEach(Array(stories.enumerated()), id: \.element.id) { index, story in
-                                StoryPreviewCard(story: story)
+                                GlassmorphicStoryPreviewCard(story: story)
                                     .tag(index)
                             }
                         }
                         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-                        .frame(height: UIScreen.main.bounds.height * 0.6)
-                        .customPageIndicator(numberOfPages: stories.count, currentPage: $currentPage)
+                        .frame(height: UIScreen.main.bounds.height * 0.55)
+                        
+                        // Page Indicator
+                        storyPageIndicator
                         
                         // Action Buttons
-                        VStack(spacing: 12) {
+                        VStack(spacing: 10) {
                             if configManager.shouldShowDownloadButtons {
                                 if !isFromHistory {
                                     // Bulk Download Button
                                     if subscriptionManager.isUserSubscribed {
-                                        ActionButton(
+                                        GlassmorphicActionButton(
                                             title: NSLocalizedString("Download Bulk", comment: ""),
                                             icon: "square.and.arrow.down.fill",
-                                            gradient: [Color("igPurple"), Color("igPink")],
+                                            isPrimary: true,
                                             action: {
                                                 downloadAllStories()
                                             }
                                         )
                                     } else {
-                                        ActionButton(
+                                        GlassmorphicActionButton(
                                             title: NSLocalizedString("Download Bulk", comment: ""),
                                             icon: "square.and.arrow.down.fill",
-                                            gradient: [Color("igPurple"), Color("igPink")],
+                                            isPrimary: true,
                                             action: {
                                                 showPaywallView = true
                                             }
@@ -106,10 +82,10 @@ struct StoryView: View {
                                 }
                                 
                                 // Download Button
-                                ActionButton(
+                                GlassmorphicActionButton(
                                     title: NSLocalizedString("Download", comment: ""),
                                     icon: "arrow.down.circle",
-                                    gradient: [Color("igPurple").opacity(0.8), Color("igPink").opacity(0.8)],
+                                    isPrimary: false,
                                     action: {
                                         if let story = stories[safe: currentPage] {
                                             downloadStory(story)
@@ -124,14 +100,14 @@ struct StoryView: View {
                                     .padding(.top, 4)
                             }
                         }
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, 16)
                     }
-                    .padding(.top, 4)
+                    .padding(.top, 12)
                     .padding(.bottom, 32)
                 }
             }
             
-            // Overlay Views - Tüm ekranı kaplamalı
+            // Overlay Views
             if isLoading {
                 if showingBulkProgress {
                     bulkDownloadLoadingOverlay
@@ -139,15 +115,18 @@ struct StoryView: View {
                     loadingOverlay
                 }
             }
-            if showSuccessMessage { successMessage }
             
-            // Ad Loading Overlay - Reklam yüklenirken tüm ekranı kaplar
+            if showSuccessMessage { 
+                successMessage 
+            }
+            
+            // Ad Loading Overlay
             if interstitialAd.isLoadingAd {
                 AdLoadingOverlayView()
                     .zIndex(999)
             }
         }
-        .navigationBarHidden(true) // Navigation bar'ı gizle
+        .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showPaywallView) {
             PaywallView()
         }
@@ -155,91 +134,262 @@ struct StoryView: View {
             configManager.reloadConfig()
         }
         .onDisappear {
-            // İndirmeleri iptal et
             downloadManager.cancelAllDownloads()
         }
     }
     
-    private var backButton: some View {
-        GlassmorphicBackButton {
-            presentationMode.wrappedValue.dismiss()
+    // MARK: - Animated Background
+    private var animatedBackground: some View {
+        ZStack {
+            LinearGradient(
+                colors: [
+                    Color.white,
+                    Color("igPurple").opacity(0.02),
+                    Color("igPink").opacity(0.03),
+                    Color.white
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            // Subtle orbs
+            GeometryReader { geometry in
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color("igPurple").opacity(0.08), Color.clear],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 120
+                        )
+                    )
+                    .frame(width: 200, height: 200)
+                    .offset(x: -50, y: 100)
+                    .blur(radius: 40)
+                
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color("igOrange").opacity(0.06), Color.clear],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 100
+                        )
+                    )
+                    .frame(width: 180, height: 180)
+                    .offset(x: geometry.size.width - 80, y: geometry.size.height - 200)
+                    .blur(radius: 50)
+            }
         }
     }
     
-    private var toolbarTitle: some View {
-        Text(NSLocalizedString("Stories", comment: ""))
-            .font(.system(size: 17, weight: .semibold))
-            .foregroundColor(.black.opacity(0.9))
+    // MARK: - Glassmorphic NavBar
+    private var glassmorphicNavBar: some View {
+        HStack {
+            // Back button
+            backButton
+            
+            Spacer()
+            
+            // Title with gradient
+            Text(NSLocalizedString("Stories", comment: ""))
+                .font(.system(size: 17, weight: .bold))
+                .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
+            
+            Spacer()
+            
+            // Placeholder for symmetry
+            Circle()
+                .fill(Color.clear)
+                .frame(width: 38, height: 38)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .background(
+            ZStack {
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.9), Color.white.opacity(0.8)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                Color("igPurple").opacity(0.03),
+                                Color("igPink").opacity(0.02)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                
+                RoundedRectangle(cornerRadius: 20)
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.5), Color("igPink").opacity(0.1)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 1
+                    )
+            }
+            .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+        )
+        .padding(.horizontal, 16)
+        .padding(.top, 8)
     }
     
+    // MARK: - Back Button
+    private var backButton: some View {
+        Button(action: { presentationMode.wrappedValue.dismiss() }) {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.6))
+                    .frame(width: 38, height: 38)
+                    .overlay(
+                        Circle()
+                            .stroke(Color.gray.opacity(0.15), lineWidth: 1)
+                    )
+                
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 16, weight: .semibold))
+                    .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+            }
+        }
+    }
+    
+    // MARK: - Story Page Indicator
+    private var storyPageIndicator: some View {
+        HStack(spacing: 6) {
+            ForEach(0..<stories.count, id: \.self) { index in
+                Capsule()
+                    .fill(currentPage == index ? Color("igPink") : Color.gray.opacity(0.3))
+                    .frame(width: currentPage == index ? 18 : 6, height: 6)
+                    .animation(.spring(response: 0.3), value: currentPage)
+                    .onTapGesture {
+                        currentPage = index
+                    }
+            }
+        }
+        .padding(.vertical, 8)
+    }
+    
+    // MARK: - Loading Overlay
     private var loadingOverlay: some View {
         ZStack {
-            Color.white.opacity(0.5)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 12) {
-                ProgressView(value: singleDownloadProgress)
-                    .progressViewStyle(CircularProgressViewStyle(tint: Color("igPurple")))
-                    .scaleEffect(1.5)
-                    .padding(.bottom, 8)
-                
-                Text("Downloading")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color("igPurple"))
-                
-                Text("\(Int(singleDownloadProgress * 100))%")
-                    .font(.system(size: 18, weight: .bold))
-                    .foregroundColor(Color("igPurple"))
-            }
-            .padding(24)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
-            )
-        }
-    }
-    
-    private var bulkDownloadLoadingOverlay: some View {
-        ZStack {
-            Color.white.opacity(0.5)
+            Color.white.opacity(0.6)
                 .ignoresSafeArea()
             
             VStack(spacing: 16) {
-                ProgressView(value: Double(downloadProgress.current) / Double(downloadProgress.total))
-                    .progressViewStyle(CircularProgressViewStyle(tint: Color("igPurple")))
-                    .scaleEffect(1.5)
-                    .padding(.bottom, 8)
+                ZStack {
+                    Circle()
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 4)
+                        .frame(width: 60, height: 60)
+                    
+                    Circle()
+                        .trim(from: 0, to: singleDownloadProgress)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color("igPurple"), Color("igPink")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ),
+                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                        )
+                        .frame(width: 60, height: 60)
+                        .rotationEffect(.degrees(-90))
                 
-                Text("Downloading Stories...")
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(Color("igPurple"))
+                    Text("\(Int(singleDownloadProgress * 100))%")
+                        .font(.system(size: 14, weight: .bold))
+                        .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+                }
                 
-                Text("\(downloadProgress.current)/\(downloadProgress.total)")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(Color("igPurple"))
+                Text(NSLocalizedString("Downloading...", comment: ""))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.gray)
             }
-            .padding(24)
+            .padding(28)
             .background(
-                RoundedRectangle(cornerRadius: 16)
+                RoundedRectangle(cornerRadius: 20)
                     .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.15), radius: 10, x: 0, y: 5)
+                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
             )
         }
     }
     
-    private var successMessage: some View {
+    // MARK: - Bulk Download Loading Overlay
+    private var bulkDownloadLoadingOverlay: some View {
         ZStack {
-            Color.black.opacity(0.5)
+            Color.white.opacity(0.6)
                 .ignoresSafeArea()
             
-            Text("Story saved successfully!")
-                .font(.system(size: 16, weight: .medium))
+            VStack(spacing: 16) {
+                ZStack {
+                    Circle()
+                        .stroke(Color.gray.opacity(0.2), lineWidth: 4)
+                        .frame(width: 60, height: 60)
+                    
+                    Circle()
+                        .trim(from: 0, to: Double(downloadProgress.current) / Double(max(downloadProgress.total, 1)))
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color("igPurple"), Color("igPink")],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            ),
+                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                        )
+                        .frame(width: 60, height: 60)
+                        .rotationEffect(.degrees(-90))
+                    
+                    VStack(spacing: 2) {
+                        Text("\(downloadProgress.current)")
+                            .font(.system(size: 16, weight: .bold))
+                            .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+                        Text("/\(downloadProgress.total)")
+                            .font(.system(size: 10, weight: .medium))
+                            .foregroundColor(.gray)
+                    }
+                }
+                
+                Text(NSLocalizedString("Downloading Stories...", comment: ""))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.gray)
+            }
+            .padding(28)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+            )
+        }
+    }
+    
+    // MARK: - Success Message
+    private var successMessage: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+            
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 24))
+                    .foregroundColor(.white)
+                
+                Text(NSLocalizedString("Story saved!", comment: ""))
+                    .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
+            }
                 .padding(.horizontal, 24)
                 .padding(.vertical, 16)
                 .background(
-                    RoundedRectangle(cornerRadius: 12)
+                Capsule()
                         .fill(
                             LinearGradient(
                                 colors: [Color("igPurple"), Color("igPink")],
@@ -248,10 +398,12 @@ struct StoryView: View {
                             )
                         )
                 )
-                .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
+            .shadow(color: Color("igPink").opacity(0.3), radius: 12, x: 0, y: 6)
         }
-        .transition(.opacity)
+        .transition(.opacity.combined(with: .scale(scale: 0.9)))
     }
+    
+    // MARK: - Helper Functions (unchanged)
     
     private func startLoading() {
         isLoading = true
@@ -271,7 +423,6 @@ struct StoryView: View {
     }
     
     private func downloadStory(_ story: InstagramStoryModel) {
-        // İndirme limiti kontrolü
         if !subscriptionManager.isUserSubscribed {
             if !CoreDataManager.shared.canDownloadMore() {
                 showPaywallView = true
@@ -279,20 +430,17 @@ struct StoryView: View {
             }
         }
         
-        // İndirme işlemini HEMEN başlat (reklam öncesi değil)
         startDownloadProcess(story)
     }
     
     private func startDownloadProcess(_ story: InstagramStoryModel) {
         startLoading()
         
-        // DownloadManager'ı kullanarak indirme işlemi
         let isPhoto = story.type != "video"
         downloadManager.downloadContent(
             urlString: story.url,
             isPhoto: isPhoto
         ) { progress in
-            // İlerleme güncellemesi
             DispatchQueue.main.async {
                 self.singleDownloadProgress = progress
             }
@@ -302,7 +450,6 @@ struct StoryView: View {
                 
                 switch result {
                 case .success(let fileURL):
-                    // İndirme başarılı, galeriye kaydet
                     if !self.subscriptionManager.isUserSubscribed {
                         CoreDataManager.shared.incrementDailyDownloadCount()
                     }
@@ -313,11 +460,9 @@ struct StoryView: View {
                         self.saveVideoToGallery(from: fileURL)
                     }
                     
-                    // Story bilgilerini Core Data'ya kaydet
                     CoreDataManager.shared.saveStoryInfo(story: story)
                     
                 case .failure(let error):
-                    // Hata durumu
                     print("❌ İndirme hatası: \(error.localizedDescription)")
                     self.showAlert = true
                 }
@@ -335,7 +480,6 @@ struct StoryView: View {
         showingBulkProgress = true
         downloadProgress = (0, stories.count)
         
-        // Toplu indirme işlemi
         Task {
             for (index, story) in stories.enumerated() {
                 await withCheckedContinuation { continuation in
@@ -345,18 +489,15 @@ struct StoryView: View {
                         urlString: story.url,
                         isPhoto: isPhoto
                     ) { progress in
-                        // Tek dosya indirme ilerlemesi - göstermiyoruz
+                        // Single file progress - not shown
                     } completion: { result in
                         DispatchQueue.main.async {
-                            // İndirilen dosya sayısını artır
                             self.downloadProgress.current = index + 1
                             
                             switch result {
                             case .success(let fileURL):
-                                // Story bilgilerini kaydet
                                 CoreDataManager.shared.saveStoryInfo(story: story)
                                 
-                                // Galeriye kaydet
                                 Task {
                                     if isPhoto {
                                         await self.saveImageToGalleryAsync(from: fileURL)
@@ -374,7 +515,6 @@ struct StoryView: View {
                     }
                 }
                 
-                // Her indirme arasında kısa bir bekleme
                 try? await Task.sleep(nanoseconds: 500_000_000)
             }
             
@@ -399,12 +539,9 @@ struct StoryView: View {
                 DispatchQueue.main.async {
                     if success {
                         if !isBulkDownload {
-                            // İndirme sayacını artır
                             self.downloadCount += 1
-                            
                             showSuccessMessage = true
                             
-                            // Success message göründükten 0.8 saniye sonra reklam göster (POST-action)
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                                 if let rootVC = UIApplication.shared.windows.first?.rootViewController {
                                     let topVC = self.findTopViewController(rootVC)
@@ -414,16 +551,14 @@ struct StoryView: View {
                                 }
                             }
                             
-                            // Success message'ı 2 saniye göster
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                 showSuccessMessage = false
                                 
-                                // Check if a review request has been shown today
                                 let calendar = Calendar.current
                                 if !calendar.isDateInToday(self.lastReviewRequestDate) {
                                     if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                                         SKStoreReviewController.requestReview(in: windowScene)
-                                        self.lastReviewRequestDateDouble = Date().timeIntervalSince1970 // Update last request date
+                                        self.lastReviewRequestDateDouble = Date().timeIntervalSince1970
                                     }
                                 }
                             }
@@ -449,12 +584,9 @@ struct StoryView: View {
                 DispatchQueue.main.async {
                     if success {
                         if !isBulkDownload {
-                            // İndirme sayacını artır
                             self.downloadCount += 1
-                            
                             showSuccessMessage = true
                             
-                            // Success message göründükten 0.8 saniye sonra reklam göster (POST-action)
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                                 if let rootVC = UIApplication.shared.windows.first?.rootViewController {
                                     let topVC = self.findTopViewController(rootVC)
@@ -464,7 +596,6 @@ struct StoryView: View {
                                 }
                             }
                             
-                            // Success message'ı 2 saniye göster
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                 showSuccessMessage = false
                             }
@@ -521,7 +652,6 @@ struct StoryView: View {
         }
     }
     
-    // En üst görünür view controller'ı bulan yardımcı fonksiyon
     private func findTopViewController(_ viewController: UIViewController) -> UIViewController {
         if let presentedVC = viewController.presentedViewController {
             return findTopViewController(presentedVC)
@@ -544,8 +674,6 @@ struct StoryView: View {
         return viewController
     }
     
-    // MARK: - Subscription Observer
-    
     private func setupSubscriptionObserver() {
         NotificationCenter.default.addObserver(
             forName: NSNotification.Name("SubscriptionChanged"),
@@ -556,6 +684,79 @@ struct StoryView: View {
         }
     }
 }
+
+// MARK: - Glassmorphic Story Preview Card
+struct GlassmorphicStoryPreviewCard: View {
+    let story: InstagramStoryModel
+    @State private var imageData: Data?
+    
+    var body: some View {
+        VStack {
+            if let data = imageData, let uiImage = UIImage(data: data) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(maxWidth: UIScreen.main.bounds.width - 32)
+                    .frame(height: UIScreen.main.bounds.height * 0.55)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.5),
+                                        Color("igPink").opacity(0.2)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    )
+                    .shadow(color: Color("igPurple").opacity(0.15), radius: 20, x: 0, y: 10)
+            } else {
+                // Loading placeholder
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.white.opacity(0.8), Color.white.opacity(0.6)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(height: UIScreen.main.bounds.height * 0.55)
+                    .overlay(
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: Color("igPink")))
+                            .scaleEffect(1.2)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                    )
+            }
+        }
+        .padding(.horizontal, 16)
+        .onAppear {
+            loadThumbnail()
+        }
+    }
+    
+    private func loadThumbnail() {
+        guard let url = URL(string: story.thumbnailUrl) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            if let data = data {
+                DispatchQueue.main.async {
+                    self.imageData = data
+                }
+            }
+        }.resume()
+    }
+}
+
+// MARK: - Legacy Components (kept for compatibility)
 
 struct StoryPreviewCard: View {
     let story: InstagramStoryModel
@@ -610,7 +811,6 @@ struct StoryPreviewCard: View {
     }
 }
 
-// Customize TabView's page indicator
 struct CustomPageIndicator: UIViewRepresentable {
     var numberOfPages: Int
     @Binding var currentPage: Int
@@ -619,11 +819,8 @@ struct CustomPageIndicator: UIViewRepresentable {
         let control = UIPageControl()
         control.numberOfPages = numberOfPages
         control.currentPage = currentPage
-        
-        // Customize colors
         control.currentPageIndicatorTintColor = UIColor(Color("igPink"))
         control.pageIndicatorTintColor = UIColor(Color("igPurple").opacity(0.3))
-        
         return control
     }
     
@@ -632,7 +829,6 @@ struct CustomPageIndicator: UIViewRepresentable {
     }
 }
 
-// Add this modifier to the TabView
 extension View {
     func customPageIndicator(numberOfPages: Int, currentPage: Binding<Int>) -> some View {
         self.overlay(
@@ -648,4 +844,3 @@ extension Collection {
         return indices.contains(index) ? self[index] : nil
     }
 } 
- 

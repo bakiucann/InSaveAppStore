@@ -31,9 +31,9 @@ struct HomeView: View {
             animatedBackground
             
             // MARK: - Main Content
-            NavigationView {
-                GeometryReader { geometry in
-                    ZStack {
+        NavigationView {
+            GeometryReader { geometry in
+                ZStack {
                         // Content
                         ScrollView(showsIndicators: false) {
                             VStack(spacing: 0) {
@@ -41,64 +41,64 @@ struct HomeView: View {
                                 Color.clear.frame(height: 70)
                                 
                                 // Main Search Card
-                                SearchSectionView(
-                                    inputText: $inputText,
-                                    showPasteButton: $showPasteButton,
-                                    isUrlSearch: $isUrlSearch,
-                                    isLoading: $isLoading,
-                                    showPreview: $showPreview,
-                                    showCustomAlert: $showCustomAlert,
-                                    interstitial: interstitial,
-                                    videoViewModel: videoViewModel
-                                )
+                            SearchSectionView(
+                                inputText: $inputText,
+                                showPasteButton: $showPasteButton,
+                                isUrlSearch: $isUrlSearch,
+                                isLoading: $isLoading,
+                                showPreview: $showPreview,
+                                showCustomAlert: $showCustomAlert,
+                                interstitial: interstitial,
+                                videoViewModel: videoViewModel
+                            )
                                 .padding(.horizontal, 16)
                                 .padding(.top, 12)
                                 
                                 Spacer(minLength: 80)
                             }
-                            .frame(minHeight: geometry.size.height)
-                        }
-                        
+                        .frame(minHeight: geometry.size.height)
+                    }
+                    
                         // Loading Overlay
                         if videoViewModel.isLoading {
                             LoadingOverlayView()
-                        }
-                        
+                    }
+                    
                         // Ad Loading Overlay
                         if interstitial.isLoadingAdForFirstSearch {
                             AdLoadingOverlayView()
                                 .zIndex(999)
-                        }
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        hideKeyboard()
                     }
                 }
-                .onAppear {
-                    videoViewModel.isLoading = false
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    hideKeyboard()
+                }
+            }
+            .onAppear {
+                videoViewModel.isLoading = false
                     withAnimation(.easeInOut(duration: 3).repeatForever(autoreverses: true)) {
                         animateBackground = true
                     }
-                }
+            }
                 .navigationBarHidden(true)
-                .navigationBarTitleDisplayMode(.inline)
-                .fullScreenCover(isPresented: $showPreview) {
-                    NavigationView {
-                        if let video = videoViewModel.video {
-                            PreviewView(video: video)
-                        }
+            .navigationBarTitleDisplayMode(.inline)
+            .fullScreenCover(isPresented: $showPreview) {
+                NavigationView {
+                    if let video = videoViewModel.video {
+                        PreviewView(video: video)
                     }
                 }
-                .fullScreenCover(isPresented: $showPaywallView) {
-                    NavigationView {
-                        PaywallView()
-                    }
+            }
+            .fullScreenCover(isPresented: $showPaywallView) {
+                NavigationView {
+                    PaywallView()
                 }
+            }
                 .fullScreenCover(isPresented: $showFeedbackView) {
                     NavigationView {
-                        FeedbackView()
-                    }
+                FeedbackView()
+            }
                     .navigationViewStyle(StackNavigationViewStyle())
                 }
                 .fullScreenCover(isPresented: $showProfileView) {
@@ -118,7 +118,7 @@ struct HomeView: View {
                     showPaywallView: $showPaywallView
                 )
                 Spacer()
-            }
+        }
             .zIndex(100)
             
             // MARK: - Alerts
@@ -146,7 +146,7 @@ struct HomeView: View {
         .onChange(of: videoViewModel.video) { newValue in
             guard let _ = newValue else { return }
             
-            if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+                if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
                 interstitial.showAd(from: rootViewController, completion: {
                     print("✅ Ad shown after successful video search, now opening PreviewView")
                     DispatchQueue.main.async {
@@ -239,7 +239,7 @@ struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         HomeView(selectedTab: .constant(.home))
-            .environmentObject(BottomSheetManager())
-            .previewDevice("iPhone 15 Pro")
+        .environmentObject(BottomSheetManager())
+        .previewDevice("iPhone 15 Pro")
     }
 }

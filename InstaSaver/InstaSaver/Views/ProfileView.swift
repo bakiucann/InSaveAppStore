@@ -16,49 +16,50 @@ struct ProfileView: View {
     @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var privacyOptionsStatus: UMPPrivacyOptionsRequirementStatus = .unknown
     
-    private let instagramGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink"),
-            Color("igOrange")
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    // Restore states
+    @State private var isRestoring = false
+    @State private var showRestoreAlert = false
+    @State private var restoreAlertTitle = ""
+    @State private var restoreAlertMessage = ""
+    
+    // Dynamic version info
+    private var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
+    }
+    
+    private var buildNumber: String {
+        Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1"
+    }
     
     var body: some View {
         ZStack {
-            Color(.white)
-                .ignoresSafeArea()
+            ProfileAnimatedBackground()
             
-            ScrollView {
-                VStack(spacing: 24) {
-                    headerSection
-                    planCard
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 20) {
+                    glassmorphicHeader
+                    glassmorphicPlanCard
+                    
                     if !subscriptionManager.isUserSubscribed {
-                        downloadLimitSection
+                        glassmorphicDownloadLimitSection
                     }
-                    quickActionsSection
-                    supportSection
-                    appInfoSection
+                    
+                    glassmorphicQuickActionsSection
+                    glassmorphicSupportSection
+                    glassmorphicAppInfoSection
                 }
-                .padding(.horizontal)
-                .padding(.top, 5)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 100)
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                GlassmorphicBackButton {
-                    presentationMode.wrappedValue.dismiss()
-                }
-            }
+        .navigationBarHidden(true)
+        .onAppear {
+            fetchSubscriptionStatus()
+            checkPrivacyOptionsStatus()
         }
-        .onAppear { fetchSubscriptionStatus() }
-        .onAppear { checkPrivacyOptionsStatus() }
         .sheet(isPresented: $showShareSheet) {
-            CustomShareView(isPresented: $showShareSheet)
+            ShareView(isPresented: $showShareSheet)
         }
         .fullScreenCover(isPresented: $showHelp) {
             NavigationView {
@@ -77,308 +78,310 @@ struct ProfileView: View {
                 PaywallView()
             }
         }
-    }
-    
-    // MARK: - Header Section
-    private var headerSection: some View {
-        HStack(spacing: 14) {
-            // Profile Icon - Compact with subtle glow
-            ZStack {
-                // Subtle glow effect
-                Circle()
-                    .fill(instagramGradient)
-                    .frame(width: 52, height: 52)
-                    .blur(radius: 12)
-                    .opacity(0.3)
-                
-                // Profile icon
-                Circle()
-                    .fill(instagramGradient)
-                    .frame(width: 48, height: 48)
-                    .overlay(
-                        Image(systemName: "person.circle.fill")
-                            .font(.system(size: 32))
-                            .foregroundColor(.white)
-                    )
-            }
-            
-            // Title with gradient
-            Text("My Account")
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.clear)
-                .overlay(
-                    LinearGradient(
-                        colors: [
-                            Color("igPurple"),
-                            Color("igPink"),
-                            Color("igOrange")
-                        ],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
-                    .mask(
-                        Text("My Account")
-                            .font(.system(size: 20, weight: .bold))
-                    )
-                )
-            
-            Spacer()
+        .alert(isPresented: $showRestoreAlert) {
+            Alert(
+                title: Text(restoreAlertTitle),
+                message: Text(restoreAlertMessage),
+                dismissButton: .default(Text(NSLocalizedString("OK", comment: "")))
+            )
         }
-        .padding(.vertical, 14)
-        .padding(.horizontal, 18)
-        .background(
-            ZStack {
-                // Glass material background (iOS 14+ compatible)
-                if #available(iOS 15.0, *) {
-                    Capsule()
-                        .fill(.ultraThinMaterial)
-                } else {
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.85),
-                                    Color.white.opacity(0.75)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
+        .overlay(
+            Group {
+                if isRestoring {
+                    restoreLoadingOverlay
                 }
-                
-                // Tinted gradient overlay (subtle)
-                Capsule()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color("igPurple").opacity(0.06),
-                                Color("igPink").opacity(0.04),
-                                Color("igOrange").opacity(0.03)
-                            ],
-                            startPoint: .leading,
-                            endPoint: .trailing
-                        )
-                    )
-                
-                // Subtle border
-                Capsule()
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.25),
-                                Color.white.opacity(0.08)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 0.5
-                    )
             }
         )
-        .shadow(color: Color.black.opacity(0.06), radius: 15, x: 0, y: 6)
-        .shadow(color: Color("igPink").opacity(0.08), radius: 20, x: 0, y: 8)
+    }
+    
+    // MARK: - Restore Loading Overlay
+    private var restoreLoadingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.4)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 16) {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: Color("igPink")))
+                    .scaleEffect(1.3)
+                
+                Text(NSLocalizedString("Restoring...", comment: ""))
+                    .font(.system(size: 15, weight: .medium))
+                    .foregroundColor(.white)
+            }
+            .padding(30)
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white)
+                    .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+            )
+        }
+    }
+    
+    // MARK: - Header
+    private var glassmorphicHeader: some View {
+        HStack(spacing: 14) {
+            Button(action: { presentationMode.wrappedValue.dismiss() }) {
+                ZStack {
+                    Circle()
+                        .fill(Color.white.opacity(0.8))
+                        .frame(width: 40, height: 40)
+                        .overlay(Circle().stroke(Color.gray.opacity(0.15), lineWidth: 1))
+                    
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+                }
+            }
+            
+            Spacer()
+            
+            Text(NSLocalizedString("My Account", comment: ""))
+                .font(.system(size: 20, weight: .bold))
+                .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
+            
+            Spacer()
+            
+            ZStack {
+                Circle()
+                    .fill(RadialGradient(colors: [Color("igPink").opacity(0.3), Color.clear], center: .center, startRadius: 10, endRadius: 25))
+                    .frame(width: 50, height: 50)
+                
+                Circle()
+                    .fill(LinearGradient(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .frame(width: 40, height: 40)
+                    .overlay(
+                        Image(systemName: "person.fill")
+                            .font(.system(size: 18, weight: .medium))
+                            .foregroundColor(.white)
+                    )
+                    .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .background(glassmorphicCardBackground(cornerRadius: 20))
     }
     
     // MARK: - Plan Card
-    private var planCard: some View {
+    private var glassmorphicPlanCard: some View {
         VStack(spacing: 16) {
             HStack {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("Current Plan")
-                        .font(.system(size: 16, weight: .semibold))
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(NSLocalizedString("Current Plan", comment: ""))
+                        .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.gray)
                     
-                    Text(isProUser ? "PRO PLAN" : "FREE PLAN")
-                        .font(.system(size: 24, weight: .bold))
-                        .foregroundColor(Color("igPink"))
+                    HStack(spacing: 8) {
+                        Text(isProUser ? "PRO" : "FREE")
+                            .font(.system(size: 26, weight: .bold))
+                            .gradientForeground(colors: isProUser ? [Color("igPurple"), Color("igPink")] : [Color.gray, Color.gray.opacity(0.7)])
+                        
+                        if isProUser {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 18, weight: .medium))
+                                .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
                 }
+                    }
+                }
+                
                 Spacer()
                 
+                if !isProUser {
                 Button(action: { showPaywall.toggle() }) {
-                    Text("Upgrade")
+                        HStack(spacing: 6) {
+                            Image(systemName: "sparkles")
                         .font(.system(size: 14, weight: .semibold))
+                            Text(NSLocalizedString("Upgrade", comment: ""))
+                                .font(.system(size: 14, weight: .bold))
+                        }
                         .foregroundColor(.white)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
+                        .padding(.horizontal, 18)
+                        .padding(.vertical, 10)
                         .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .fill(instagramGradient)
+                            Capsule()
+                                .fill(LinearGradient(colors: [Color("igPurple"), Color("igPink")], startPoint: .leading, endPoint: .trailing))
                         )
-                        .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
+                        .shadow(color: Color("igPink").opacity(0.4), radius: 10, x: 0, y: 5)
+                    }
                 }
             }
             
             if !isProUser {
-                HStack(spacing: 12) {
-                    FeatureItem(
-                        icon: "sparkles",
-                        text: NSLocalizedString("No Ads", comment: "Feature description indicating no advertisements")
-                    )
-                    FeatureItem(
-                        icon: "video.fill",
-                        text: NSLocalizedString("HD Quality", comment: "Feature description indicating high-definition quality")
-                    )
-                    FeatureItem(
-                        icon: "arrow.down.circle.fill",
-                        text: NSLocalizedString("Unlimited", comment: "Feature description indicating unlimited usage")
-                    )
+                HStack(spacing: 10) {
+                    GlassmorphicFeatureItem(icon: "sparkles", text: NSLocalizedString("No Ads", comment: ""))
+                    GlassmorphicFeatureItem(icon: "video.fill", text: NSLocalizedString("HD Quality", comment: ""))
+                    GlassmorphicFeatureItem(icon: "infinity", text: NSLocalizedString("Unlimited", comment: ""))
                 }
             }
         }
-        .padding(20)
-        .background(Color.white)
-        .cornerRadius(20)
-        .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-        .overlay(
-            RoundedRectangle(cornerRadius: 20)
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            Color("igPurple").opacity(0.2),
-                            Color("igPink").opacity(0.2)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-        )
+        .padding(18)
+        .background(glassmorphicCardBackground(cornerRadius: 20))
+        .shadow(color: Color("igPurple").opacity(0.1), radius: 15, x: 0, y: 8)
     }
     
     // MARK: - Download Limit Section
-    private var downloadLimitSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Daily Download Limit")
-                .font(.system(size: 16, weight: .semibold))
+    private var glassmorphicDownloadLimitSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(NSLocalizedString("Daily Download Limit", comment: ""))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.gray)
+                .padding(.leading, 4)
             
             HStack(spacing: 12) {
-                DownloadStatsCard(
+                GlassmorphicDownloadStatsCard(
                     icon: "arrow.down.circle.fill",
-                    title: "\(CoreDataManager.shared.getTodayDownloadCount())",
-                    subtitle: NSLocalizedString("Downloads Today", comment: "")
+                    value: "\(CoreDataManager.shared.getTodayDownloadCount())",
+                    label: NSLocalizedString("Today", comment: "")
                 )
                 
-                DownloadStatsCard(
-                    icon: "number.circle.fill",
-                    title: "\(CoreDataManager.shared.getRemainingDownloads())",
-                    subtitle: NSLocalizedString("Remaining Today", comment: "")
+                GlassmorphicDownloadStatsCard(
+                    icon: "hourglass.circle.fill",
+                    value: "\(CoreDataManager.shared.getRemainingDownloads())",
+                    label: NSLocalizedString("Left", comment: "")
                 )
             }
             
             Button(action: { showPaywall.toggle() }) {
                 HStack {
-                    Text("Get unlimited downloads")
+                    Image(systemName: "infinity.circle.fill")
+                        .font(.system(size: 18))
+                        .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+                    
+                    Text(NSLocalizedString("Get unlimited downloads", comment: ""))
                         .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(.black.opacity(0.7))
+                    
                     Spacer()
+                    
                     Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(Color("igPink"))
                 }
-                .foregroundColor(Color("igPurple"))
-                .padding(.vertical, 12)
-                .padding(.horizontal, 16)
-                .background(Color("igPurple").opacity(0.1))
-                .cornerRadius(12)
+                .padding(14)
+                .background(RoundedRectangle(cornerRadius: 14).fill(Color("igPurple").opacity(0.08)))
             }
         }
     }
     
-    // MARK: - Quick Actions
-    private var quickActionsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Quick Actions")
-                .font(.system(size: 16, weight: .semibold))
+    // MARK: - Quick Actions Section
+    private var glassmorphicQuickActionsSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(NSLocalizedString("Quick Actions", comment: ""))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.gray)
+                .padding(.leading, 4)
             
             HStack(spacing: 12) {
-                QuickActionButton(
-                    icon: "arrow.clockwise",
-                    title: NSLocalizedString("Restore", comment: "Button title to restore purchases"),
-                    action: restorePurchases
-                )
-                
-                QuickActionButton(
-                    icon: "square.and.arrow.up",
-                    title: NSLocalizedString("Share App", comment: "Button title to share the app"),
-                    action: { showShareSheet.toggle() }
-                )
-                
-                QuickActionButton(
-                    icon: "questionmark.circle",
-                    title: NSLocalizedString("Help", comment: "Button title to show help"),
-                    action: { showHelp.toggle() }
-                )
+                GlassmorphicQuickActionButton(icon: "arrow.clockwise", title: NSLocalizedString("Restore", comment: ""), action: restorePurchases)
+                GlassmorphicQuickActionButton(icon: "square.and.arrow.up", title: NSLocalizedString("Share", comment: ""), action: { showShareSheet.toggle() })
+                GlassmorphicQuickActionButton(icon: "questionmark.circle", title: NSLocalizedString("Help", comment: ""), action: { showHelp.toggle() })
             }
         }
     }
     
     // MARK: - Support Section
-    private var supportSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("Support")
-                .font(.system(size: 16, weight: .semibold))
+    private var glassmorphicSupportSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text(NSLocalizedString("Support", comment: ""))
+                .font(.system(size: 15, weight: .semibold))
                 .foregroundColor(.gray)
+                .padding(.leading, 4)
             
-            VStack(spacing: 1) {
-                MenuLink(
-                    title: NSLocalizedString("Privacy Policy", comment: "Menu link title for Privacy Policy"),
-                    icon: "hand.raised",
-                    action: { showPrivacyPolicySheet.toggle() }
-                )
-                
-                MenuLink(
-                    title: NSLocalizedString("Terms of Use", comment: "Menu link title for Terms of Use"),
-                    icon: "doc.text",
-                    action: { showTermsOfUseSheet.toggle() }
-                )
+            VStack(spacing: 2) {
+                GlassmorphicMenuLink(title: NSLocalizedString("Privacy Policy", comment: ""), icon: "hand.raised.fill", isFirst: true, isLast: privacyOptionsStatus != .required, action: { showPrivacyPolicySheet.toggle() })
+                GlassmorphicMenuLink(title: NSLocalizedString("Terms of Use", comment: ""), icon: "doc.text.fill", isFirst: false, isLast: privacyOptionsStatus != .required, action: { showTermsOfUseSheet.toggle() })
 
                 if privacyOptionsStatus == .required {
-                    MenuLink(
-                        title: NSLocalizedString("Privacy Options", comment: "Menu link title for Privacy Options"),
-                        icon: "gearshape",
-                        action: { presentPrivacyOptions() }
-                    )
+                    GlassmorphicMenuLink(title: NSLocalizedString("Privacy Options", comment: ""), icon: "gearshape.fill", isFirst: false, isLast: true, action: { presentPrivacyOptions() })
                 }
             }
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 5)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color("igPurple").opacity(0.2),
-                                Color("igPink").opacity(0.2)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(LinearGradient(colors: [Color.white.opacity(0.95), Color.white.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing))
             )
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(LinearGradient(colors: [Color.white.opacity(0.5), Color("igPink").opacity(0.15)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+            )
+            .shadow(color: Color("igPurple").opacity(0.08), radius: 12, x: 0, y: 6)
         }
     }
     
     // MARK: - App Info Section
-    private var appInfoSection: some View {
-        VStack(spacing: 8) {
-            LogoView()
+    private var glassmorphicAppInfoSection: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(RadialGradient(colors: [Color("igPink").opacity(0.2), Color.clear], center: .center, startRadius: 15, endRadius: 40))
+                    .frame(width: 80, height: 80)
+                
+                Image("insaver2")
+                    .resizable()
+                    .frame(width: 56, height: 56)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .shadow(color: Color("igPink").opacity(0.3), radius: 10, x: 0, y: 5)
+            }
             
-            Text("Version 1.0.0")
-                .font(.system(size: 12))
+            Text("InSave")
+                .font(.system(size: 18, weight: .bold))
+                .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
+            
+            Text("Version \(appVersion) (\(buildNumber))")
+                .font(.system(size: 12, weight: .medium))
                 .foregroundColor(.gray)
         }
-        .padding(.top, 32)
+        .padding(.top, 24)
         .padding(.bottom, 16)
     }
     
+    // MARK: - Helper Views
+    private func glassmorphicCardBackground(cornerRadius: CGFloat) -> some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(LinearGradient(colors: [Color.white.opacity(0.95), Color.white.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing))
+            
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .fill(LinearGradient(colors: [Color("igPurple").opacity(0.03), Color("igPink").opacity(0.02)], startPoint: .topLeading, endPoint: .bottomTrailing))
+            
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(LinearGradient(colors: [Color.white.opacity(0.6), Color("igPink").opacity(0.15)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+        }
+        .shadow(color: Color.black.opacity(0.06), radius: 12, x: 0, y: 4)
+    }
+    
+    // MARK: - Helper Functions
     private func restorePurchases() {
+        isRestoring = true
+        
         Purchases.shared.restorePurchases { customerInfo, error in
+            DispatchQueue.main.async {
+                isRestoring = false
+                
             if let error = error {
                 print("Error restoring purchases: \(error.localizedDescription)")
+                    restoreAlertTitle = NSLocalizedString("Restore Failed", comment: "")
+                    restoreAlertMessage = NSLocalizedString("Failed to restore purchases. Please try again later.", comment: "")
+                    showRestoreAlert = true
+                } else if let customerInfo = customerInfo,
+                          customerInfo.entitlements["pro"]?.isActive == true {
+                    // Başarılı restore
+                    restoreAlertTitle = NSLocalizedString("Success", comment: "")
+                    restoreAlertMessage = NSLocalizedString("Your purchases have been successfully restored!", comment: "")
+                    showRestoreAlert = true
+                    
+                    // Update subscription status
+                    subscriptionManager.isUserSubscribed = true
+                    isProUser = true
+                    
+                    // Notify subscription change
+                    NotificationCenter.default.post(name: NSNotification.Name("SubscriptionChanged"), object: nil)
             } else {
-                print("Purchases restored successfully!")
+                    // No active subscription found
+                    restoreAlertTitle = NSLocalizedString("No Purchases Found", comment: "")
+                    restoreAlertMessage = NSLocalizedString("No previous purchases were found to restore.", comment: "")
+                    showRestoreAlert = true
+                }
             }
         }
     }
@@ -395,462 +398,26 @@ struct ProfileView: View {
 
     private func checkPrivacyOptionsStatus() {
         self.privacyOptionsStatus = UMPConsentInformation.sharedInstance.privacyOptionsRequirementStatus
-        print("Checked Privacy Options Status: \(self.privacyOptionsStatus.rawValue)")
     }
 
     private func presentPrivacyOptions() {
-        // Create request parameters and set debug settings for testing
         let parameters = UMPRequestParameters()
-        // #if DEBUG
-        // let debugSettings = UMPDebugSettings()
-        // // Force geography to EEA only for testing the options form presentation
-        // // debugSettings.geography = .EEA // <--- COMMENTED OUT for release
-        // parameters.debugSettings = debugSettings
-        // #endif
-
-        // Request the latest consent info before presenting the form, using debug parameters if applicable.
-        UMPConsentInformation.sharedInstance.requestConsentInfoUpdate(with: parameters) { requestError in // Pass parameters here
+        
+        UMPConsentInformation.sharedInstance.requestConsentInfoUpdate(with: parameters) { requestError in
             if let error = requestError {
-                print("UMP Error requesting consent info update for options form: \(error)")
-                // Optionally show an alert to the user
-                // We might still try to present the form below,
-                // as sometimes it might work even with a request error.
+                print("UMP Error: \(error)")
             }
 
-            DispatchQueue.main.async { // Ensure UI operations are on the main thread
+            DispatchQueue.main.async {
                 guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                      let rootViewController = windowScene.windows.first?.rootViewController else {
-                    print("UMP Error: Could not find root view controller when presenting options form.")
-                    return
-                }
+                      let rootViewController = windowScene.windows.first?.rootViewController else { return }
 
                 UMPConsentForm.presentPrivacyOptionsForm(from: rootViewController) { formError in
                     if let error = formError {
-                        print("UMP Error presenting privacy options form: \(error)")
-                        // Optionally show an alert to the user if the form fails to present
-                    } else {
-                        print("UMP Privacy options form presented successfully.")
+                        print("UMP Error presenting form: \(error)")
                     }
                 }
             }
         }
     }
 }
-
-// MARK: - Supporting Views
-struct FeatureItem: View {
-    let icon: String
-    let text: String
-    
-    private let instagramGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink")
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .fill(instagramGradient)
-                    .frame(width: 36, height: 36)
-                    .shadow(color: Color("igPink").opacity(0.3), radius: 6, x: 0, y: 3)
-                
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundColor(.white)
-            }
-            
-            Text(text)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            Color("igPurple").opacity(0.2),
-                            Color("igPink").opacity(0.2)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-        )
-    }
-}
-
-struct QuickActionButton: View {
-    let icon: String
-    let title: String
-    let action: () -> Void
-    
-    private let instagramGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink")
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(instagramGradient)
-                        .frame(width: 44, height: 44)
-                        .shadow(color: Color("igPink").opacity(0.3), radius: 8, x: 0, y: 4)
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 20))
-                        .foregroundColor(.white)
-                }
-                
-                Text(title)
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.gray)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(Color.white)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                Color("igPurple").opacity(0.2),
-                                Color("igPink").opacity(0.2)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 1
-                    )
-            )
-        }
-    }
-}
-
-struct MenuLink: View {
-    let title: String
-    let icon: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack {
-                ZStack {
-                    Circle()
-                        .fill(Color("igPink").opacity(0.1))
-                        .frame(width: 32, height: 32)
-                    
-                    Image(systemName: icon)
-                        .font(.system(size: 14))
-                        .foregroundColor(Color("igPink"))
-                }
-                
-                Text(title)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.black.opacity(0.8))
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14))
-                    .foregroundColor(Color("igPink"))
-            }
-            .padding()
-            .background(Color.white)
-        }
-    }
-}
-
-// BackButton is now replaced by GlassmorphicBackButton in Utilities/GlassmorphicBackButton.swift
-
-struct LogoView: View {
-    private let instagramGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink"),
-            Color("igOrange")
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-    
-    var body: some View {
-        Text("InSave")
-            .font(.system(size: 14, weight: .bold))
-            .foregroundColor(Color("igPink"))
-            .overlay(
-                Text("InSave")
-                    .font(.system(size: 14, weight: .bold))
-                    .mask(
-                        Rectangle()
-                            .fill(instagramGradient)
-                    )
-            )
-    }
-}
-
-// MARK: - Download Stats Card
-struct DownloadStatsCard: View {
-    let icon: String
-    let title: String
-    let subtitle: String
-    
-    var body: some View {
-        VStack(spacing: 8) {
-            ZStack {
-                Circle()
-                    .fill(LinearGradient(
-                        colors: [Color("igPurple"), Color("igPink")],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ))
-                    .frame(width: 36, height: 36)
-                    .shadow(color: Color("igPink").opacity(0.3), radius: 6, x: 0, y: 3)
-                
-                Image(systemName: icon)
-                    .font(.system(size: 16))
-                    .foregroundColor(.white)
-            }
-            
-            Text(title)
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(Color("igPurple"))
-            
-            Text(subtitle)
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            Color("igPurple").opacity(0.2),
-                            Color("igPink").opacity(0.2)
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: 1
-                )
-        )
-    }
-}
-
-struct CustomShareView: View {
-    @Binding var isPresented: Bool
-    @State private var selectedPlatform: SharePlatform?
-    @State private var showNativeShare = false
-    
-    private let platforms: [SharePlatform] = [
-        .init(name: "WhatsApp", icon: "whatsapp", color: Color.green),
-        .init(name: "Messages", icon: "message.fill", color: Color("igPurple")),
-        .init(name: "Copy Link", icon: "link", color: Color.gray),
-        .init(name: "More", icon: "square.and.arrow.up", color: Color("igPink"))
-    ]
-    
-    private let appLink = "https://apps.apple.com/us/app/insave/id6740251620"
-    private let shareMessage = "Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨"
-    
-    var body: some View {
-        NavigationView {
-            VStack(spacing: 24) {
-                // Header
-                shareHeader
-                
-                // Preview Card
-                sharePreviewCard
-                
-                // Platform Buttons
-                platformButtons
-                
-                Spacer()
-            }
-            .padding()
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: { isPresented = false }) {
-                        Image(systemName: "xmark")
-                            .foregroundColor(.gray)
-                    }
-                }
-                ToolbarItem(placement: .principal) {
-                    Text("Share InSave")
-                        .font(.system(size: 17, weight: .semibold))
-                }
-            }
-            .sheet(isPresented: $showNativeShare) {
-                ShareSheet(activityItems: ["\(shareMessage)\n\nDownload now: \(appLink)", UIImage(named: "AppIcon") ?? UIImage()])
-            }
-        }
-    }
-    
-    private var shareHeader: some View {
-        VStack(spacing: 8) {
-            Image("insaver2")
-                .resizable()
-                .frame(width: 80, height: 80)
-                .cornerRadius(16)
-                .shadow(color: Color.black.opacity(0.1), radius: 10)
-            
-            Text("Share InSave with friends")
-                .font(.system(size: 20, weight: .bold))
-            
-            Text(NSLocalizedString("Help your friends discover the easiest way\nto save Instagram videos!", comment: ""))
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-        }
-    }
-    
-    private var sharePreviewCard: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text(shareMessage)
-                .font(.system(size: 15))
-                .padding()
-                .background(Color.gray.opacity(0.1))
-                .cornerRadius(12)
-            
-            HStack {
-                Text(appLink)
-                    .font(.system(size: 13))
-                    .foregroundColor(.blue)
-                
-                Spacer()
-                
-                Button(action: {
-                    UIPasteboard.general.string = "\(shareMessage)\n\nDownload now: \(appLink)"
-                }) {
-                    Image(systemName: "doc.on.doc")
-                        .foregroundColor(Color("igPurple"))
-                }
-            }
-        }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 10)
-    }
-    
-    private var platformButtons: some View {
-        VStack(spacing: 16) {
-            ForEach(platforms) { platform in
-                Button(action: { handleShare(platform) }) {
-                    HStack {
-                        if platform.name == "WhatsApp" {
-                            Image("whatsapp")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .foregroundColor(.white)
-                                .frame(width: 24, height: 24)
-                                .frame(width: 36, height: 36)
-                                .background(platform.color)
-                                .cornerRadius(18)
-                        } else {
-                            Image(systemName: platform.icon)
-                                .font(.system(size: 17))
-                                .foregroundColor(.white)
-                                .frame(width: 36, height: 36)
-                                .background(platform.color)
-                                .cornerRadius(18)
-                        }
-                        
-                        Text(platform.name)
-                            .font(.system(size: 16, weight: .medium))
-                            .foregroundColor(.black)
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
-                    }
-                    .padding()
-                    .background(Color.white)
-                    .cornerRadius(12)
-                    .shadow(color: Color.black.opacity(0.05), radius: 5)
-                }
-            }
-        }
-    }
-    
-    private func handleShare(_ platform: SharePlatform) {
-        switch platform.name {
-        case "WhatsApp":
-            let message = "\(shareMessage)\n\nDownload now: \(appLink)"
-            let urlString = "whatsapp://send?phone=&text=\(message)"
-            
-            if let encodedString = urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-               let whatsappURL = URL(string: encodedString) {
-                if UIApplication.shared.canOpenURL(whatsappURL) {
-                    UIApplication.shared.open(whatsappURL)
-                } else {
-                    // WhatsApp yüklü değilse App Store'a yönlendir
-                    if let appStoreURL = URL(string: "itms-apps://itunes.apple.com/app/id310633997") {
-                        UIApplication.shared.open(appStoreURL)
-                    }
-                }
-            }
-        case "Messages":
-            if let smsURL = URL(string: "sms:&body=\(shareMessage)\n\nDownload now: \(appLink)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "") {
-                if UIApplication.shared.canOpenURL(smsURL) {
-                    UIApplication.shared.open(smsURL)
-                }
-            }
-        case "Copy Link":
-            UIPasteboard.general.string = "\(shareMessage)\n\nDownload now: \(appLink)"
-        case "More":
-            showNativeShare = true
-        default:
-            break
-        }
-    }
-}
-
-struct SharePlatform: Identifiable {
-    let id = UUID()
-    let name: String
-    let icon: String
-    let color: Color
-}
-
-struct ShareSheet: UIViewControllerRepresentable {
-    let activityItems: [Any]
-    
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        let controller = UIActivityViewController(
-            activityItems: activityItems,
-            applicationActivities: nil
-        )
-        return controller
-    }
-    
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
-}
-

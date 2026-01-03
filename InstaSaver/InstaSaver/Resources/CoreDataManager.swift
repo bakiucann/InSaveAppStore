@@ -93,14 +93,9 @@ class CoreDataManager {
     
     // Story kaydetmek için yeni bir yardımcı fonksiyon
     func saveStoryInfo(story: InstagramStoryModel) {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateStyle = .medium
-        dateFormatter.timeStyle = .short
-        let formattedDate = dateFormatter.string(from: Date())
-        
         saveVideoInfo(
             videoID: story.id,
-            uniqueId: "Story - \(formattedDate)",
+            uniqueId: "", // Boş bırakılıyor, HistoryView'da "Instagram Story" olarak gösterilecek
             originCover: story.thumbnailUrl,
             downloadLink: story.url,
             date: Date(),

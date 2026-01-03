@@ -138,14 +138,19 @@
 "Daily Download Limit" = "Günlük İndirme Limiti";
 "Downloads Today" = "Bugünkü İndirmeler";
 "Remaining Today" = "Bugün Kalan";
+"Today" = "Bugün";
+"Left" = "Kalan";
 "Get unlimited downloads" = "Sınırsız indirme elde edin";
 "Quick Actions" = "Hızlı İşlemler";
 "Restore" = "Geri Yükle";
+"Share" = "Paylaş";
 "Share App" = "Uygulamayı Paylaş";
 "Help" = "Yardım";
 "Support" = "Destek";
 "Privacy Policy" = "Gizlilik Politikası";
 "Terms of Use" = "Kullanım Koşulları";
+"Privacy Options" = "Gizlilik Seçenekleri";
+"Restoring..." = "Geri Yükleniyor...";
 
 /* Input */
 "Input Required" = "Giriş Gerekli";
@@ -240,3 +245,14 @@
 /* New Error Messages - Private Account & Timeout */
 "error_private_or_server" = "İndirme Başarısız. Lütfen Instagram hesabının HERKESE AÇIK olduğundan emin olun. Gizli hesaplardan indirme yapamıyoruz.";
 "error_connection_timeout" = "Bağlantı zaman aşımına uğradı. Lütfen internet bağlantınızı kontrol edip tekrar deneyin.";
+
+/* ShareView */
+"Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨" = "Hey! InSave'e göz atın - En iyi Instagram video indirici uygulama. Favori Instagram videolarınızı kolayca kaydedin! 📱✨";
+"Instagram Video Downloader" = "Instagram Video İndirici";
+"Fast" = "Hızlı";
+"Easy" = "Kolay";
+"Safe" = "Güvenli";
+"Share via" = "Paylaş";
+"Messages" = "Mesajlar";
+"More" = "Diğer";
+"App Link" = "Uygulama Linki";

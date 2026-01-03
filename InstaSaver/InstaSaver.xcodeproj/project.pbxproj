@@ -16,6 +16,8 @@
 		004D79B72D6A19E40002C994 /* TimerPulseAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D79B62D6A19E40002C994 /* TimerPulseAnimation.swift */; };
 		0062C1B62F0498D500305377 /* GlassmorphicBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0062C1B52F0498D500305377 /* GlassmorphicBackButton.swift */; };
 		0062C1B82F06D68600305377 /* CollectionsAlertOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0062C1B72F06D68600305377 /* CollectionsAlertOverlay.swift */; };
+		0062C1BC2F09BFDE00305377 /* ShareView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0062C1BA2F09BFDE00305377 /* ShareView.swift */; };
+		0062C1BD2F09BFDE00305377 /* ProfileViewComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0062C1B92F09BFDE00305377 /* ProfileViewComponents.swift */; };
 		00690D162D7F110600E55550 /* ConfigService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00690D152D7F110600E55550 /* ConfigService.swift */; };
 		00690D492D86F2D600E55550 /* LocalizationHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00690D472D86F2D600E55550 /* LocalizationHelper.swift */; };
 		00922AA72DC43B6000464A60 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 00922AA62DC43B6000464A60 /* Kingfisher */; };
@@ -117,6 +119,8 @@
 		004D79B62D6A19E40002C994 /* TimerPulseAnimation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimerPulseAnimation.swift; sourceTree = "<group>"; };
 		0062C1B52F0498D500305377 /* GlassmorphicBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassmorphicBackButton.swift; sourceTree = "<group>"; };
 		0062C1B72F06D68600305377 /* CollectionsAlertOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionsAlertOverlay.swift; sourceTree = "<group>"; };
+		0062C1B92F09BFDE00305377 /* ProfileViewComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewComponents.swift; sourceTree = "<group>"; };
+		0062C1BA2F09BFDE00305377 /* ShareView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareView.swift; sourceTree = "<group>"; };
 		00690D152D7F110600E55550 /* ConfigService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfigService.swift; sourceTree = "<group>"; };
 		00690D472D86F2D600E55550 /* LocalizationHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalizationHelper.swift; sourceTree = "<group>"; };
 		00A81D442D2B27A500ABA492 /* InstaSaver.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = InstaSaver.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -228,6 +232,15 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		0062C1BB2F09BFDE00305377 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				0062C1B92F09BFDE00305377 /* ProfileViewComponents.swift */,
+				0062C1BA2F09BFDE00305377 /* ShareView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
 		00690D482D86F2D600E55550 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -301,6 +314,7 @@
 		00A81D672D2B282D00ABA492 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				0062C1BB2F09BFDE00305377 /* Profile */,
 				0062C1B72F06D68600305377 /* CollectionsAlertOverlay.swift */,
 				004642392F016B9C00481A3F /* AdLoadingOverlayView.swift */,
 				004D79B62D6A19E40002C994 /* TimerPulseAnimation.swift */,
@@ -594,6 +608,8 @@
 				00D06FB52DAEE3F600FB5A58 /* DownloadManager.swift in Sources */,
 				00A81DAA2D2B282E00ABA492 /* InstaService.swift in Sources */,
 				00A81D8E2D2B282E00ABA492 /* PreviewView.swift in Sources */,
+				0062C1BC2F09BFDE00305377 /* ShareView.swift in Sources */,
+				0062C1BD2F09BFDE00305377 /* ProfileViewComponents.swift in Sources */,
 				00A81D9E2D2B282E00ABA492 /* CollectionModel.swift in Sources */,
 				00A81D9F2D2B282E00ABA492 /* HistoryModel.swift in Sources */,
 				0062C1B62F0498D500305377 /* GlassmorphicBackButton.swift in Sources */,

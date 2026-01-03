@@ -138,14 +138,19 @@
 "Daily Download Limit" = "Daily Save Limit";
 "Downloads Today" = "Saves Today";
 "Remaining Today" = "Remaining Today";
+"Today" = "Today";
+"Left" = "Left";
 "Get unlimited downloads" = "Get unlimited saves";
 "Quick Actions" = "Quick Actions";
 "Restore" = "Restore";
+"Share" = "Share";
 "Share App" = "Share App";
 "Help" = "Help";
 "Support" = "Support";
 "Privacy Policy" = "Privacy Policy";
 "Terms of Use" = "Terms of Use";
+"Privacy Options" = "Privacy Options";
+"Restoring..." = "Restoring...";
 
 /* Input */
 "Input Required" = "Input Required";
@@ -241,3 +246,14 @@
 "Purchase Failed" = "Purchase Failed";
 "Failed to complete the purchase. Please try again later." = "Failed to complete the purchase. Please try again later.";
 "Thank you for your purchase!" = "Thank you for your purchase!";
+
+/* ShareView */
+"Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨" = "Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨";
+"Instagram Video Downloader" = "Instagram Video Downloader";
+"Fast" = "Fast";
+"Easy" = "Easy";
+"Safe" = "Safe";
+"Share via" = "Share via";
+"Messages" = "Messages";
+"More" = "More";
+"App Link" = "App Link";

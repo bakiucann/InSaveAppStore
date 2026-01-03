@@ -134,14 +134,19 @@
 "Daily Download Limit" = "每日下载限制";
 "Downloads Today" = "今日下载";
 "Remaining Today" = "今日剩余";
+"Today" = "今天";
+"Left" = "剩余";
 "Get unlimited downloads" = "获取无限下载";
 "Quick Actions" = "快捷操作";
 "Restore" = "恢复";
+"Share" = "分享";
 "Share App" = "分享应用";
 "Help" = "帮助";
 "Support" = "支持";
 "Privacy Policy" = "隐私政策";
 "Terms of Use" = "使用条款";
+"Privacy Options" = "隐私设置";
+"Restoring..." = "恢复中...";
 
 /* Input */
 "Input Required" = "需要输入";
@@ -236,3 +241,14 @@
 /* New Error Messages - Private Account & Timeout */
 "error_private_or_server" = "下载失败。请确保 Instagram 账户是公开的。我们无法从私人账户下载。";
 "error_connection_timeout" = "连接超时。请检查您的网络并重试。";
+
+/* ShareView */
+"Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨" = "嗨！快来看看 InSave - 最好的 Instagram 视频下载应用。轻松保存你喜欢的视频！📱✨";
+"Instagram Video Downloader" = "Instagram 视频下载器";
+"Fast" = "快速";
+"Easy" = "简单";
+"Safe" = "安全";
+"Share via" = "分享到";
+"Messages" = "信息";
+"More" = "更多";
+"App Link" = "应用链接";

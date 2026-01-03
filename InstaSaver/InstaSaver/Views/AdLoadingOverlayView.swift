@@ -31,5 +31,5 @@ struct AdLoadingOverlayView: View {
 }
 
 #Preview {
-    AdLoadingOverlayView()
-}
+        AdLoadingOverlayView()
+    }

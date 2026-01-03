@@ -134,14 +134,19 @@
 "Daily Download Limit" = "Limite download giornaliero";
 "Downloads Today" = "Download oggi";
 "Remaining Today" = "Rimanenti oggi";
+"Today" = "Oggi";
+"Left" = "Rimanenti";
 "Get unlimited downloads" = "Ottieni download illimitati";
 "Quick Actions" = "Azioni rapide";
 "Restore" = "Ripristina";
+"Share" = "Condividi";
 "Share App" = "Condividi app";
 "Help" = "Aiuto";
 "Support" = "Supporto";
 "Privacy Policy" = "Informativa privacy";
 "Terms of Use" = "Termini d'uso";
+"Privacy Options" = "Opzioni privacy";
+"Restoring..." = "Ripristino in corso...";
 
 /* Input */
 "Input Required" = "Input richiesto";
@@ -236,3 +241,14 @@
 /* New Error Messages - Private Account & Timeout */
 "error_private_or_server" = "Download fallito. Assicurati che l'account Instagram sia PUBBLICO. Non possiamo scaricare da account privati.";
 "error_connection_timeout" = "Timeout della connessione. Controlla la tua connessione internet e riprova.";
+
+/* ShareView */
+"Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨" = "Ehi! Scopri InSave - La migliore app per scaricare video Instagram. Salva facilmente i tuoi video preferiti! 📱✨";
+"Instagram Video Downloader" = "Scaricatore Video Instagram";
+"Fast" = "Veloce";
+"Easy" = "Facile";
+"Safe" = "Sicuro";
+"Share via" = "Condividi tramite";
+"Messages" = "Messaggi";
+"More" = "Altro";
+"App Link" = "Link App";

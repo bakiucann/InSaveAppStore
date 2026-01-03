@@ -169,7 +169,7 @@ struct SearchSectionView: View {
                         .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
                 }
                 .offset(y: floatingIconOffset)
-            }
+                }
             
             // Compact title
             VStack(spacing: 4) {
@@ -292,20 +292,20 @@ struct SearchSectionView: View {
                 .transition(.scale.combined(with: .opacity))
             } else {
                 pasteButton
-            }
-        }
+                    }
+                }
         .padding(12)
         .background(
             RoundedRectangle(cornerRadius: 16)
                 .fill(Color.white.opacity(0.6))
-                .overlay(
+                        .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(
+                                .stroke(
                             isInputFocused
                                 ? LinearGradient(
                                     colors: [Color("igPurple"), Color("igPink"), Color("igOrange")],
-                                    startPoint: .leading,
-                                    endPoint: .trailing
+                                        startPoint: .leading,
+                                        endPoint: .trailing
                                 )
                                 : LinearGradient(
                                     colors: [Color.gray.opacity(0.2), Color.gray.opacity(0.1)],
@@ -317,27 +317,27 @@ struct SearchSectionView: View {
                 )
         )
         .animation(.spring(response: 0.3), value: isInputFocused)
-    }
-    
+                            }
+                        
     // MARK: - Compact Paste Button
     private var pasteButton: some View {
-        Button(action: {
-            if let clipboardText = UIPasteboard.general.string {
+                            Button(action: {
+                                if let clipboardText = UIPasteboard.general.string {
                 withAnimation(.spring()) {
-                    inputText = clipboardText
-                }
-            }
-        }) {
+                                        inputText = clipboardText
+                                    }
+                                }
+                            }) {
             HStack(spacing: 4) {
                 Image(systemName: "doc.on.clipboard")
                     .font(.system(size: 11, weight: .semibold))
-                Text(NSLocalizedString("Paste", comment: ""))
+                                Text(NSLocalizedString("Paste", comment: ""))
                     .font(.system(size: 12, weight: .semibold))
             }
-            .foregroundColor(.white)
+                                    .foregroundColor(.white)
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(
+                                    .padding(.vertical, 8)
+                                    .background(
                 Capsule().fill(instagramGradient)
             )
             .shadow(color: Color("igPink").opacity(0.25), radius: 6, x: 0, y: 3)
@@ -372,7 +372,7 @@ struct SearchSectionView: View {
                     
                     RoundedRectangle(cornerRadius: 16)
                         .fill(
-                            LinearGradient(
+                                        LinearGradient(
                                 colors: [Color.white.opacity(0.2), Color.white.opacity(0.08), Color.clear],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -415,9 +415,9 @@ struct SearchSectionView: View {
                         .fill(currentPage == index ? Color("igPink") : Color.gray.opacity(0.3))
                         .frame(width: currentPage == index ? 18 : 6, height: 6)
                         .animation(.spring(response: 0.3), value: currentPage)
+                        }
+                    }
                 }
-            }
-        }
     }
     
     // Tutorial Data
@@ -435,52 +435,52 @@ struct SearchSectionView: View {
     
     // MARK: - Actions
     private func handleDownloadAction() {
-        guard !inputText.isEmpty else {
-            errorMessage = searchMode.emptyInputError
-            showError = true
-            return
-        }
-        
-        withAnimation {
-            searchCount += 1
-            videoViewModel.clearVideoData()
-            isUrlSearch = true
-            isLoading = true
-        }
-        
-        switch searchMode {
-        case .username:
-            if inputText.contains("instagram.com") || inputText.contains("http") || inputText.contains("/") {
-                errorMessage = NSLocalizedString("Please enter only the username without URL", comment: "")
-                showError = true
-                isLoading = false
-                isUrlSearch = false
-                return
-            }
-            handleStoryURL()
-            
-        case .url:
-            if !inputText.contains("instagram.com") {
-                errorMessage = NSLocalizedString("Please enter a valid Instagram URL", comment: "")
-                showError = true
-                isLoading = false
-                isUrlSearch = false
-                return
-            }
-            
-            if !inputText.hasPrefix("http://") && !inputText.hasPrefix("https://") {
-                inputText = "https://www." + inputText
-            }
-            
-            if isStoryURL(inputText) {
-                handleStoryURL()
-            } else if let profileUsername = extractProfileUsername(from: inputText) {
-                print("🔍 Detected profile URL for username: \(profileUsername)")
-                Task {
-                    await loadStories(username: profileUsername)
-                }
-            } else {
-                performSearch()
+                    guard !inputText.isEmpty else {
+                        errorMessage = searchMode.emptyInputError
+                        showError = true
+                        return
+                    }
+                    
+                    withAnimation {
+                        searchCount += 1
+                        videoViewModel.clearVideoData()
+                        isUrlSearch = true
+                        isLoading = true
+                    }
+
+                    switch searchMode {
+                    case .username:
+                        if inputText.contains("instagram.com") || inputText.contains("http") || inputText.contains("/") {
+                            errorMessage = NSLocalizedString("Please enter only the username without URL", comment: "")
+                            showError = true
+                            isLoading = false
+                            isUrlSearch = false
+                            return
+                        }
+                        handleStoryURL()
+                        
+                    case .url:
+                        if !inputText.contains("instagram.com") {
+                            errorMessage = NSLocalizedString("Please enter a valid Instagram URL", comment: "")
+                            showError = true
+                            isLoading = false
+                            isUrlSearch = false
+                            return
+                        }
+                        
+                        if !inputText.hasPrefix("http://") && !inputText.hasPrefix("https://") {
+                            inputText = "https://www." + inputText
+                        }
+                        
+                        if isStoryURL(inputText) {
+                            handleStoryURL()
+                        } else if let profileUsername = extractProfileUsername(from: inputText) {
+                            print("🔍 Detected profile URL for username: \(profileUsername)")
+                               Task {
+                                    await loadStories(username: profileUsername)
+                           }
+                        } else {
+                                performSearch()
             }
         }
     }
@@ -494,13 +494,13 @@ struct SearchSectionView: View {
         guard !url.contains("/p/") && !url.contains("/reel/") && !url.contains("/reels/") && !url.contains("/tv/") && !url.contains("/stories/") && !url.contains("/s/") else {
             return nil
         }
-        
+
         let components = url.components(separatedBy: "instagram.com/")
         guard components.count > 1 else { return nil }
-        
+
         let pathPart = components[1]
         let usernamePart = pathPart.components(separatedBy: CharacterSet(charactersIn: "/?")).first ?? pathPart
-        
+
         return usernamePart.isEmpty ? nil : usernamePart.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
@@ -533,7 +533,7 @@ struct SearchSectionView: View {
         if let username = extractUsername(from: inputText) {
             print("🔍 Extracted username: \(username)")
             Task {
-                await loadStories(username: username)
+                    await loadStories(username: username)
             }
         } else {
             print("❌ Failed to extract username from: \(inputText)")
@@ -603,16 +603,16 @@ struct SearchSectionView: View {
 extension View {
     func gradientForeground(colors: [Color]) -> some View {
         self.overlay(
-            LinearGradient(
+                        LinearGradient(
                 colors: colors,
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-        )
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
         .mask(self)
     }
-}
-
+            }
+            
 // MARK: - Compact Glassmorphic Segmented Control
 struct GlassmorphicSegmentedControl: View {
     @Binding var selectedMode: SearchSectionView.SearchMode
@@ -622,8 +622,8 @@ struct GlassmorphicSegmentedControl: View {
         GeometryReader { geometry in
             let width = (geometry.size.width - 6) / CGFloat(modes.count)
             
-            ZStack(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 12)
+        ZStack(alignment: .leading) {
+            RoundedRectangle(cornerRadius: 12)
                     .fill(Color.white.opacity(0.5))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
@@ -644,19 +644,19 @@ struct GlassmorphicSegmentedControl: View {
                     .shadow(color: Color("igPink").opacity(0.25), radius: 6, x: 0, y: 3)
                     .animation(.spring(response: 0.35, dampingFraction: 0.7), value: selectedMode)
                 
-                HStack(spacing: 0) {
+            HStack(spacing: 0) {
                     ForEach(modes, id: \.self) { mode in
                         Button(action: { selectedMode = mode }) {
-                            HStack(spacing: 6) {
+                        HStack(spacing: 6) {
                                 Image(systemName: mode == .url ? "link.circle.fill" : "at.circle.fill")
                                     .font(.system(size: 14, weight: .semibold))
                                 Text(mode.displayName)
                                     .font(.system(size: 14, weight: .semibold))
-                            }
+                        }
                             .foregroundColor(selectedMode == mode ? .white : .gray)
                             .frame(width: width, height: 40)
-                        }
-                    }
+                                        }
+                                    }
                 }
             }
         }
@@ -687,8 +687,8 @@ struct CompactTutorialCard: View {
                     .frame(width: 60, height: 60)
                 
                 Circle()
-                    .fill(
-                        LinearGradient(
+                        .fill(
+                            LinearGradient(
                             colors: [Color.white.opacity(0.95), Color.white.opacity(0.8)],
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
@@ -705,7 +705,7 @@ struct CompactTutorialCard: View {
                                 ),
                                 lineWidth: 1.5
                             )
-                    )
+                        )
                     .shadow(color: Color("igPink").opacity(0.15), radius: 8, x: 0, y: 4)
                 
                 VStack(spacing: 1) {

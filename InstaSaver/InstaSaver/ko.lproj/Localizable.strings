@@ -134,14 +134,19 @@
 "Daily Download Limit" = "일일 다운로드 제한";
 "Downloads Today" = "오늘 다운로드";
 "Remaining Today" = "오늘 남은 횟수";
+"Today" = "오늘";
+"Left" = "남음";
 "Get unlimited downloads" = "무제한 다운로드 받기";
 "Quick Actions" = "빠른 작업";
 "Restore" = "복원";
+"Share" = "공유";
 "Share App" = "앱 공유";
 "Help" = "도움말";
 "Support" = "지원";
 "Privacy Policy" = "개인정보 처리방침";
 "Terms of Use" = "이용약관";
+"Privacy Options" = "개인정보 설정";
+"Restoring..." = "복원 중...";
 
 /* Input */
 "Input Required" = "입력 필요";
@@ -236,3 +241,14 @@
 /* New Error Messages - Private Account & Timeout */
 "error_private_or_server" = "다운로드 실패. Instagram 계정이 공개되어 있는지 확인하세요. 비공개 계정에서는 다운로드할 수 없습니다.";
 "error_connection_timeout" = "연결 시간 초과. 인터넷 연결을 확인하고 다시 시도하세요.";
+
+/* ShareView */
+"Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨" = "안녕! InSave를 확인해 봐 - 최고의 Instagram 비디오 다운로더 앱이야. 좋아하는 비디오를 쉽게 저장해! 📱✨";
+"Instagram Video Downloader" = "Instagram 비디오 다운로더";
+"Fast" = "빠름";
+"Easy" = "쉬움";
+"Safe" = "안전";
+"Share via" = "공유하기";
+"Messages" = "메시지";
+"More" = "더보기";
+"App Link" = "앱 링크";

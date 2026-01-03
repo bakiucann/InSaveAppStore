@@ -134,14 +134,19 @@
 "Daily Download Limit" = "Limite quotidienne de téléchargement";
 "Downloads Today" = "Téléchargements aujourd'hui";
 "Remaining Today" = "Restants aujourd'hui";
+"Today" = "Aujourd'hui";
+"Left" = "Restants";
 "Get unlimited downloads" = "Obtenez des téléchargements illimités";
 "Quick Actions" = "Actions rapides";
 "Restore" = "Restaurer";
+"Share" = "Partager";
 "Share App" = "Partager l'app";
 "Help" = "Aide";
 "Support" = "Support";
 "Privacy Policy" = "Politique de confidentialité";
 "Terms of Use" = "Conditions d'utilisation";
+"Privacy Options" = "Options de confidentialité";
+"Restoring..." = "Restauration...";
 
 /* Input */
 "Input Required" = "Saisie requise";
@@ -236,3 +241,14 @@
 /* New Error Messages - Private Account & Timeout */
 "error_private_or_server" = "Téléchargement échoué. Veuillez vous assurer que le compte Instagram est PUBLIC. Nous ne pouvons pas télécharger depuis des comptes privés.";
 "error_connection_timeout" = "Délai de connexion dépassé. Veuillez vérifier votre connexion internet et réessayer.";
+
+/* ShareView */
+"Hey! Check out InSave - The best Instagram video downloader app. Save your favorite Instagram videos easily! 📱✨" = "Salut ! Découvrez InSave - La meilleure app de téléchargement de vidéos Instagram. Enregistrez facilement vos vidéos préférées ! 📱✨";
+"Instagram Video Downloader" = "Téléchargeur de Vidéos Instagram";
+"Fast" = "Rapide";
+"Easy" = "Facile";
+"Safe" = "Sécurisé";
+"Share via" = "Partager via";
+"Messages" = "Messages";
+"More" = "Plus";
+"App Link" = "Lien de l'App";

@@ -612,17 +612,22 @@ struct PreviewView: View {
     
     private var collectionsSheet: some View {
         NavigationView {
-            CollectionsView(
-                viewModel: collectionsViewModel,
-                onCollectionSelected: { collection in
-                    saveToCollection(collection: collection)
-                    showCollectionsSheet = false
-                    isBookmarked = true
-                    collectionSuccessMessage = true
-                },
-                isPresentedModally: true
-            )
-            .navigationBarTitle("Collections", displayMode: .inline)
+            ZStack {
+                CollectionsView(
+                    viewModel: collectionsViewModel,
+                    onCollectionSelected: { collection in
+                        saveToCollection(collection: collection)
+                        showCollectionsSheet = false
+                        isBookmarked = true
+                        collectionSuccessMessage = true
+                    },
+                    isPresentedModally: true
+                )
+                .navigationBarTitle("Collections", displayMode: .inline)
+                
+                // Collections Alert Overlay - + butonuna basıldığında gösterilir
+                CollectionsAlertOverlay(viewModel: collectionsViewModel)
+            }
         }
     }
     
@@ -786,7 +791,8 @@ struct PreviewView: View {
             uniqueId: video.videoTitle,
             originCover: video.thumbnailUrl,
             downloadLink: video.downloadLink,
-            date: Date()
+            date: Date(),
+            type: (video.isPhoto ?? false) ? "photo" : "video"
         )
     }
     

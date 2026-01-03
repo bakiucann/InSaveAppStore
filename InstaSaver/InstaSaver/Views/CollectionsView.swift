@@ -96,101 +96,75 @@ struct CollectionsView: View {
 }
 
 struct EmptyCollectionsView: View {
-    private let instagramGradient = LinearGradient(
-        colors: [
-            Color("igPurple"),
-            Color("igPink"),
-            Color("igOrange")
-        ],
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
+    @State private var floatAnimation = false
     
     var body: some View {
-        VStack(spacing: 28) {
-            // Glassmorphic Icon Container
+        VStack(spacing: 24) {
+            Spacer()
+            
+            // Floating animated icon
             ZStack {
-                // Glow Effect
+                // Glow effect
                 Circle()
-                    .fill(instagramGradient)
-                    .frame(width: 100, height: 100)
+                    .fill(
+                        RadialGradient(
+                            colors: [Color("igPurple").opacity(0.3), Color.clear],
+                            center: .center,
+                            startRadius: 20,
+                            endRadius: 60
+                        )
+                    )
+                    .frame(width: 120, height: 120)
                     .blur(radius: 20)
-                    .opacity(0.3)
                 
-                // Glassmorphic Circle Background
-                ZStack {
-                    if #available(iOS 15.0, *) {
-                        Circle()
-                            .fill(.ultraThinMaterial)
-                    } else {
+                // Glass circle
                         Circle()
                             .fill(
                                 LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(0.9),
-                                        Color.white.opacity(0.85)
-                                    ],
+                            colors: [Color.white.opacity(0.9), Color.white.opacity(0.7)],
                                     startPoint: .topLeading,
                                     endPoint: .bottomTrailing
                                 )
                             )
-                    }
-                    
-                    Circle()
-                        .fill(
-                            LinearGradient(
-                                colors: [
-                                    Color("igPurple").opacity(0.08),
-                                    Color("igPink").opacity(0.06),
-                                    Color("igOrange").opacity(0.05)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                    
+                    .frame(width: 90, height: 90)
+                    .overlay(
                     Circle()
                         .stroke(
                             LinearGradient(
-                                colors: [
-                                    Color("igPurple").opacity(0.3),
-                                    Color("igPink").opacity(0.3)
-                                ],
+                                    colors: [Color.white.opacity(0.8), Color("igPurple").opacity(0.3)],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
                             ),
                             lineWidth: 2
                         )
-                }
-                .frame(width: 90, height: 90)
-                .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
-                .shadow(color: Color("igPink").opacity(0.2), radius: 25, x: 0, y: 12)
+                    )
+                    .shadow(color: Color("igPurple").opacity(0.2), radius: 15, x: 0, y: 8)
                 
-                // Icon
                 Image(systemName: "square.grid.2x2.fill")
                     .font(.system(size: 36, weight: .medium))
-                    .foregroundColor(.clear)
-                    .overlay(
-                        instagramGradient
-                            .mask(
-                                Image(systemName: "square.grid.2x2.fill")
-                                    .font(.system(size: 36, weight: .medium))
-                            )
-                    )
+                    .gradientForeground(colors: [Color("igPurple"), Color("igPink"), Color("igOrange")])
             }
+            .offset(y: floatAnimation ? -8 : 8)
+            .animation(
+                Animation.easeInOut(duration: 2.5).repeatForever(autoreverses: true),
+                value: floatAnimation
+            )
+            .onAppear { floatAnimation = true }
             
-            VStack(spacing: 12) {
+            // Text content
+            VStack(spacing: 10) {
                 Text(NSLocalizedString("No Collections Yet", comment: ""))
-                    .font(.system(size: 24, weight: .bold))
-                    .foregroundColor(.black.opacity(0.9))
+                    .font(.system(size: 22, weight: .bold))
+                    .foregroundColor(.black.opacity(0.8))
                 
                 Text(NSLocalizedString("Create your first collection to organize your downloads", comment: ""))
-                    .font(.system(size: 16))
+                    .font(.system(size: 15))
                     .foregroundColor(.gray)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
-                    .lineSpacing(4)
             }
+            
+            Spacer()
         }
     }
 }
