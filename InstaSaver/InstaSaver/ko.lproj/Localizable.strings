@@ -189,11 +189,11 @@
 "Yearly" = "연간";
 "BEST VALUE" = "최고의 가치";
 "FLEXIBLE PLAN" = "유연한 플랜";
-"Save 33%" = "33% 절약";
+"Save %d%%" = "%d%% 절약";
 "per year" = "연간";
 "per month" = "월간";
 "Annual" = "연간";
-"Only %@ per month" = "월 %@만";
+"Only %@ per week" = "주 %@만";
 "BEST OFFER" = "최고의 혜택";
 
 /* StoryView */

@@ -189,11 +189,11 @@
 "Yearly" = "年付";
 "BEST VALUE" = "最优惠";
 "FLEXIBLE PLAN" = "灵活套餐";
-"Save 33%" = "节省33%";
+"Save %d%%" = "节省%d%%";
 "per year" = "每年";
 "per month" = "每月";
 "Annual" = "年度";
-"Only %@ per month" = "仅 %@ 每月";
+"Only %@ per week" = "每周仅 %@";
 "BEST OFFER" = "最佳优惠";
 
 /* StoryView */

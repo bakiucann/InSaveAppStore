@@ -189,11 +189,11 @@
 "Yearly" = "سنوي";
 "BEST VALUE" = "أفضل قيمة";
 "FLEXIBLE PLAN" = "خطة مرنة";
-"Save 33%" = "وفر 33%";
+"Save %d%%" = "وفر %d%%";
 "per year" = "في السنة";
 "per month" = "في الشهر";
 "Annual" = "سنوي";
-"Only %@ per month" = "فقط %@ في الشهر";
+"Only %@ per week" = "فقط %@ في الأسبوع";
 "BEST OFFER" = "أفضل عرض";
 
 /* StoryView */

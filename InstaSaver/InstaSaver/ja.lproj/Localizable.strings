@@ -189,11 +189,11 @@
 "Yearly" = "年額";
 "BEST VALUE" = "ベストバリュー";
 "FLEXIBLE PLAN" = "フレキシブルプラン";
-"Save 33%" = "33%お得";
+"Save %d%%" = "%d%%お得";
 "per year" = "年間";
 "per month" = "月額";
 "Annual" = "年間";
-"Only %@ per month" = "月額たったの %@";
+"Only %@ per week" = "週額たったの %@";
 "BEST OFFER" = "ベストオファー";
 
 /* StoryView */

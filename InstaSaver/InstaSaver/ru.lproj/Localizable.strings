@@ -189,11 +189,11 @@
 "Yearly" = "Ежегодно";
 "BEST VALUE" = "ЛУЧШАЯ ЦЕНА";
 "FLEXIBLE PLAN" = "ГИБКИЙ ПЛАН";
-"Save 33%" = "Экономия 33%";
+"Save %d%%" = "Экономия %d%%";
 "per year" = "в год";
 "per month" = "в месяц";
 "Annual" = "Годовой";
-"Only %@ per month" = "Всего %@ в месяц";
+"Only %@ per week" = "Всего %@ в неделю";
 "BEST OFFER" = "ЛУЧШЕЕ ПРЕДЛОЖЕНИЕ";
 
 /* StoryView */

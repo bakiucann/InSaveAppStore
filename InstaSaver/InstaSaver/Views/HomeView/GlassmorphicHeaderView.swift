@@ -101,7 +101,7 @@ struct GlassmorphicHeaderView: View {
         HStack(spacing: 10) {
             ZStack {
                 // Subtle glow behind logo
-                Image("insaver2")
+                Image("insaver26")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)
@@ -109,7 +109,7 @@ struct GlassmorphicHeaderView: View {
                     .opacity(0.3)
                 
                 // Main logo without frame
-                Image("insaver2")
+                Image("insaver26")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 36, height: 36)

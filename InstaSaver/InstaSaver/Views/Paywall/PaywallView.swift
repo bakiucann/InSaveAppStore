@@ -46,6 +46,7 @@ struct PaywallView: View {
                         VStack(spacing: 14) {
                             // MARK: - Premium Hero Section
                             premiumHeroSection
+                                .padding(.top, 8)
                             
                             // MARK: - Features Grid
                             featuresGrid
@@ -260,7 +261,7 @@ struct PaywallView: View {
     
     // MARK: - CTA Section
     private var ctaSection: some View {
-        VStack(spacing: 10) {
+        VStack(spacing: 15) {
             // Main CTA Button
             Button(action: {
                 if let package = selectedPackage {
@@ -612,21 +613,27 @@ extension PaywallView {
     @ViewBuilder
     func packageSection(offering: Offering) -> some View {
         VStack(spacing: 10) {
-            if let annual = offering.annual {
-                if let perMonth = annual.storeProduct.localizedPricePerMonth {
-                    premiumPackageCard(
-                        title: NSLocalizedString("Annual", comment: ""),
-                        price: annual.storeProduct.localizedPriceString,
-                        perMonth: perMonth,
-                        highlight: NSLocalizedString("BEST OFFER", comment: ""),
-                        package: annual,
-                        isRecommended: true,
-                        savings: NSLocalizedString("Save 33%", comment: "")
-                    )
-                }
+            // Config'den paket görünürlük ayarlarını al
+            let showAnnual = configManager.subscriptionConfig?.showAnnual ?? true
+            let showMonthly = configManager.subscriptionConfig?.showMonthly ?? true
+            let showWeekly = configManager.subscriptionConfig?.showWeekly ?? false
+            
+            if showAnnual, let annual = offering.annual {
+                let perWeek = annual.storeProduct.pricePerWeek
+                let savingsText = calculateSavings(annual: annual, monthly: offering.monthly, showMonthly: showMonthly)
+                
+                premiumPackageCard(
+                    title: NSLocalizedString("Annual", comment: ""),
+                    price: annual.storeProduct.localizedPriceString,
+                    perWeek: perWeek,
+                    highlight: NSLocalizedString("BEST OFFER", comment: ""),
+                    package: annual,
+                    isRecommended: true,
+                    savings: savingsText
+                )
             }
             
-            if let monthly = offering.monthly {
+            if showMonthly, let monthly = offering.monthly {
                 premiumPackageCard(
                     title: NSLocalizedString("Monthly", comment: ""),
                     price: monthly.storeProduct.localizedPriceString,
@@ -634,7 +641,7 @@ extension PaywallView {
                 )
             }
             
-            if let weekly = offering.weekly {
+            if showWeekly, let weekly = offering.weekly {
                 premiumPackageCard(
                     title: NSLocalizedString("Weekly", comment: ""),
                     price: weekly.storeProduct.localizedPriceString,
@@ -644,10 +651,34 @@ extension PaywallView {
         }
     }
     
+    /// Calculate savings percentage between annual and monthly packages
+    private func calculateSavings(annual: Package, monthly: Package?, showMonthly: Bool) -> String? {
+        guard showMonthly, let monthly = monthly else { return nil }
+        
+        let annualPrice = annual.storeProduct.price as Decimal
+        let monthlyPrice = monthly.storeProduct.price as Decimal
+        let annualEquivalent = monthlyPrice * 12
+        
+        guard annualEquivalent > 0 else { return nil }
+        
+        let savingsPercentage = ((annualEquivalent - annualPrice) / annualEquivalent) * 100
+        let roundedPercentage = Int(NSDecimalNumber(decimal: savingsPercentage).doubleValue.rounded())
+        
+        guard roundedPercentage > 0 else { return nil }
+        
+        // Get localized string and ensure 'Save' is not replaced with 'Bookmark'
+        let localizedFormat = NSLocalizedString("Save %d%%", comment: "")
+        let formattedString = String(format: localizedFormat, roundedPercentage)
+        
+        // Force 'Save' to remain as 'Save' (not 'Bookmark') for paywall savings
+        // This is a percentage discount, not a bookmark action
+        return formattedString.replacingOccurrences(of: "Bookmark", with: "Save")
+    }
+    
     func premiumPackageCard(
         title: String,
         price: String,
-        perMonth: String? = nil,
+        perWeek: String? = nil,
         highlight: String? = nil,
         package: Package,
         isRecommended: Bool = false,
@@ -710,8 +741,8 @@ extension PaywallView {
                                 }
                             }
                             
-                            if let perMonth = perMonth {
-                                Text(String(format: NSLocalizedString("Only %@ per month", comment: ""), "\(perMonth)"))
+                            if let perWeek = perWeek {
+                                Text(String(format: NSLocalizedString("Only %@ per week", comment: ""), "\(perWeek)"))
                                 .font(.system(size: 12))
                                 .foregroundColor(.white.opacity(0.5))
                         }
@@ -759,7 +790,7 @@ extension PaywallView {
                 // Badge
                 if let highlight = highlight {
                     HStack(spacing: 4) {
-                        Image(systemName: "crown.fill")
+                        Image(systemName: "sparkles")
                             .font(.system(size: 9))
                             .foregroundColor(Color(red: 1.0, green: 0.84, blue: 0.0))
                         
@@ -808,16 +839,81 @@ extension PaywallView {
 extension PaywallView {
     private func fetchOfferings() {
         isLoadingOfferings = true
+        
+        // Config'den offering ID'yi al (varsa)
+        let offeringIdentifier = configManager.subscriptionConfig?.offeringId
+        let fallbackIdentifier = configManager.subscriptionConfig?.fallbackOfferingId
+        
+        print("📱 Fetching offerings - Primary: \(offeringIdentifier ?? "default"), Fallback: \(fallbackIdentifier ?? "none")")
+        
         Purchases.shared.getOfferings { (offerings, error) in
             isLoadingOfferings = false
             if let error = error {
                 print("Error fetching offerings: \(error.localizedDescription)")
-            } else if let offerings = offerings {
-                self.offering = offerings.current
-                // Annual paketi varsayılan seçim:
-                if let annualPackage = offerings.current?.annual {
-                    self.selectedPackage = annualPackage
-                }
+                return
+            }
+            
+            guard let offerings = offerings else {
+                print("No offerings available")
+                return
+            }
+            
+            // Offering seçim stratejisi:
+            // 1. Config'den gelen offering ID'yi kullan
+            // 2. Eğer bulunamazsa fallback'i dene
+            // 3. Son çare olarak current offering'i kullan
+            var selectedOffering: Offering?
+            
+            if let primaryId = offeringIdentifier,
+               let primaryOffering = offerings.offering(identifier: primaryId) {
+                selectedOffering = primaryOffering
+                print("✅ Using primary offering: \(primaryId)")
+            } else if let fallbackId = fallbackIdentifier,
+                      let fallbackOffering = offerings.offering(identifier: fallbackId) {
+                selectedOffering = fallbackOffering
+                print("⚠️ Primary not found, using fallback offering: \(fallbackId)")
+            } else {
+                selectedOffering = offerings.current
+                print("ℹ️ Using default current offering")
+            }
+            
+            self.offering = selectedOffering
+            
+            // Preferred package'ı seç
+            if let offering = selectedOffering {
+                self.selectPreferredPackage(from: offering)
+            }
+        }
+    }
+    
+    /// Config'den gelen tercih edilen paketi seçer
+    private func selectPreferredPackage(from offering: Offering) {
+        let preferredType = configManager.subscriptionConfig?.preferredPackage ?? "annual"
+        
+        switch preferredType.lowercased() {
+        case "annual":
+            if let annual = offering.annual {
+                self.selectedPackage = annual
+                print("📦 Selected preferred package: Annual")
+            }
+        case "monthly":
+            if let monthly = offering.monthly {
+                self.selectedPackage = monthly
+                print("📦 Selected preferred package: Monthly")
+            }
+        case "weekly":
+            if let weekly = offering.weekly {
+                self.selectedPackage = weekly
+                print("📦 Selected preferred package: Weekly")
+            }
+        default:
+            // Fallback: Annual > Monthly > Weekly
+            if let annual = offering.annual {
+                self.selectedPackage = annual
+            } else if let monthly = offering.monthly {
+                self.selectedPackage = monthly
+            } else if let weekly = offering.weekly {
+                self.selectedPackage = weekly
             }
         }
     }
@@ -925,5 +1021,85 @@ struct ShimmeringEffect: ViewModifier {
                 phase = 1
             }
             .clipped()
+    }
+}
+
+// MARK: - StoreProduct Extension for Weekly Price
+extension StoreProduct {
+    var pricePerWeek: String? {
+        guard let subscriptionPeriod = subscriptionPeriod else { return nil }
+        
+        let weeks: Decimal
+        switch subscriptionPeriod.unit {
+        case .year:
+            weeks = Decimal(52 * subscriptionPeriod.value)
+        case .month:
+            weeks = Decimal(subscriptionPeriod.value) * Decimal(52) / Decimal(12)
+        case .week:
+            weeks = Decimal(subscriptionPeriod.value)
+        case .day:
+            weeks = Decimal(subscriptionPeriod.value) / Decimal(7)
+        @unknown default:
+            return nil
+        }
+        
+        guard weeks > 0 else { return nil }
+        let weeklyPrice = price / weeks
+        
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        
+        // Try to detect locale from the price string format
+        if let detectedLocale = detectLocaleFromPriceString(localizedPriceString) {
+            formatter.locale = detectedLocale
+        } else {
+            formatter.locale = Locale.current
+        }
+        
+        return formatter.string(from: weeklyPrice as NSDecimalNumber)
+    }
+    
+    private func detectLocaleFromPriceString(_ priceString: String) -> Locale? {
+        // Common currency symbols and their locale identifiers
+        let currencyMap: [(String, String)] = [
+            ("$", "en_US"),
+            ("€", "de_DE"),
+            ("£", "en_GB"),
+            ("¥", "ja_JP"),
+            ("₺", "tr_TR"),
+            ("₹", "en_IN"),
+            ("R$", "pt_BR"),
+            ("₽", "ru_RU"),
+            ("₩", "ko_KR"),
+            ("CHF", "de_CH"),
+            ("SEK", "sv_SE"),
+            ("NOK", "nb_NO"),
+            ("DKK", "da_DK"),
+            ("PLN", "pl_PL"),
+            ("HUF", "hu_HU"),
+            ("CZK", "cs_CZ")
+        ]
+        
+        for (symbol, localeId) in currencyMap {
+            if priceString.contains(symbol) {
+                return Locale(identifier: localeId)
+            }
+        }
+        
+        // Check for currency codes (e.g., "USD", "EUR")
+        let isoCodes = Locale.isoCurrencyCodes
+        for code in isoCodes {
+            if priceString.contains(code) {
+                // Find a locale that uses this currency
+                if let locale = Locale.availableIdentifiers.first(where: { identifier in
+                    let locale = Locale(identifier: identifier)
+                    return locale.currencyCode == code
+                }) {
+                    return Locale(identifier: locale)
+                }
+            }
+        }
+        
+        return nil
     }
 }

@@ -13,6 +13,11 @@ class LocalizationManager {
     func localizedString(forKey key: String, comment: String) -> String {
         let originalString = Bundle.main.localizedString(forKey: key, value: nil, table: nil)
         
+        // Paywall savings percentage için bypass (Save %d%% gibi)
+        if key.contains("Save %d%%") || key.hasPrefix("Save ") && key.contains("%") {
+            return originalString
+        }
+        
         // shouldShowDownloadButtons kontrolü
         if !configManager.shouldShowDownloadButtons {
             // Download ile ilgili kelimeleri değiştir
@@ -60,6 +65,16 @@ extension Bundle {
         
         // Sadece ana bundle için uygula
         if self == Bundle.main {
+            // "InSave" içeren stringleri bypass et (örn: "InSave for Instagram")
+            if key.contains("InSave") || string.contains("InSave") {
+                return string
+            }
+            
+            // Paywall savings percentage için bypass (Save %d%% gibi)
+            if key.contains("Save %d%%") || (key.hasPrefix("Save ") && key.contains("%")) {
+                return string
+            }
+            
             // shouldShowDownloadButtons kontrolü
             if !ConfigManager.shared.shouldShowDownloadButtons {
                 return string
@@ -82,6 +97,16 @@ extension Bundle {
 extension String {
     var localized: String {
         let originalString = NSLocalizedString(self, comment: "")
+        
+        // "InSave" içeren stringleri bypass et (örn: "InSave for Instagram")
+        if self.contains("InSave") || originalString.contains("InSave") {
+            return originalString
+        }
+        
+        // Paywall savings percentage için bypass (Save %d%% gibi)
+        if self.contains("Save %d%%") || (self.hasPrefix("Save ") && self.contains("%")) {
+            return originalString
+        }
         
         // shouldShowDownloadButtons kontrolü
         if !ConfigManager.shared.shouldShowDownloadButtons {

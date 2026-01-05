@@ -189,11 +189,11 @@
 "Yearly" = "Jährlich";
 "BEST VALUE" = "BESTER WERT";
 "FLEXIBLE PLAN" = "FLEXIBLER PLAN";
-"Save 33%" = "33% sparen";
+"Save %d%%" = "%d%% sparen";
 "per year" = "pro Jahr";
 "per month" = "pro Monat";
 "Annual" = "Jährlich";
-"Only %@ per month" = "Nur %@ pro Monat";
+"Only %@ per week" = "Nur %@ pro Woche";
 "BEST OFFER" = "BESTES ANGEBOT";
 
 /* StoryView */

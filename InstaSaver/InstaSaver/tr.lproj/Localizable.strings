@@ -193,11 +193,11 @@
 "Yearly" = "Yıllık";
 "BEST VALUE" = "EN İYİ DEĞER";
 "FLEXIBLE PLAN" = "ESNEK PLAN";
-"Save 33%" = "33% İndirim";
+"Save %d%%" = "%%%d İndirim";
 "per year" = "yıllık";
 "per month" = "aylık";
 "Annual" = "Yıllık";
-"Only %@ per month" = "Ayda yalnızca %@";
+"Only %@ per week" = "Haftada yalnızca %@";
 "BEST OFFER" = "EN İYİ TEKLİF";
 
 /* StoryView */
