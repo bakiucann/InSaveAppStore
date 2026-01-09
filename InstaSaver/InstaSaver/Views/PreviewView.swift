@@ -36,6 +36,8 @@ struct PreviewView: View {
     @State private var showCarouselControls: Bool = false
     @State private var downloadProgress: Double = 0
     @StateObject private var downloadManager = DownloadManager.shared
+    @State private var bulkDownloadProgress = (current: 0, total: 0)
+    @State private var showingBulkProgress = false
     
     // MARK: - Initializer
     init(video: InstagramVideoModel) {
@@ -395,11 +397,34 @@ struct PreviewView: View {
     
     private var actionButtons: some View {
         VStack(spacing: 10) {
+            // Download All HD Button (Carousel only, Premium feature)
+            if let isCarousel = video.isCarousel, isCarousel, let totalItems = video.totalItems, totalItems > 1 {
+                if subscriptionManager.isUserSubscribed {
+                    GlassmorphicActionButton(
+                        title: NSLocalizedString("Download All HD", comment: ""),
+                        icon: "square.and.arrow.down.fill",
+                        isPrimary: true,
+                        action: {
+                            downloadAllCarouselItems()
+                        }
+                    )
+                } else {
+                    GlassmorphicActionButton(
+                        title: NSLocalizedString("Download All HD", comment: ""),
+                        icon: "square.and.arrow.down.fill",
+                        isPrimary: true,
+                        action: {
+                            showPaywallView = true
+                        }
+                    )
+                }
+            }
+            
             // Download HD Button
             GlassmorphicActionButton(
                 title: NSLocalizedString("Download HD", comment: ""),
                 icon: "arrow.down.circle.fill",
-                isPrimary: true,
+                isPrimary: isCarouselContent ? false : true,
                 action: {
                     if subscriptionManager.isUserSubscribed {
                         startLoading()
@@ -506,41 +531,88 @@ struct PreviewView: View {
             Color.white.opacity(0.6)
                 .ignoresSafeArea()
             
-            VStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .stroke(Color.gray.opacity(0.2), lineWidth: 4)
-                        .frame(width: 60, height: 60)
+            if showingBulkProgress {
+                bulkDownloadLoadingOverlay
+            } else {
+                VStack(spacing: 16) {
+                    ZStack {
+                        Circle()
+                            .stroke(Color.gray.opacity(0.2), lineWidth: 4)
+                            .frame(width: 60, height: 60)
+                        
+                        Circle()
+                            .trim(from: 0, to: downloadProgress)
+                            .stroke(
+                                LinearGradient(
+                                    colors: [Color("igPurple"), Color("igPink")],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                ),
+                                style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                            )
+                            .frame(width: 60, height: 60)
+                            .rotationEffect(.degrees(-90))
+                        
+                        Text("\(Int(downloadProgress * 100))%")
+                            .font(.system(size: 14, weight: .bold))
+                            .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+                    }
                     
-                    Circle()
-                        .trim(from: 0, to: downloadProgress)
-                        .stroke(
-                            LinearGradient(
-                                colors: [Color("igPurple"), Color("igPink")],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ),
-                            style: StrokeStyle(lineWidth: 4, lineCap: .round)
-                        )
-                        .frame(width: 60, height: 60)
-                        .rotationEffect(.degrees(-90))
-                    
-                    Text("\(Int(downloadProgress * 100))%")
-                        .font(.system(size: 14, weight: .bold))
-                        .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+                    Text(NSLocalizedString("Downloading...", comment: ""))
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(.gray)
                 }
-                
-                Text(NSLocalizedString("Downloading...", comment: ""))
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundColor(.gray)
+                .padding(28)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.white)
+                        .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+                )
             }
-            .padding(28)
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(Color.white)
-                    .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
-            )
         }
+    }
+    
+    // MARK: - Bulk Download Loading Overlay
+    private var bulkDownloadLoadingOverlay: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .stroke(Color.gray.opacity(0.2), lineWidth: 4)
+                    .frame(width: 60, height: 60)
+                
+                Circle()
+                    .trim(from: 0, to: Double(bulkDownloadProgress.current) / Double(max(bulkDownloadProgress.total, 1)))
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color("igPurple"), Color("igPink")],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        style: StrokeStyle(lineWidth: 4, lineCap: .round)
+                    )
+                    .frame(width: 60, height: 60)
+                    .rotationEffect(.degrees(-90))
+                
+                VStack(spacing: 2) {
+                    Text("\(bulkDownloadProgress.current)")
+                        .font(.system(size: 16, weight: .bold))
+                        .gradientForeground(colors: [Color("igPurple"), Color("igPink")])
+                    Text("/\(bulkDownloadProgress.total)")
+                        .font(.system(size: 10, weight: .medium))
+                        .foregroundColor(.gray)
+                }
+            }
+            
+            Text(NSLocalizedString("Downloading Carousel...", comment: ""))
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(.gray)
+        }
+        .padding(28)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.white)
+                .shadow(color: Color.black.opacity(0.1), radius: 20, x: 0, y: 10)
+        )
     }
     
     private var successMessage: some View {
@@ -882,6 +954,158 @@ struct PreviewView: View {
         }
         
         isPhotoContent = item.isPhoto
+    }
+    
+    // MARK: - Carousel Bulk Download
+    private var isCarouselContent: Bool {
+        if let isCarousel = video.isCarousel, isCarousel, let totalItems = video.totalItems, totalItems > 1 {
+            return true
+        }
+        return false
+    }
+    
+    private func downloadAllCarouselItems() {
+        guard let carouselItems = video.carouselItems, !carouselItems.isEmpty else {
+            print("❌ No carousel items to download")
+            return
+        }
+        
+        startLoading()
+        showingBulkProgress = true
+        bulkDownloadProgress = (0, carouselItems.count)
+        
+        print("🎠 Starting bulk carousel download: \(carouselItems.count) items")
+        
+        Task {
+            for (index, item) in carouselItems.enumerated() {
+                await withCheckedContinuation { continuation in
+                    let urlString: String
+                    
+                    // Determine the best quality URL for this item
+                    if item.isPhoto {
+                        urlString = item.downloadLink
+                        print("📸 Downloading carousel photo \(index + 1)/\(carouselItems.count)")
+                    } else if let hdVersion = item.allVideoVersions.first(where: { $0.type == 101 }) {
+                        urlString = hdVersion.url
+                        print("🎥 Downloading carousel video HD \(index + 1)/\(carouselItems.count)")
+                    } else if let firstVersion = item.allVideoVersions.first {
+                        urlString = firstVersion.url
+                        print("🎥 Downloading carousel video \(index + 1)/\(carouselItems.count)")
+                    } else {
+                        urlString = item.downloadLink
+                        print("📥 Downloading carousel item \(index + 1)/\(carouselItems.count)")
+                    }
+                    
+                    downloadManager.downloadContent(
+                        urlString: urlString,
+                        isPhoto: item.isPhoto
+                    ) { progress in
+                        // Individual item progress - not displayed in bulk mode
+                    } completion: { result in
+                        DispatchQueue.main.async {
+                            self.bulkDownloadProgress.current = index + 1
+                            
+                            switch result {
+                            case .success(let fileURL):
+                                print("✅ Carousel item \(index + 1) downloaded successfully")
+                                
+                                Task {
+                                    if item.isPhoto {
+                                        await self.saveImageToGalleryAsync(from: fileURL)
+                                    } else {
+                                        await self.saveVideoToGalleryAsync(from: fileURL)
+                                    }
+                                    continuation.resume()
+                                }
+                                
+                            case .failure(let error):
+                                print("❌ Carousel item \(index + 1) download failed: \(error.localizedDescription)")
+                                continuation.resume()
+                            }
+                        }
+                    }
+                }
+                
+                // Small delay between downloads
+                try? await Task.sleep(nanoseconds: 500_000_000)
+            }
+            
+            // All downloads complete
+            DispatchQueue.main.async {
+                self.stopLoading()
+                self.showingBulkProgress = false
+                self.showSuccessMessage = true
+                
+                print("✅ All carousel items downloaded successfully")
+                
+                // Show ad after bulk download
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+                    if let rootViewController = UIApplication.shared.windows.first?.rootViewController {
+                        self.interstitialAd.showAd(from: rootViewController) {
+                            print("✅ Ad shown after carousel bulk download")
+                        }
+                    }
+                }
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    self.showSuccessMessage = false
+                    
+                    let calendar = Calendar.current
+                    if !calendar.isDateInToday(self.lastReviewRequestDate) {
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                            SKStoreReviewController.requestReview(in: windowScene)
+                            self.lastReviewRequestDateDouble = Date().timeIntervalSince1970
+                        }
+                    }
+                }
+                
+                // Save to history
+                self.saveVideoInfoToCoreData(video: self.video)
+                NotificationCenter.default.post(name: NSNotification.Name("NewVideoSaved"), object: nil)
+            }
+        }
+    }
+    
+    // Async gallery save functions for bulk operations
+    private func saveImageToGalleryAsync(from fileURL: URL) async {
+        await withCheckedContinuation { continuation in
+            PHPhotoLibrary.requestAuthorization { status in
+                guard status == .authorized else {
+                    continuation.resume()
+                    return
+                }
+                
+                PHPhotoLibrary.shared().performChanges({
+                    PHAssetCreationRequest.forAsset().addResource(with: .photo, fileURL: fileURL, options: nil)
+                }) { success, error in
+                    if !success {
+                        print("Error saving image to gallery: \(String(describing: error))")
+                    }
+                    continuation.resume()
+                }
+            }
+        }
+    }
+    
+    private func saveVideoToGalleryAsync(from fileURL: URL) async {
+        await withCheckedContinuation { continuation in
+            PHPhotoLibrary.requestAuthorization { status in
+                guard status == .authorized else {
+                    continuation.resume()
+                    return
+                }
+                
+                PHPhotoLibrary.shared().performChanges({
+                    let creationRequest = PHAssetCreationRequest.forAsset()
+                    creationRequest.addResource(with: .video, fileURL: fileURL, options: nil)
+                }) { success, error in
+                    if !success {
+                        print("Error saving video to gallery: \(String(describing: error))")
+                    }
+                    continuation.resume()
+                }
+            }
+        }
     }
 }
 

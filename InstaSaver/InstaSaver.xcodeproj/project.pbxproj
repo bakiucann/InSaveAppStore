@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		000A38222F116B6200671114 /* GlassmorphicDropdownMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000A38212F116B6200671114 /* GlassmorphicDropdownMenu.swift */; };
 		0046423A2F016B9C00481A3F /* AdLoadingOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004642392F016B9C00481A3F /* AdLoadingOverlayView.swift */; };
 		0046423C2F032AD700481A3F /* GlassmorphicHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0046423B2F032AD700481A3F /* GlassmorphicHeaderView.swift */; };
 		004D79AE2D690B010002C994 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 004D79AB2D690B010002C994 /* Color+Hex.swift */; };
@@ -110,6 +111,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		000A38212F116B6200671114 /* GlassmorphicDropdownMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassmorphicDropdownMenu.swift; sourceTree = "<group>"; };
 		004642392F016B9C00481A3F /* AdLoadingOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdLoadingOverlayView.swift; sourceTree = "<group>"; };
 		0046423B2F032AD700481A3F /* GlassmorphicHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassmorphicHeaderView.swift; sourceTree = "<group>"; };
 		004D79AB2D690B010002C994 /* Color+Hex.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
@@ -382,6 +384,7 @@
 		00A81D832D2B282E00ABA492 /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				000A38212F116B6200671114 /* GlassmorphicDropdownMenu.swift */,
 				0062C1B52F0498D500305377 /* GlassmorphicBackButton.swift */,
 				00D06FB42DAEE3F600FB5A58 /* DownloadManager.swift */,
 				00A81D7B2D2B282E00ABA492 /* AlertModifier.swift */,
@@ -600,6 +603,7 @@
 				004D79B12D690B130002C994 /* SpecialOfferViewModel.swift in Sources */,
 				00A81D9B2D2B282E00ABA492 /* HistoryViewModel.swift in Sources */,
 				00A81D8B2D2B282E00ABA492 /* FeedbackView.swift in Sources */,
+				000A38222F116B6200671114 /* GlassmorphicDropdownMenu.swift in Sources */,
 				00A81D8A2D2B282E00ABA492 /* CollectionsView.swift in Sources */,
 				004D79AE2D690B010002C994 /* Color+Hex.swift in Sources */,
 				00A81D892D2B282E00ABA492 /* CollectionDetailView.swift in Sources */,

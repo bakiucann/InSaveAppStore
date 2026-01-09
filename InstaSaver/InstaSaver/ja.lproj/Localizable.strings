@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "HDでダウンロード";
+"Download All HD" = "すべてHDでダウンロード";
 "Download" = "ダウンロード";
 "Downloading..." = "ダウンロード中...";
+"Downloading Carousel..." = "カルーセルをダウンロード中...";
 "Video saved successfully!" = "動画を保存しました！";
 "Choose from library" = "ライブラリから選択";
 "Image selected" = "画像を選択しました";
@@ -200,6 +202,12 @@
 "Stories" = "ストーリー";
 "Download Bulk" = "一括ダウンロード";
 "Downloading Stories..." = "ストーリーをダウンロード中...";
+"Story saved!" = "ストーリーを保存しました！";
+
+/* Success Messages */
+"Photo saved!" = "写真を保存しました！";
+"Video saved!" = "動画を保存しました！";
+"Added to collection!" = "コレクションに追加しました！";
 
 /* New additions from the code block */
 "What You'll Get" = "あなたが得るもの";

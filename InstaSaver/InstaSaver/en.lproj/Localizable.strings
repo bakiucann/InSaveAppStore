@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "Save HD";
+"Download All HD" = "Save All HD";
 "Download" = "Save";
 "Downloading..." = "Saving...";
+"Downloading Carousel..." = "Saving Carousel...";
 "Video saved successfully!" = "Video saved successfully!";
 "Choose from library" = "Choose from library";
 "Image selected" = "Image selected";
@@ -209,6 +211,12 @@
 "Stories" = "Stories";
 "Download Bulk" = "Save Bulk";
 "Downloading Stories..." = "Save Stories...";
+"Story saved!" = "Story saved!";
+
+/* Success Messages */
+"Photo saved!" = "Photo saved!";
+"Video saved!" = "Video saved!";
+"Added to collection!" = "Added to collection!";
 
 /* New additions */
 "What You'll Get" = "What You'll Get";

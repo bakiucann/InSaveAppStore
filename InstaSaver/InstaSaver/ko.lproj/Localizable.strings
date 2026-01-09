@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "HD 다운로드";
+"Download All HD" = "모두 HD로 다운로드";
 "Download" = "다운로드";
 "Downloading..." = "다운로드 중...";
+"Downloading Carousel..." = "캐러셀 다운로드 중...";
 "Video saved successfully!" = "동영상 저장 성공!";
 "Choose from library" = "라이브러리에서 선택";
 "Image selected" = "이미지 선택됨";
@@ -200,6 +202,12 @@
 "Stories" = "스토리";
 "Download Bulk" = "일괄 다운로드";
 "Downloading Stories..." = "스토리 다운로드 중...";
+"Story saved!" = "스토리 저장됨!";
+
+/* Success Messages */
+"Photo saved!" = "사진 저장됨!";
+"Video saved!" = "동영상 저장됨!";
+"Added to collection!" = "컨렉션에 추가됨!";
 
 /* New additions */
 "What You'll Get" = "당신이 얻을 것";

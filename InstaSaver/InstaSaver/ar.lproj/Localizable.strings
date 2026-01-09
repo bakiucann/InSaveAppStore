@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "تحميل بجودة عالية";
+"Download All HD" = "تحميل الكل بجودة عالية";
 "Download" = "تحميل";
 "Downloading..." = "جارٍ التحميل...";
+"Downloading Carousel..." = "جارٍ تحميل الألبوم...";
 "Video saved successfully!" = "تم حفظ الفيديو بنجاح!";
 "Choose from library" = "اختر من المكتبة";
 "Image selected" = "تم اختيار الصورة";
@@ -200,6 +202,12 @@
 "Stories" = "القصص";
 "Download Bulk" = "تحميل متعدد";
 "Downloading Stories..." = "جارٍ تحميل القصص...";
+"Story saved!" = "تم حفظ القصة!";
+
+/* Success Messages */
+"Photo saved!" = "تم حفظ الصورة!";
+"Video saved!" = "تم حفظ الفيديو!";
+"Added to collection!" = "تمت الإضافة إلى المجموعة!";
 
 /* New additions */
 "What You'll Get" = "ما ستحصل عليه";

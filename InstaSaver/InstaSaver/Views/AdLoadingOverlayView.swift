@@ -10,10 +10,11 @@ import SwiftUI
 struct AdLoadingOverlayView: View {
     var body: some View {
         ZStack {
+            // Full screen background overlay
             Color.black.opacity(0.6)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .ignoresSafeArea(.all)
+                .edgesIgnoringSafeArea(.all)
             
+            // Loading indicator
             VStack(spacing: 20) {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -25,8 +26,7 @@ struct AdLoadingOverlayView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(.all)
-        .allowsHitTesting(true)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 

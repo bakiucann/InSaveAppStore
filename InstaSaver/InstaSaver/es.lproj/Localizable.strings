@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "Descargar HD";
+"Download All HD" = "Descargar todo en HD";
 "Download" = "Descargar";
 "Downloading..." = "Descargando...";
+"Downloading Carousel..." = "Descargando carrusel...";
 "Video saved successfully!" = "¡Video guardado exitosamente!";
 "Choose from library" = "Elegir de la biblioteca";
 "Image selected" = "Imagen seleccionada";
@@ -200,6 +202,12 @@
 "Stories" = "Historias";
 "Download Bulk" = "Descarga múltiple";
 "Downloading Stories..." = "Descargando historias...";
+"Story saved!" = "¡Historia guardada!";
+
+/* Success Messages */
+"Photo saved!" = "¡Foto guardada!";
+"Video saved!" = "¡Video guardado!";
+"Added to collection!" = "¡Añadido a la colección!";
 
 /* New additions */
 "What You'll Get" = "Lo que obtendrás";

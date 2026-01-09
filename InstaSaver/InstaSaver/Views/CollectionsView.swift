@@ -34,6 +34,10 @@ struct CollectionsView: View {
                 viewModel.fetchCollections()
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .NSManagedObjectContextDidSave)) { _ in
+            // Refresh collections when any Core Data change occurs
+            viewModel.refreshCollections()
+        }
         .background(navigationLink)
     }
     
@@ -70,7 +74,7 @@ struct CollectionsView: View {
     private var navigationLink: some View {
         isPresentedModally ? nil : NavigationLink(
             destination: selectedCollection.map {
-                CollectionDetailView(collection: $0, viewModel: CollectionsViewModel())
+                CollectionDetailView(collection: $0, viewModel: viewModel)
             },
             isActive: Binding(
                 get: { selectedCollection != nil },
@@ -193,7 +197,7 @@ struct CollectionsListView: View {
 }
 
 struct CollectionRowView: View {
-    var collection: CollectionModel
+    @ObservedObject var collection: CollectionModel
     var coverImageData: Data?
     
     private let instagramGradient = LinearGradient(

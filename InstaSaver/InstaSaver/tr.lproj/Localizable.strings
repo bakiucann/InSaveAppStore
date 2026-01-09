@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "HD İndir";
+"Download All HD" = "Tümünü HD İndir";
 "Download" = "İndir";
 "Downloading..." = "İndiriliyor...";
+"Downloading Carousel..." = "Carousel İndiriliyor...";
 "Video saved successfully!" = "Video başarıyla kaydedildi!";
 "Choose from library" = "Kütüphaneden seç";
 "Image selected" = "Görsel seçildi";
@@ -204,6 +206,12 @@
 "Stories" = "Hikayeler";
 "Download Bulk" = "Toplu İndir";
 "Downloading Stories..." = "Hikayeler İndiriliyor...";
+"Story saved!" = "Hikaye kaydedildi!";
+
+/* Success Messages */
+"Photo saved!" = "Fotoğraf kaydedildi!";
+"Video saved!" = "Video kaydedildi!";
+"Added to collection!" = "Koleksiyona eklendi!";
 
 /* New translations */
 "What You'll Get" = "Ne Alacaksınız";

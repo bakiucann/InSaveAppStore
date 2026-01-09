@@ -26,6 +26,7 @@ struct InstaSaverApp: App {
     @StateObject private var interstitialAd = InterstitialAd()
     @Environment(\.screenSize) var screenSize
     @State private var isConnected = false
+    @State private var isAppReady = false // Controls splash screen to main app transition
     @AppStorage("appLaunchCount") private var appLaunchCount = 0
     @AppStorage("lastReviewRequest") private var lastReviewRequest = Date.distantPast.timeIntervalSince1970
     @AppStorage("reviewRequestCount") private var reviewRequestCount = 0
@@ -46,22 +47,31 @@ struct InstaSaverApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                ContentView()
-                    .environment(
-                        \.managedObjectContext,
-                        persistenceController.container.viewContext
-                    )
-                    .environmentObject(subscriptionManager)
-                    .preferredColorScheme(.light)
-                    .environment(
-                        \.screenSize,
-                        UIScreen.main.bounds.size
-                    )
-                
-                // Ad Loading Overlay - Reklam yüklenirken tüm uygulamayı kaplar
-                if interstitialAd.isLoadingAd {
-                    AdLoadingOverlayView()
-                        .zIndex(999)
+                // Main App Content (shown after splash)
+                if isAppReady {
+                    ContentView()
+                        .environment(
+                            \.managedObjectContext,
+                            persistenceController.container.viewContext
+                        )
+                        .environmentObject(subscriptionManager)
+                        .environmentObject(interstitialAd)
+                        .preferredColorScheme(.light)
+                        .environment(
+                            \.screenSize,
+                            UIScreen.main.bounds.size
+                        )
+                        .transition(.opacity)
+                    
+                    // Ad Loading Overlay - Reklam yüklenirken tüm uygulamayı kaplar
+                    if interstitialAd.isLoadingAd || interstitialAd.isLoadingAdForFirstSearch {
+                        AdLoadingOverlayView()
+                            .zIndex(999)
+                    }
+                } else {
+                    // Splash Screen (shown first)
+                    SplashView(isAppReady: $isAppReady)
+                        .transition(.opacity)
                 }
             }
                 .onAppear {
@@ -85,25 +95,6 @@ struct InstaSaverApp: App {
                         if !subscriptionManager.isUserSubscribed {
                             print("🔄 Preloading interstitial ad after UMP completion...")
                             interstitialAd.loadInterstitial()
-                        }
-                        
-                        // PRO kullanıcı kontrolü - Paywall ve Special Offer gösterme mantığını UMP tamamlandıktan sonra çalıştır
-                    if !subscriptionManager.isUserSubscribed {
-                        // Sadece ücretsiz kullanıcılar için paywall göster
-                            if !hasScheduledPaywall { // Avoid scheduling multiple times
-                            hasScheduledPaywall = true
-                                // Schedule Paywall presentation (e.g., after 2 seconds)
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                // Double-check subscription status before showing
-                                if !subscriptionManager.isUserSubscribed {
-                                    showPaywall = true
-                                }
-                            }
-                        }
-                    } else {
-                            // PRO user, ensure paywall and special offer are hidden
-                        showPaywall = false
-                        specialOfferViewModel.isPresented = false
                         }
                     }
                     notificationObservers.append(umpObserver)
@@ -156,6 +147,21 @@ struct InstaSaverApp: App {
                         NotificationCenter.default.removeObserver(observer)
                     }
                     notificationObservers.removeAll()
+                }
+                // MARK: - Monitor isAppReady change (SplashView completed)
+                .onChange(of: isAppReady) { newValue in
+                    if newValue == true {
+                        // SplashView bitti, 1 saniye sonra paywall göster
+                        if !subscriptionManager.isUserSubscribed && !hasScheduledPaywall {
+                            hasScheduledPaywall = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                // Double-check subscription status before showing
+                                if !subscriptionManager.isUserSubscribed {
+                                    showPaywall = true
+                                }
+                            }
+                        }
+                    }
                 }
                 // .fullScreenCover(isPresented: $specialOfferViewModel.isPresented) {
                 //     SpecialOfferView(viewModel: specialOfferViewModel)

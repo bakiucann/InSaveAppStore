@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "HD下载";
+"Download All HD" = "全部HD下载";
 "Download" = "下载";
 "Downloading..." = "下载中...";
+"Downloading Carousel..." = "下载轮播图中...";
 "Video saved successfully!" = "视频保存成功！";
 "Choose from library" = "从相册选择";
 "Image selected" = "已选择图片";
@@ -200,6 +202,12 @@
 "Stories" = "故事";
 "Download Bulk" = "批量下载";
 "Downloading Stories..." = "正在下载故事...";
+"Story saved!" = "故事已保存！";
+
+/* Success Messages */
+"Photo saved!" = "照片已保存！";
+"Video saved!" = "视频已保存！";
+"Added to collection!" = "已添加到收藏！";
 
 /* New translations */
 "What You'll Get" = "你将获得什么";

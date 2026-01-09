@@ -73,47 +73,39 @@ struct SearchSectionView: View {
     }
     
     var body: some View {
-        ZStack {
-            VStack(spacing: 16) {
-                // MARK: - Compact Hero Section
-                heroSection
-                
-                // MARK: - Glassmorphic Search Card
-                glassmorphicSearchCard
-                
-                // MARK: - Compact Tutorial Cards
-                tutorialCarousel
-            }
-            .fullScreenCover(isPresented: $showStoryView) {
-                NavigationView {
-                    StoryView(stories: stories, isFromHistory: false)
-                }
-            }
-            .alert(isPresented: $showError) {
-                Alert(
-                    title: Text("Error"),
-                    message: Text(errorMessage),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
-            .onAppear {
-                withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
-                    floatingIconOffset = 6
-                }
-                withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                    pulseAnimation = true
-                }
-            }
-            .onChange(of: configManager.shouldShowDownloadButtons) { newValue in
-                if !newValue {
-                    searchMode = .url
-                }
-            }
+        VStack(spacing: 16) {
+            // MARK: - Compact Hero Section
+            heroSection
             
-            // Ad Loading Overlay
-            if interstitial.isLoadingAd {
-                AdLoadingOverlayView()
-                    .zIndex(999)
+            // MARK: - Glassmorphic Search Card
+            glassmorphicSearchCard
+            
+            // MARK: - Compact Tutorial Cards
+            tutorialCarousel
+        }
+        .fullScreenCover(isPresented: $showStoryView) {
+            NavigationView {
+                StoryView(stories: stories, isFromHistory: false)
+            }
+        }
+        .alert(isPresented: $showError) {
+            Alert(
+                title: Text("Error"),
+                message: Text(errorMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+        .onAppear {
+            withAnimation(.easeInOut(duration: 2).repeatForever(autoreverses: true)) {
+                floatingIconOffset = 6
+            }
+            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
+                pulseAnimation = true
+            }
+        }
+        .onChange(of: configManager.shouldShowDownloadButtons) { newValue in
+            if !newValue {
+                searchMode = .url
             }
         }
     }
@@ -280,6 +272,15 @@ struct SearchSectionView: View {
                     withAnimation(.spring(response: 0.3)) {
                         isInputFocused = !newValue.isEmpty
                     }
+                    
+                    // Auto-switch to URL mode if user pastes/enters a URL in username mode
+                    if searchMode == .username && !newValue.isEmpty {
+                        if newValue.contains("http://") || newValue.contains("https://") || newValue.contains("instagram.com") || newValue.contains("/") {
+                            withAnimation(.spring(response: 0.3)) {
+                                searchMode = .url
+                            }
+                        }
+                    }
                 }
             
             // Clear / Paste Button
@@ -325,6 +326,13 @@ struct SearchSectionView: View {
                                 if let clipboardText = UIPasteboard.general.string {
                 withAnimation(.spring()) {
                                         inputText = clipboardText
+                                        
+                                        // Auto-switch to URL mode if clipboard contains a URL
+                                        if searchMode == .username {
+                                            if clipboardText.contains("http://") || clipboardText.contains("https://") || clipboardText.contains("instagram.com") || clipboardText.contains("/") {
+                                                searchMode = .url
+                                            }
+                                        }
                                     }
                                 }
                             }) {

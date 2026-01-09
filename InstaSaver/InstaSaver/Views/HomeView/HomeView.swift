@@ -21,7 +21,7 @@ struct HomeView: View {
     @State private var errorAlertMessage: String = ""
     @State private var animateBackground = false
     
-    @ObservedObject var interstitial = InterstitialAd()
+    @EnvironmentObject var interstitial: InterstitialAd
     
     @Environment(\.screenSize) var screenSize
     
@@ -62,12 +62,6 @@ struct HomeView: View {
                         // Loading Overlay
                         if videoViewModel.isLoading {
                             LoadingOverlayView()
-                    }
-                    
-                        // Ad Loading Overlay
-                        if interstitial.isLoadingAdForFirstSearch {
-                            AdLoadingOverlayView()
-                                .zIndex(999)
                     }
                 }
                 .contentShape(Rectangle())

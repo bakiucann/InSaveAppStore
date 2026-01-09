@@ -101,18 +101,18 @@ struct GlassmorphicHeaderView: View {
         HStack(spacing: 10) {
             ZStack {
                 // Subtle glow behind logo
-                Image("insaver26")
+                Image("insaver2")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
+                    .frame(width: 40, height: 40)
                     .blur(radius: 10)
                     .opacity(0.3)
                 
                 // Main logo without frame
-                Image("insaver26")
+                Image("insaver2")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width: 36, height: 36)
+                    .frame(width: 40, height: 40)
             }
             
             Text("InSave")

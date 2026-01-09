@@ -119,12 +119,6 @@ struct StoryView: View {
             if showSuccessMessage { 
                 successMessage 
             }
-            
-            // Ad Loading Overlay
-            if interstitialAd.isLoadingAd {
-                AdLoadingOverlayView()
-                    .zIndex(999)
-            }
         }
         .navigationBarHidden(true)
         .fullScreenCover(isPresented: $showPaywallView) {

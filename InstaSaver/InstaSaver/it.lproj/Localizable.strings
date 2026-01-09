@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "Scarica HD";
+"Download All HD" = "Scarica tutto in HD";
 "Download" = "Scarica";
 "Downloading..." = "Download in corso...";
+"Downloading Carousel..." = "Download carosello in corso...";
 "Video saved successfully!" = "Video salvato con successo!";
 "Choose from library" = "Scegli dalla libreria";
 "Image selected" = "Immagine selezionata";
@@ -200,6 +202,12 @@
 "Stories" = "Storie";
 "Download Bulk" = "Download multiplo";
 "Downloading Stories..." = "Download storie in corso...";
+"Story saved!" = "Storia salvata!";
+
+/* Success Messages */
+"Photo saved!" = "Foto salvata!";
+"Video saved!" = "Video salvato!";
+"Added to collection!" = "Aggiunto alla raccolta!";
 
 /* New additions from the code block */
 "What You'll Get" = "Cosa otterrai";

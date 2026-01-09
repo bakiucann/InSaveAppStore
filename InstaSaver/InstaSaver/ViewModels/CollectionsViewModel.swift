@@ -91,8 +91,8 @@ class CollectionsViewModel: ObservableObject {
     }
     
     func fetchCollections() {
-        // Prevent duplicate fetches
-        guard !isLoading && !hasFetched else { return }
+        // Prevent duplicate fetches while loading
+        guard !isLoading else { return }
         
         isLoading = true
         hasFetched = true
@@ -133,9 +133,10 @@ class CollectionsViewModel: ObservableObject {
         }
     }
     
-    /// Force refresh collections (e.g., after adding/deleting)
+    /// Force refresh collections (e.g., after adding/deleting/renaming)
     func refreshCollections() {
-        hasFetched = false
+        isLoading = false // Reset loading state
+        hasFetched = false // Reset fetch flag
         fetchCollections()
     }
     

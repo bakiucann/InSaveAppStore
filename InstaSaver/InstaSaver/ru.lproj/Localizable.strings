@@ -95,8 +95,10 @@
 
 /* Download Related */
 "Download HD" = "Скачать HD";
+"Download All HD" = "Скачать все в HD";
 "Download" = "Скачать";
 "Downloading..." = "Загрузка...";
+"Downloading Carousel..." = "Загрузка карусели...";
 "Video saved successfully!" = "Видео успешно сохранено!";
 "Choose from library" = "Выбрать из библиотеки";
 "Image selected" = "Изображение выбрано";
@@ -200,6 +202,12 @@
 "Stories" = "Истории";
 "Download Bulk" = "Массовая загрузка";
 "Downloading Stories..." = "Загрузка историй...";
+"Story saved!" = "История сохранена!";
+
+/* Success Messages */
+"Photo saved!" = "Фото сохранено!";
+"Video saved!" = "Видео сохранено!";
+"Added to collection!" = "Добавлено в коллекцию!";
 
 /* New additions from the code block */
 "What You'll Get" = "Что вы получите";
