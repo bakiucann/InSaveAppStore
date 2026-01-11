@@ -28,7 +28,7 @@ struct PreviewView: View {
     @State private var isPhotoContent: Bool = false
     @AppStorage("lastReviewRequestDate") private var lastReviewRequestDateDouble: Double = Date.distantPast.timeIntervalSince1970
     @State private var collectionSuccessMessage = false
-    @StateObject private var configManager = ConfigManager.shared
+    @ObservedObject var configManager = ConfigManager.shared
     @State private var selectedCollectionID: String?
     @State private var isCollectionSaveSuccess = false
     @State private var isShowingSuccess = false

@@ -1,14 +1,20 @@
 // HistoryView.swift
 
 import SwiftUI
+import UIKit
 
 struct HistoryView: View {
     @ObservedObject var viewModel: HistoryViewModel
+    @EnvironmentObject var interstitial: InterstitialAd
     @StateObject private var videoViewModel = VideoViewModel()
+    @StateObject private var subscriptionManager = SubscriptionManager.shared
     @State private var selectedStories: [InstagramStoryModel] = []
     @State private var showStoryView = false
     @State private var isLoadingStory = false
     @State private var showClearAlert = false
+    @State private var isVerifyingLink = false
+    @State private var showVerificationErrorAlert = false
+    @State private var verificationErrorMessage = ""
     
     private let instagramGradient = LinearGradient(
         colors: [
@@ -67,33 +73,10 @@ struct HistoryView: View {
                                                 showStoryView = true
                                             }
                                         } else {
-                                            // Normal video için PreviewView'ı aç
-                                            let video = InstagramVideoModel(
-                                                id: historyItem.id,
-                                                allVideoVersions: [
-                                                    VideoVersion(
-                                                        type: 101,
-                                                        width: 1080,
-                                                        height: 1920,
-                                                        id: historyItem.id + "_hd",
-                                                        url: historyItem.originalUrl ?? ""
-                                                    ),
-                                                    VideoVersion(
-                                                        type: 103,
-                                                        width: 720,
-                                                        height: 1280,
-                                                        id: historyItem.id + "_sd",
-                                                        url: historyItem.originalUrl ?? ""
-                                                    )
-                                                ],
-                                                downloadLink: historyItem.originalUrl ?? "",
-                                                thumbnailUrl: historyItem.originCover ?? "",
-                                                videoTitle: historyItem.title,
-                                                videoQuality: VideoQuality.default,
-                                                isPhoto: historyItem.type == "photo",
-                                                isCarousel: false
-                                            )
-                                            videoViewModel.setVideo(video)
+                                            // Normal video için Smart Refetch akışı
+                                            Task {
+                                                await verifyAndPlay(historyItem)
+                                            }
                                         }
                                     }
                                 )
@@ -107,8 +90,18 @@ struct HistoryView: View {
             }
             
             // Loading Overlay
-            if videoViewModel.isLoading || isLoadingStory {
+            if videoViewModel.isLoading || isLoadingStory || isVerifyingLink {
                 GlassmorphicHistoryLoadingView()
+            }
+            
+            if showVerificationErrorAlert {
+                ModernCustomAlert(
+                    title: NSLocalizedString("Error", comment: ""),
+                    message: verificationErrorMessage,
+                    buttonTitle: NSLocalizedString("OK", comment: ""),
+                    onDismiss: { showVerificationErrorAlert = false }
+                )
+                .zIndex(200)
             }
         }
         .navigationBarHidden(true)
@@ -140,6 +133,51 @@ struct HistoryView: View {
                     PreviewView(video: video)
                 }
             }
+        }
+    }
+    
+    // MARK: - Smart Refetch Flow
+    
+    private func verifyAndPlay(_ historyItem: HistoryItem) async {
+        await MainActor.run {
+            isVerifyingLink = true
+        }
+        
+        let shouldShowAd = !subscriptionManager.isUserSubscribed
+        if shouldShowAd {
+            await showInterstitialIfNeeded()
+        }
+        
+        do {
+            let context = CoreDataManager.shared.context
+            if let model = try await videoViewModel.refreshHistoryItem(historyItem, context: context) {
+                await MainActor.run {
+                    videoViewModel.setVideo(model)
+                }
+            } else {
+                await MainActor.run {
+                    verificationErrorMessage = NSLocalizedString("Something went wrong. Please try again.", comment: "")
+                    showVerificationErrorAlert = true
+                }
+            }
+        } catch {
+            await MainActor.run {
+                verificationErrorMessage = NSLocalizedString("Something went wrong. Please try again.", comment: "")
+                showVerificationErrorAlert = true
+            }
+        }
+        
+        await MainActor.run {
+            isVerifyingLink = false
+        }
+    }
+    
+    private func showInterstitialIfNeeded() async {
+        guard let rootVC = UIApplication.shared.windows.first?.rootViewController else { return }
+        await withCheckedContinuation { continuation in
+            interstitial.showAd(from: rootVC, completion: {
+                continuation.resume()
+            }, skipCooldown: true)
         }
     }
     

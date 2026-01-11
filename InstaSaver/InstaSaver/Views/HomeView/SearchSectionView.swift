@@ -26,7 +26,7 @@ struct SearchSectionView: View {
     @State private var searchMode: SearchMode = .url
     @State private var pulseAnimation = false
     @State private var floatingIconOffset: CGFloat = 0
-    @StateObject private var configManager = ConfigManager.shared
+    @ObservedObject var configManager = ConfigManager.shared
     
     @ObservedObject var subscriptionManager = SubscriptionManager.shared
     let interstitial: InterstitialAd

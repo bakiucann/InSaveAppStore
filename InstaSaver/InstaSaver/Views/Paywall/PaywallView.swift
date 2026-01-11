@@ -14,7 +14,7 @@ struct PaywallView: View {
     @State private var particleAnimation = false
     @StateObject private var specialOfferViewModel = SpecialOfferViewModel()
     @StateObject private var subscriptionManager = SubscriptionManager.shared
-    @StateObject private var configManager = ConfigManager.shared
+    @ObservedObject var configManager = ConfigManager.shared
     
     // Alert için state değişkenleri
     @State private var showAlert = false
@@ -73,7 +73,8 @@ struct PaywallView: View {
         }
         .navigationBarHidden(true)
         .onAppear {
-            configManager.reloadConfig()
+            configManager.fetchConfig()
+            configManager.fetchSubscriptionConfig()
             fetchOfferings()
             withAnimation {
             animateGradient = true

@@ -1,6 +1,7 @@
 // VideoViewModel.swift
 import Foundation
 import Combine
+import CoreData
 
 class VideoViewModel: ObservableObject {
     @Published var video: InstagramVideoModel?
@@ -158,5 +159,135 @@ class VideoViewModel: ObservableObject {
     
     func setVideo(_ video: InstagramVideoModel) {
         self.video = video
+    }
+    
+    // MARK: - Smart Refetch Helpers
+    
+    /// Lightweight health check for a video URL using HTTP HEAD.
+    /// - Returns: true if statusCode is in 200...299, false otherwise (including timeout / errors).
+    private func checkVideoUrlStatus(url: String) async -> Bool {
+        guard let url = URL(string: url) else { return false }
+        var request = URLRequest(url: url)
+        request.httpMethod = "HEAD"
+        request.timeoutInterval = 5 // seconds
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else { return false }
+            return (200...299).contains(httpResponse.statusCode)
+        } catch {
+            print("⚠️ URL health check failed: \(error.localizedDescription)")
+            return false
+        }
+    }
+    
+    /// Build an InstagramVideoModel from a HistoryItem using only local data (no network).
+    private func makeVideoModel(from item: HistoryItem) -> InstagramVideoModel {
+        InstagramVideoModel(
+            id: item.id,
+            allVideoVersions: [
+                VideoVersion(
+                    type: 101,
+                    width: 1080,
+                    height: 1920,
+                    id: item.id + "_hd",
+                    url: item.originalUrl ?? ""
+                ),
+                VideoVersion(
+                    type: 103,
+                    width: 720,
+                    height: 1280,
+                    id: item.id + "_sd",
+                    url: item.originalUrl ?? ""
+                )
+            ],
+            downloadLink: item.originalUrl ?? "",
+            thumbnailUrl: item.originCover ?? "",
+            videoTitle: item.title,
+            videoQuality: VideoQuality.default,
+            isPhoto: item.type == "photo",
+            isCarousel: false
+        )
+    }
+    
+    /// Fetch fresh video info from the API and return an InstagramVideoModel without mutating view-model state.
+    private func fetchVideoModel(url: String, quality: Int? = nil) async throws -> InstagramVideoModel {
+        let formattedURL = formatInstagramURL(url)
+        // Validate before hitting the network
+        guard isValidURL(formattedURL) else {
+            throw InstagramServiceError.invalidURL
+        }
+        return try await withCheckedThrowingContinuation { continuation in
+            instagramService.fetchReelInfo(url: formattedURL, quality: quality) { [weak self] result in
+                switch result {
+                case .success(let videoData):
+                    guard let instagramID = self?.extractInstagramID(from: formattedURL) else {
+                        continuation.resume(throwing: InstagramServiceError.invalidURL)
+                        return
+                    }
+                    var model = InstagramVideoModel(
+                        id: instagramID,
+                        allVideoVersions: videoData.allVideoVersions ?? [],
+                        downloadLink: videoData.downloadLink,
+                        thumbnailUrl: videoData.thumbnailUrl,
+                        videoTitle: videoData.videoTitle,
+                        videoQuality: videoData.videoQuality,
+                        isPhoto: videoData.isPhoto,
+                        isCarousel: videoData.isCarousel
+                    )
+                    if videoData.isCarousel == true {
+                        model.carouselItems = videoData.items
+                        model.totalItems = videoData.totalItems
+                    }
+                    continuation.resume(returning: model)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    
+    /// Smart refetch for a history item. Returns a model built from local data if URL is healthy,
+    /// otherwise fetches fresh info from the API, updates Core Data, and returns the new model.
+    func refreshHistoryItem(_ item: HistoryItem, context: NSManagedObjectContext) async throws -> InstagramVideoModel? {
+        // If we don't have a URL at all, skip health check and go straight to refetch.
+        let existingUrl = item.originalUrl ?? ""
+        if !existingUrl.isEmpty {
+            let isHealthy = await checkVideoUrlStatus(url: existingUrl)
+            if isHealthy {
+                // Use local data only, no API call.
+                return makeVideoModel(from: item)
+            }
+        }
+        
+        // URL is missing or dead -> refetch from API using canonical Instagram URL built from the ID.
+        let reconstructedUrl = "https://www.instagram.com/reel/\(item.id)/"
+        let freshModel = try await fetchVideoModel(url: reconstructedUrl)
+        
+        // Update Core Data on the context's queue for thread safety.
+        let updatedModel = try await withCheckedThrowingContinuation { continuation in
+            context.perform {
+                do {
+                    let fetchRequest: NSFetchRequest<SavedVideo> = SavedVideo.fetchRequest()
+                    fetchRequest.predicate = NSPredicate(format: "id == %@", item.id)
+                    let results = try context.fetch(fetchRequest)
+                    if let savedVideo = results.first {
+                        savedVideo.originalUrl = freshModel.downloadLink
+                        savedVideo.originCover = freshModel.thumbnailUrl
+                        savedVideo.date = Date()
+                        if let isPhoto = freshModel.isPhoto {
+                            savedVideo.type = isPhoto ? "photo" : "video"
+                        }
+                    }
+                    if context.hasChanges {
+                        try context.save()
+                    }
+                    continuation.resume(returning: freshModel)
+                } catch {
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+        
+        return updatedModel
     }
 }

@@ -31,11 +31,12 @@ struct InstaSaverApp: App {
     @AppStorage("lastReviewRequest") private var lastReviewRequest = Date.distantPast.timeIntervalSince1970
     @AppStorage("reviewRequestCount") private var reviewRequestCount = 0
     @AppStorage("hasReviewedApp") private var hasReviewedApp = false
-    @StateObject private var configManager = ConfigManager.shared
+    @ObservedObject var configManager = ConfigManager.shared
     
     // MARK: - Paywall ile ilgili yeni state'ler
     @State private var showPaywall: Bool = false
     @State private var hasScheduledPaywall: Bool = false
+    @State private var isUMPFinished = false // UMP consent flow completed
     
     @State private var isAppInBackground = false // Uygulamanın arka planda olup olmadığını kontrol etmek için bir bayrak
     
@@ -90,14 +91,29 @@ struct InstaSaverApp: App {
                     let umpObserver = NotificationCenter.default.addObserver(forName: .umpFlowDidComplete, object: nil, queue: .main) { _ in
                         print("UMP flow completed notification received.")
                         
+                        // Mark UMP as finished
+                        isUMPFinished = true
+                        
                         // Google Mobile Ads SDK başlatıldı, şimdi reklamı önceden yükle
                         // Bu, ilk aramada reklamın hazır olmasını sağlar
                         if !subscriptionManager.isUserSubscribed {
                             print("🔄 Preloading interstitial ad after UMP completion...")
                             interstitialAd.loadInterstitial()
                         }
+                        
+                        // Check if we should show the Paywall now
+                        checkAndShowPaywall()
                     }
                     notificationObservers.append(umpObserver)
+                    
+                    // Safety fallback: Force UMP finished after 10 seconds to prevent infinite waiting
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
+                        if !isUMPFinished {
+                            print("⏱️ Safety fallback: UMP timeout after 10 seconds, proceeding to show Paywall")
+                            isUMPFinished = true
+                            checkAndShowPaywall()
+                        }
+                    }
                     
                     // Uygulama açıldığında bildirimleri dinle
                     let backgroundObserver = NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: .main) { _ in
@@ -151,16 +167,8 @@ struct InstaSaverApp: App {
                 // MARK: - Monitor isAppReady change (SplashView completed)
                 .onChange(of: isAppReady) { newValue in
                     if newValue == true {
-                        // SplashView bitti, 1 saniye sonra paywall göster
-                        if !subscriptionManager.isUserSubscribed && !hasScheduledPaywall {
-                            hasScheduledPaywall = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                                // Double-check subscription status before showing
-                                if !subscriptionManager.isUserSubscribed {
-                                    showPaywall = true
-                                }
-                            }
-                        }
+                        // SplashView bitti, UMP bitmiş mi kontrol et ve Paywall göster
+                        checkAndShowPaywall()
                     }
                 }
                 // .fullScreenCover(isPresented: $specialOfferViewModel.isPresented) {
@@ -187,6 +195,24 @@ struct InstaSaverApp: App {
         
         Purchases.logLevel = .debug
         Purchases.configure(withAPIKey: "appl_JLkyCPgqxTiOUDAJFOrIOsrEIoy")
+    }
+    
+    // MARK: - Gatekeeper Function
+    /// Shows the Paywall only when BOTH conditions are met:
+    /// 1. Splash screen is complete (isAppReady = true)
+    /// 2. UMP consent flow is complete (isUMPFinished = true)
+    private func checkAndShowPaywall() {
+        // Only show Paywall if Splash is done AND UMP is done AND user is not subscribed
+        if isAppReady && isUMPFinished && !subscriptionManager.isUserSubscribed && !hasScheduledPaywall {
+            hasScheduledPaywall = true
+            print("✅ Both gates passed: Splash complete + UMP complete. Showing Paywall...")
+            // Smooth transition delay
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                showPaywall = true
+            }
+        } else {
+            print("⏳ Paywall gatekeeper: isAppReady=\(isAppReady), isUMPFinished=\(isUMPFinished), isSubscribed=\(subscriptionManager.isUserSubscribed)")
+        }
     }
     
     // MARK: - App Store Review
@@ -233,7 +259,7 @@ struct InstaSaverApp: App {
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     private var umpTimeoutWorkItem: DispatchWorkItem?
-    private let umpTimeout: TimeInterval = 3.0 // 3 seconds max
+    private let umpTimeout: TimeInterval = 8.0 // 3 seconds max
     
     // Helper function to initialize Mobile Ads SDK
     func initializeMobileAdsSDK(completion: (() -> Void)? = nil) {
@@ -260,7 +286,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         
         // Set up timeout - if UMP takes longer than 3 seconds, fail silently
         let timeoutItem = DispatchWorkItem { [weak self] in
-            print("⏱️ UMP consent request timeout (3 seconds) - initializing ads SDK anyway")
+            print("⏱️ UMP consent request timeout (8 seconds) - initializing ads SDK anyway")
             self?.completeUMPFlow()
         }
         umpTimeoutWorkItem = timeoutItem

@@ -19,7 +19,7 @@ struct StoryView: View {
     @State private var downloadProgress = (current: 0, total: 0)
     @State private var showingBulkProgress = false
     @State private var downloadCount = 0
-    @StateObject private var configManager = ConfigManager.shared
+    @ObservedObject var configManager = ConfigManager.shared
     @StateObject private var downloadManager = DownloadManager.shared
     @State private var singleDownloadProgress: Double = 0
     @AppStorage("lastReviewRequestDate") private var lastReviewRequestDateDouble: Double = Date.distantPast.timeIntervalSince1970
@@ -125,7 +125,8 @@ struct StoryView: View {
             PaywallView()
         }
         .onAppear {
-            configManager.reloadConfig()
+            configManager.fetchConfig()
+            configManager.fetchSubscriptionConfig()
         }
         .onDisappear {
             downloadManager.cancelAllDownloads()

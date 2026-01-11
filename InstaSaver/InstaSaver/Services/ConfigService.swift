@@ -57,9 +57,10 @@ class ConfigManager: ObservableObject {
     @Published var showDownloadButtons: Bool = false
     @Published var subscriptionConfig: SubscriptionConfig?
     
-    private let baseURL = "https://instagramcoms.vercel.app/api/config"
-    private let subscriptionConfigURL = "https://instagramcoms.vercel.app/api/subscription-config"
+    private let baseURL = "https://instasaver-api-v2.vercel.app/api/config"
+    private let subscriptionConfigURL = "https://instasaver-api-v2.vercel.app/api/subscription-config"
     private let userDefaults = UserDefaults.standard
+    private let cacheDuration: TimeInterval = 600 // 10 minutes
     
     // UserDefaults için anahtarlar
     private enum UserDefaultsKeys {
@@ -118,7 +119,6 @@ class ConfigManager: ObservableObject {
         if let lastUpdated = config.lastUpdated {
             userDefaults.set(lastUpdated, forKey: UserDefaultsKeys.lastUpdated)
         }
-        userDefaults.set(Date().timeIntervalSince1970, forKey: UserDefaultsKeys.lastFetchTime)
         
         print("💾 Feature config saved to UserDefaults")
     }
@@ -159,7 +159,20 @@ class ConfigManager: ObservableObject {
         return showDownloadButtons
     }
     
-    func fetchConfig() {
+    func fetchConfig(force: Bool = false) {
+        // Check cache validity unless forced
+        if !force, let lastFetch = userDefaults.object(forKey: UserDefaultsKeys.lastFetchTime) as? Date {
+            let elapsedTime = Date().timeIntervalSince(lastFetch)
+            if elapsedTime < cacheDuration {
+                let remainingTime = cacheDuration - elapsedTime
+                let minutes = Int(remainingTime / 60)
+                let seconds = Int(remainingTime.truncatingRemainder(dividingBy: 60))
+                print("⏱️ Feature Config cache is valid. Skipping network request.")
+                print("   Cache expires in: \(minutes)m \(seconds)s")
+                return
+            }
+        }
+        
         guard let url = URL(string: baseURL) else { 
             print("❌ Invalid URL: \(baseURL)")
             return 
@@ -202,6 +215,8 @@ class ConfigManager: ObservableObject {
                         self.showDownloadButtons = x5t9
                     }
                     self.saveConfig(config: config)
+                    // Update fetch timestamp on successful fetch
+                    self.userDefaults.set(Date(), forKey: UserDefaultsKeys.lastFetchTime)
                     self.objectWillChange.send()
                     
                     // Final durumu logla
@@ -215,7 +230,20 @@ class ConfigManager: ObservableObject {
         }
     }
     
-    func fetchSubscriptionConfig() {
+    func fetchSubscriptionConfig(force: Bool = false) {
+        // Check cache validity unless forced
+        if !force, let lastFetch = userDefaults.object(forKey: UserDefaultsKeys.lastFetchTime) as? Date {
+            let elapsedTime = Date().timeIntervalSince(lastFetch)
+            if elapsedTime < cacheDuration {
+                let remainingTime = cacheDuration - elapsedTime
+                let minutes = Int(remainingTime / 60)
+                let seconds = Int(remainingTime.truncatingRemainder(dividingBy: 60))
+                print("⏱️ Subscription Config cache is valid. Skipping network request.")
+                print("   Cache expires in: \(minutes)m \(seconds)s")
+                return
+            }
+        }
+        
         guard let url = URL(string: subscriptionConfigURL) else { 
             print("❌ Invalid subscription config URL: \(subscriptionConfigURL)")
             return 
@@ -267,8 +295,8 @@ class ConfigManager: ObservableObject {
     
     // Config'i yeniden yükleme fonksiyonu
     func reloadConfig() {
-        print("🔄 Reload configs requested...")
-        fetchConfig()
-        fetchSubscriptionConfig()
+        print("🔄 Reload configs requested (Forced)...")
+        fetchConfig(force: true)
+        fetchSubscriptionConfig(force: true)
     }
 }
